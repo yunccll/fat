@@ -13,7 +13,7 @@ void test_device()
     char  buf[2048] = {0,};
     fat_dev_read(&fdv, 0, buf, sizeof(buf));
 
-
+    FAT_PRINT("%02x %02x %02x", buf[0], buf[1], buf[2]);
 
 }
 

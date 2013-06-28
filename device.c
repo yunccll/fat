@@ -6,8 +6,8 @@
 static int open_file(fat_dev_t * pdev)
 {
     assert(pdev);
-    if( (pdev->fd = open(pdev->fname, pdev->flag))){
-        FAT_ERROR("open file failed!\n"); 
+    if( (pdev->fd = open(pdev->fname, pdev->flag)) < 0){
+        FAT_ERROR("open file failed! errorno:%s\n", strerror(pdev->fd)); 
         return -1;
     }
     return 0;
