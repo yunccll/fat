@@ -4,6 +4,7 @@
 
 #include <stdio.h>
 
+#define FAT_PRINT       printf
 #define FAT_DEBUG       printf
 #define FAT_ERROR       printf
 #define FAT_FATAL       printf
