@@ -2,12 +2,11 @@
 #include "common.h"
 
 
-
 static int open_file(fat_dev_t * pdev)
 {
     assert(pdev);
     if( (pdev->fd = open(pdev->fname, pdev->flag)) < 0){
-        FAT_ERROR("open file failed! errorno:%s\n", strerror(pdev->fd)); 
+        FAT_ERROR("open file failed! err:%s\n", strerror(errno)); 
         return -1;
     }
     return 0;
@@ -36,25 +35,47 @@ void fat_dev_init(fat_dev_t * pdev, const char * fname, unsigned int flag)
     pdev->flag = flag;
 }
 
+
+
+static int create_file(fat_dev_t * pdev, mode_t mode)
+{
+    assert(pdev);
+    if( (pdev->fd = open(pdev->fname, pdev->flag, mode)) < 0){
+        FAT_ERROR("open file failed! err:%s\n", strerror(errno));
+        return -1;
+    }
+    return 0;
+}
+int fat_dev_create_file(fat_dev_t * pdev, const char * fname)
+{
+    assert(pdev && fname);
+    pdev->fname = fname;
+    pdev->flag = O_CREAT|O_RDWR;
+    if( 0 > create_file(pdev, S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH)){
+        FAT_ERROR("create file failed! err:%s\n", strerror(errno));
+        return -1;
+    }
+    return 0;
+}
 int fat_dev_read(fat_dev_t * pdev, int offset, char * buf, int sz)
 {
     assert(pdev);
     if(pdev->fd == INVALID_FD){
         if(open_file(pdev)) {
-            FAT_ERROR("open file failed!\n");
+            FAT_ERROR("call open file failed!");
             return -1;
         }
     }
 
     int ret = lseek(pdev->fd, offset, SEEK_SET);
     if(ret < 0){
-        FAT_ERROR("lseek file failed!\n");
+        FAT_ERROR("lseek file failed! err:%s\n", strerror(errno));
         return ret;
     }
 
     ret = read(pdev->fd, buf, sz);
     if(ret < 0){
-        FAT_ERROR("read file failed!\n"); 
+        FAT_ERROR("read file failed! err:%s\n", strerror(errno)); 
         return ret;
     }
     return ret;
@@ -71,13 +92,13 @@ int fat_dev_write(fat_dev_t * pdev, int offset, const char * buf, int sz)
 
     int ret = lseek(pdev->fd, offset, SEEK_SET);
     if(ret < 0){
-        FAT_ERROR("lseek file failed!\n");
+        FAT_ERROR("lseek file failed! err:%s\n", strerror(errno));
         return ret;
     }
 
     ret = write(pdev->fd, buf, sz);
     if(ret < 0){
-        FAT_ERROR("read file failed!\n"); 
+        FAT_ERROR("write file failed! err:%s\n", strerror(errno)); 
         return ret;
     }
     return ret;
