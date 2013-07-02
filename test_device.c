@@ -1,8 +1,9 @@
 
 #include "device.h"
 
-void test_device()
+void test_rw()
 {
+    // set_up();
     const char * f_file = "a.img.flp";
 
     const char * t_file = "b.img.flp";
@@ -22,5 +23,12 @@ void test_device()
     FAT_PRINT("jmp: %02x %02x %02x\n", buf[0], buf[1], buf[2]);
 
     fat_dev_destroy(&fdv_t);
+//    tear_down();
+}
 
+
+void test_device()
+{
+    //1. lll......
+    test_rw();
 }
