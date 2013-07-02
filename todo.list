@@ -1,2 +1,15 @@
 1. write an loger with file:line to debug
-2. show boot sector. 
+
+2. test the device.c|.h  (WC)
+    1>. open for op
+        r:  read && show
+        w:  write && read && show
+        rw :read && show; 
+            write && read && show 
+
+    2>. create file for rw  
+        read &&  write && read && close
+            1). no file 
+            2). file already existing
+
+3. show boot sector 

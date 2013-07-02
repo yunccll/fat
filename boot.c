@@ -15,6 +15,4 @@ void fat_boot_init(fat_boot_t * pb)
     pb->jmp[0] = 0x02;
     pb->jmp[1] = 0x42;
     pb->jmp[2] = 0x82;
-
-   
 }
