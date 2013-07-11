@@ -4,6 +4,8 @@
 
 #include <stdio.h>
 
+#define PRINT_OUT      printf
+
 #define FAT_FATAL(args...)       PrintOut(0, 0, __FILE__, __func__, __LINE__, ##args)
 #define FAT_ERROR(args...)       PrintOut(0, 1, __FILE__, __func__, __LINE__, ##args)
 #define FAT_WARNING(args...)	 PrintOut(0, 2, __FILE__, __func__, __LINE__, ##args)

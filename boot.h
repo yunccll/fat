@@ -1,4 +1,4 @@
-#include <linux/types.h>
+#include "common.h"
 
 #define BOOTCODE_SIZE       448
 
@@ -38,5 +38,5 @@ void fat_boot_print(fat_boot_t * pb);
 void fat_boot_init(fat_boot_t * pb);
 
 
-int fat_boot_read(fat_boot_t * pb, const char * file, int offset);
-int fat_boot_write(fat_boot_t * pb, const char * file, int offset);
+int fat_boot_read(fat_boot_t * pb, const char * file, fat_offset_t offset);
+int fat_boot_write(fat_boot_t * pb, const char * file, fat_offset_t offset);
