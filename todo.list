@@ -1,6 +1,6 @@
-1. write an loger with file:line to debug
+(OK) 1. write an loger with file:line to debug
 
-2. test the device.c|.h  (WC)
+(OK) 2. test the device.c|.h  (WC)
     1>. open for op
         r:  read && show
         w:  write && read && show
@@ -12,7 +12,7 @@
             1). no file 
             2). file already existing
 
-3. show boot sector 
+(OK) 3. show boot sector
 4. show the fat content: fat1 && fat2
 5. show the root directory 
 6. show the file 's data
