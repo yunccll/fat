@@ -4,18 +4,24 @@
 
 static void print_boot()
 {
-    
     const char * file_name = "a.img.flp";
-
     fat_boot_t boot;
     int ret = fat_boot_read(&boot, file_name, 0);
     fat_boot_print(&boot);
-     
+}
+
+
+static void init_boot()
+{
+    fat_boot_t boot;
+    fat_boot_init(&boot);
+    fat_boot_print(&boot);
 }
 
 
 void test_boot()
 {
     print_boot(); 
+    init_boot();
 }
 

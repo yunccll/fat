@@ -12,7 +12,7 @@ struct msdos_volume_info {
 } __attribute__ ((packed));
 
 struct fat_boot {
-    __u8          jmp[3];
+    __u8          jmp[3];           // 0xeb 0x3c 0x90
     __u8          sys_id[8];        // system id 
     __u8          sector_size[2];   //  bytes per logical sector
     __u8          cluster_size;     //  sectors per cluster

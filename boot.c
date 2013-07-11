@@ -9,10 +9,13 @@ void fat_boot_print(fat_boot_t * pb)
 
     char buf[32];
     PRINT_OUT("jmp              : 0x%02x 0x%02x 0x%02x\n", pb->jmp[0], pb->jmp[1], pb->jmp[2]);
-    PRINT_OUT("system id        : %s\n", pb->sys_id);
+    memcpy(buf,pb->sys_id, 8);
+    buf[8] = '\0';
+    PRINT_OUT("system id        : %s\n", buf);
     PRINT_OUT("bytes per sec    : %d\n", two_bytes_to_int(pb->sector_size));
     PRINT_OUT("secs per cluster : %d\n", pb->cluster_size);
     PRINT_OUT("number of FATs   : %d\n", pb->fats);
+    PRINT_OUT("root dir entries : %d\n", two_bytes_to_int(pb->dir_entries));
     PRINT_OUT("number of secs   : %d\n", two_bytes_to_int(pb->sectors));
     PRINT_OUT("media            : 0x%02x\n", pb->media);
     PRINT_OUT("secs per FAT     : %d\n", pb->fat_length);
@@ -34,15 +37,25 @@ void fat_boot_print(fat_boot_t * pb)
     memcpy(buf,pb->vi.fs_type, 8);
     buf[8] = '\0';
     PRINT_OUT("fs type          : %s\n", buf);
-    PRINT_OUT("boot sign        : 0x%02x 0x%02x\n", (uchar)pb->boot_sign, (uchar)(pb->boot_sign >> 8));
+    PRINT_OUT("boot sign        : 0x%02x 0x%02x\nfinished....\n\n", (uchar)pb->boot_sign, (uchar)(pb->boot_sign >> 8));
 }
 
 void fat_boot_init(fat_boot_t * pb)
 {
     assert(pb);
-    pb->jmp[0] = 0x02;
-    pb->jmp[1] = 0x42;
-    pb->jmp[2] = 0x82;
+    memset(pb, 0, sizeof(fat_boot_t));
+
+    pb->jmp[0] = 0xeb;
+    pb->jmp[1] = 0x3c;
+    pb->jmp[2] = 0x90;
+
+    *((short *)pb->sector_size) = 512;
+    pb->cluster_size   = 1;
+    pb->fats = 2;
+
+    *((short * )pb->dir_entries) = 224;
+    *((short * )pb->sectors) = 2880;
+    pb->media = 0xf0;
 }
 
 
