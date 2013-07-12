@@ -1,3 +1,8 @@
+
+#ifndef  BOOT_H
+#define  BOOT_H
+
+
 #include "common.h"
 
 #define BOOTCODE_SIZE       448
@@ -35,8 +40,18 @@ typedef struct fat_boot fat_boot_t;
 
 void fat_boot_print(fat_boot_t * pb);
 
+
 void fat_boot_init(fat_boot_t * pb);
+
+void fat_boot_format12(fat_boot_t * pb);
 
 
 int fat_boot_read(fat_boot_t * pb, const char * file, fat_offset_t offset);
 int fat_boot_write(fat_boot_t * pb, const char * file, fat_offset_t offset);
+
+#define  DECLARE_FAT_BOOT(name) \
+    fat_boot_t name;    \
+    fat_boot_init(&name)
+        
+
+#endif   /* BOOT_H */
