@@ -22,7 +22,7 @@ void fat_boot_print(fat_boot_t * pb)
     PRINT_OUT("secs per track   : %d\n", pb->secs_track);
     PRINT_OUT("heads            : %d\n", pb->heads);
     PRINT_OUT("hidden secs      : %d\n", pb->hidden);
-    PRINT_OUT("total secs       : %d\n", pb->total_sect);
+    // PRINT_OUT("total secs       : %d\n", pb->total_sect);
 
     PRINT_OUT("\nmsdos volume info: \n");
     PRINT_OUT("bios drive number: 0x%02x\n", pb->vi.drive_number);
@@ -36,8 +36,8 @@ void fat_boot_print(fat_boot_t * pb)
 
     memcpy(buf,pb->vi.fs_type, 8);
     buf[8] = '\0';
-    PRINT_OUT("fs type          : %s\n", buf);
-    PRINT_OUT("boot sign        : 0x%02x 0x%02x\nfinished....\n\n", (uchar)pb->boot_sign, (uchar)(pb->boot_sign >> 8));
+    PRINT_OUT("fs type          : %s#\n", buf);
+    PRINT_OUT("boot sign        : 0x%02x 0x%02x\n", (uchar)pb->boot_sign, (uchar)(pb->boot_sign >> 8));
 }
 
 void fat_boot_init(fat_boot_t * pb)
@@ -56,6 +56,15 @@ void fat_boot_init(fat_boot_t * pb)
     *((short * )pb->dir_entries) = 224;
     *((short * )pb->sectors) = 2880;
     pb->media = 0xf0;
+    pb->fat_length = 9;
+    pb->secs_track =  18;
+    pb->heads = 2;
+
+    pb->vi.ext_boot_sign = 0x29;
+    *((unsigned int*)pb->vi.volume_id) = 0x73bde084;
+    memcpy(pb->vi.fs_type, "FAT12   ", 8);
+
+    pb->boot_sign = 0xAA55;
 }
 
 
