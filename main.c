@@ -7,5 +7,7 @@ int main(int argc, char * argv[])
     
     test_boot();
 
+    test_fat();
+
     return 0;
 }
