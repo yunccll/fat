@@ -7,6 +7,7 @@
 
 #define BOOTCODE_SIZE       448
 
+
 struct msdos_volume_info {
     __u8        drive_number;       //  BIOS drive number
     __u8        RESERVED;           //  Unused
@@ -53,5 +54,25 @@ int fat_boot_write(fat_boot_t * pb, const char * file, fat_offset_t offset);
     fat_boot_t name;    \
     fat_boot_init(&name)
         
+
+
+// macro for fat1 and fat2 length
+#define BOOT_SECTOR_SIZE           1
+
+#define fat1_start_sector               BOOT_SECTOR_SIZE
+
+#define fat_end_sector(start,fat_len)   ((start) + (fat_len) - 1)
+#define fat1_end_sector(fat_len)        fat_end_sector(fat1_start_sector, fat_len)
+
+#define fat2_start_sector(fat_len)      (fat1_end_sector(fat_len) + 1)
+#define fat2_end_sector(fat_len)        fat_end_sector(fat2_start_sector(fat_len), fat_len)
+
+// calculation from boot value
+#define FAT_DIR_ENTRY_SIZE              32
+#define fat_root_dir_sectno(pb)           ( (*((short*)((pb)->dir_entries))) * FAT_DIR_ENTRY_SIZE/512)
+
+#define fat_root_dir_start_sectno(pb)   (BOOT_SECTOR_SIZE+(pb)->fat_length*(pb)->fats)
+#define fat_root_dir_end_sectno(pb)     (fat_root_dir_start_sectno(pb) + fat_root_dir_sectno(pb)-1)
+
 
 #endif   /* BOOT_H */
