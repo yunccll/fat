@@ -1,7 +1,7 @@
 #include "test_fat.h"
 
 #include "fat.h"
-#include "boot.h"
+#include "device.h"
 
 void test_offset_to_clusno()
 {
@@ -77,16 +77,23 @@ void test_sectno_to_clusno()
     assert(ret == 0);
 }
 
-void test_fat_print_fat_next_clusno()
+void test_fat_stat_fat_info()
 {
+	int ret = 0;
 
     const char * file_name = "a.img.flp";
-    DECLARE_FAT_BOOT(boot);
-    int ret = fat_boot_read(&boot, file_name, 0);
-    assert(ret == 0);
+	size_t fat_size = 9 * 512 ;
 
-    ret = 0;
-    assert(ret == 0);
+	uchar * pb = (uchar *) malloc(sizeof(uchar)* fat_size);
+	assert(pb);
+
+    DECLARE_DEVICE_R(fdev, file_name);
+    ret = fat_dev_read(&fdev, 512, (uchar*)pb, fat_size);
+	assert(ret == fat_size);
+
+	ret = fat_stat_fat_info(pb, fat_size);
+	assert(ret == 0);
+	free(pb); pb = NULL;
 }
 
 void test_fat()
@@ -97,5 +104,5 @@ void test_fat()
     test_clusno_to_sectno();
     test_sectno_to_clusno();
 
-    test_fat_print_fat_next_clusno();
+	test_fat_stat_fat_info();
 }

@@ -18,10 +18,21 @@ int offset_to_cluster_val(const uchar * buf, fat_offset_t offset);
 
 
 // format fat buffer
-// iterate the fat buffer
-typedef int (*cb_iter_cluster_t)(void * data);
+//TODO????
+
+// iterate the fat buffer : TODO????
+typedef int (*cb_iter_cluster_t)(int clusno, int val, void * data);
 int fat_iterate_fat_clusno(uchar * buf, size_t size, cb_iter_cluster_t cb_iter);
 
-int fat_print_fat_next_clusno(uchar *buf, size_t size);
+// static all clust info
+int fat_stat_fat_info(uchar *buf, size_t size);
 
+
+#define BAD_CLUSTER_NO_START		0xFF0
+#define BAD_CLUSTER_NO_END			0xFF7
+
+#define LAST_CLUSTER_NO_START		0xFF8
+#define LAST_CLUSTER_NO_END			0xFFF
+
+#define NOT_USED_CLUSTER			0x000
 #endif   /* FAT_H */
