@@ -1,6 +1,7 @@
 #include "test_fat.h"
 
 #include "fat.h"
+#include "boot.h"
 
 void test_offset_to_clusno()
 {
@@ -76,6 +77,18 @@ void test_sectno_to_clusno()
     assert(ret == 0);
 }
 
+void test_fat_print_fat_next_clusno()
+{
+
+    const char * file_name = "a.img.flp";
+    DECLARE_FAT_BOOT(boot);
+    int ret = fat_boot_read(&boot, file_name, 0);
+    assert(ret == 0);
+
+    ret = 0;
+    assert(ret == 0);
+}
+
 void test_fat()
 {
     test_offset_to_clusno();
@@ -84,4 +97,5 @@ void test_fat()
     test_clusno_to_sectno();
     test_sectno_to_clusno();
 
+    test_fat_print_fat_next_clusno();
 }

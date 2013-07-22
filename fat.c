@@ -19,3 +19,14 @@ int offset_to_cluster_val(const uchar * buf, fat_offset_t offset)
     }
     return ret;
 }
+
+int fat_iterate_buffer(uchar * buf, size_t size)
+{
+    return 0;
+}
+
+int fat_print_fat_next_clusno(uchar * buf, size_t size)
+{
+    assert(buf && size % 3 == 0);
+    return 0 ;
+}
