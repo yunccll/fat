@@ -13,6 +13,9 @@
             2). file already existing
 
 (OK) 3. show boot sector
-4. show the fat content: fat1 && fat2
+(OK) 4. show the fat content: fat1 && fat2
 5. show the root directory 
+	show the file count in the root directory
 6. show the file 's data
+	show the file 's entry info 
+	show the file 's content
