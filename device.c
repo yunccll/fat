@@ -48,9 +48,7 @@ static int create_file(fat_dev_t * pdev, mode_t mode)
 int fat_dev_create_file(fat_dev_t * pdev, const char * fname)
 {
     assert(pdev && fname);
-    pdev->fname = fname; // by gushui
-    pdev->flag = O_CREAT|O_RDWR;// by gushui
-    //fat_dev_init(pdev, fname, O_CREAT|O_RDWR); // by gushui
+    fat_dev_init(pdev, fname, O_CREAT|O_RDWR);
     if( 0 > create_file(pdev, S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH)){
         FAT_ERROR("create file failed! err:%s\n", strerror(errno));
         return -1;

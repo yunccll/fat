@@ -10,5 +10,4 @@ int main(int argc, char * argv[])
     test_fat();
 
     test_dentry();
-    return 0;
 }
