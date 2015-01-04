@@ -18,8 +18,8 @@ typedef unsigned char uchar;
 typedef unsigned int fat_offset_t;
 
 
-#define  two_bytes_to_int(bytes)       (((int) (*( (bytes)+1 )) << 8 ) + *(bytes))
-#define  four_bytes_to_int(bytes)      ( ((*(bytes)+3) << 24)+((*(bytes)+2) << 16)+(*(bytes+1) << 8)+(*(bytes))  )
+#define  two_bytes_to_int(bytes)       (*(unsigned short*)(bytes))
+#define  four_bytes_to_int(bytes)      (*(unsigned int *)(bytes))
 
 #define INVALID_FD      -1
 

@@ -2,6 +2,7 @@
 
 #include "fat.h"
 #include "device.h"
+#include "boot.h"
 
 void test_offset_to_clusno()
 {
@@ -79,21 +80,53 @@ void test_sectno_to_clusno()
 
 void test_fat_stat_fat_info()
 {
+    FAT_PRINT("Clustor info of scaning FAT :\n");
 	int ret = 0;
 
     const char * file_name = "a.img.flp";
-	size_t fat_size = 9 * 512 ;
 
-	uchar * pb = (uchar *) malloc(sizeof(uchar)* fat_size);
-	assert(pb);
+	DECLARE_FAT_BOOT(boot);
+    ret = fat_boot_read(&boot, file_name, 0);
+	assert(ret == 0);
+	
+	size_t fat_size = 512*9;
+	uchar * pfat = (uchar *) malloc(sizeof(uchar)* fat_size);
+	assert(pfat);
 
     DECLARE_DEVICE_R(fdev, file_name);
-    ret = fat_dev_read(&fdev, 512, (uchar*)pb, fat_size);
+    ret = fat_dev_read(&fdev, 512, (uchar*)pfat, fat_size);
 	assert(ret == fat_size);
 
-	ret = fat_stat_fat_info(pb, fat_size);
+	ret = fat_stat_info(pfat, fat_size);
 	assert(ret == 0);
-	free(pb); pb = NULL;
+	free(pfat); pfat = NULL;
+    FAT_PRINT("Finished......\n\n");
+}
+
+static int print_cluster_val(size_t clusno, unsigned int val, void * data){
+	FAT_PRINT("clusno : %04d, clus_val : %04x\n", clusno, val);
+	return 0;
+}
+static void test_fat_iterate_fat_clusno()
+{
+    FAT_PRINT("Clustor info of scaning FAT :\n");
+	int ret = 0;
+
+    const char * file_name = "a.img.flp";
+
+	size_t fat_size = 512 * 9;
+
+	uchar * pfat = (uchar *) malloc(sizeof(uchar) * fat_size);
+	assert(pfat);
+
+    DECLARE_DEVICE_R(fdev, file_name);
+    ret = fat_dev_read(&fdev, 512, (uchar*)pfat, fat_size);
+	assert(ret == fat_size);
+
+	ret = fat_iterate_fat_clusno(pfat, fat_size, print_cluster_val);
+	assert(ret == 0);
+	free(pfat); pfat = NULL;
+    FAT_PRINT("Finished......\n\n");
 }
 
 void test_fat()
@@ -105,4 +138,6 @@ void test_fat()
     test_sectno_to_clusno();
 
 	test_fat_stat_fat_info();
+
+	test_fat_iterate_fat_clusno();
 }

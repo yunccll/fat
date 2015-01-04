@@ -9,9 +9,6 @@
 #define offset_to_clusno(offset)   ( ((offset)%3) ? ((offset)/3*2+1) : ((offset)/3*2) )
 #define clusno_to_offset(clusno)     ((clusno) *3/2)
 
-// get the cluster val with the byte offset
-int offset_to_cluster_val(const uchar * buf, fat_offset_t offset);
-
 // cluster no(0-based) to  physical sector no(0-based)
 #define clusno_to_sectno(clusno)     ((clusno) + 31)
 #define sectno_to_clusno(sectno)     ((sectno) - 31)
@@ -21,11 +18,12 @@ int offset_to_cluster_val(const uchar * buf, fat_offset_t offset);
 //TODO????
 
 // iterate the fat buffer : TODO????
-typedef int (*cb_iter_cluster_t)(int clusno, int val, void * data);
-int fat_iterate_fat_clusno(uchar * buf, size_t size, cb_iter_cluster_t cb_iter);
+typedef int (*cb_iter_cluster_t)(size_t clusno, unsigned int val, void * data);
+int fat_iterate_fat_clusno(uchar * fat_addr, size_t size, cb_iter_cluster_t cb_iter);
 
 // static all clust info
-int fat_stat_fat_info(uchar *buf, size_t size);
+int fat_stat_info(uchar *fat_addr, size_t size);
+int fat_cluster_val_with(uchar * fat_addr, size_t clusno);
 
 
 #define BAD_CLUSTER_NO_START		0xFF0

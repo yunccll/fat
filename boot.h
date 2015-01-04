@@ -24,7 +24,7 @@ struct fat_boot {
     __u8          cluster_size;     //  sectors per cluster
     __u16         reserved;         //  reserved sectors
     __u8          fats;             //  number of FATs
-    __u8          dir_entries[2];   //  root directory entries
+	__u8          dir_entries[2];   //  root directory entries
     __u8          sectors[2];       //  number of sectors
     __u8          media;            //  media code (unused)
     __u16         fat_length;       //  sectors per FAT

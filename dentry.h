@@ -3,6 +3,13 @@
 
 #include "common.h"
 
+#define 	NORMAL_FILE			00000000b
+#define 	READ_ONLY			00000001b
+#define 	HIDEN_FILE			00000010b
+#define 	SYSTEM_FILE			00000100b
+#define 	VOLUMN_FLAG			00001000b
+#define 	DIR_FILE			00010000b
+#define 	SAVED_FILE			00100000b
 
 struct dentry
 {
@@ -35,5 +42,10 @@ struct dentry
 } __attribute__ ((packed));
 
 typedef struct dentry fat_dentry_t;
+
+//TODO:  read root_entries
+//TODO:  iterator all entries
+void print_entries(fat_dentry_t * pdentry);
+void print_root_entries(uchar * root_entries, size_t  re_size);
 
 #endif   /* DENTRY_H */

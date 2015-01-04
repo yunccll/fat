@@ -19,3 +19,10 @@
 6. show the file 's data
 	show the file 's entry info 
 	show the file 's content
+
+7. new_task:
+	file : 	create, delete, move, info 
+	dire :  create, delete, move, info
+
+8. record the FAT12 info
+	show all details about the FAT12
