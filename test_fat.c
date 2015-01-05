@@ -104,7 +104,9 @@ void test_fat_stat_fat_info()
 }
 
 static int print_cluster_val(size_t clusno, unsigned int val, void * data){
-	FAT_PRINT("clusno : %04d, clus_val : %04x\n", clusno, val);
+    if(val != 0){
+        FAT_PRINT("clusno : %04d, clus_val : %04x\n", clusno, val);
+    }
 	return 0;
 }
 static void test_fat_iterate_fat_clusno()

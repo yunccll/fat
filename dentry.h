@@ -43,9 +43,7 @@ struct dentry
 
 typedef struct dentry fat_dentry_t;
 
-//TODO:  read root_entries
-//TODO:  iterator all entries
-void print_entries(fat_dentry_t * pdentry);
-void print_root_entries(uchar * root_entries, size_t  re_size);
+void fat_entry_print(fat_dentry_t * pdentry);
+void fat_root_entries_print(uchar * root_entries, size_t  re_size);
 
 #endif   /* DENTRY_H */
