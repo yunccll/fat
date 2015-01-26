@@ -16,13 +16,151 @@
 (OK) 4. show the fat content: fat1 && fat2
 (OK) 5. show the root directory 
 	show the file count in the root directory
-6. show the file 's data
-	show the file 's entry info 
-	show the file 's content
+(TODO) 6. show the file 's data
+	(OK)show the file 's entry info 
+	(TODO)show the file 's content
 
-7. new_task:
+
+7. 
+buffer
+	int buffer_init();
+	int find_buffer(int dev, int block);
+	int block_release(int dev, int nblock);
+
+
+	void *  get_block(int dev); //
+	//read block
+	int block_read(int dev, int nblock);
+	int block_read_page(unsigned long addr, int dev, int b[4]);
+	int block_read_a(int dev, int first, ...);
+
+	//write --
+	int sys_sync(); 
+	int sync_dev(int dev);
+
+
+
+bitmap
+inode
+namei
+super
+truncate
+
+
+8. new_task:
 	file : 	create, delete, move, info 
 	dire :  create, delete, move, info
 
-8. record the FAT12 info
+9. record the FAT12 info
 	show all details about the FAT12
+
+open 
+close
+write 
+read 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+100:
+	MINIX fs
