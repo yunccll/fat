@@ -34,11 +34,22 @@ static void test_fat12_cluster_val(){
 	printf("high : %04x\n", Clust_Val_Second(buf+3));
 }
 
+
+#include "buffer.h"
+static void test_buffer(){
+	buffer_t * ptr = buffer_create();
+	buffer_init(ptr);
+	buffer_show(ptr);
+    buffer_free(ptr);
+}
+
 int main(int argc, char * argv[])
 {
     test_device();
     test_boot();
     test_fat();
     test_dentry();
+
+	test_buffer();
 	return 0;
 }

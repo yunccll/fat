@@ -24,11 +24,11 @@
 7. 
 buffer
 	int buffer_init();
+
 	int find_buffer(int dev, int block);
 	int block_release(int dev, int nblock);
-
-
 	void *  get_block(int dev); //
+
 	//read block
 	int block_read(int dev, int nblock);
 	int block_read_page(unsigned long addr, int dev, int b[4]);
