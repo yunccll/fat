@@ -4,6 +4,9 @@
 
 #define DEBUG_PRINT		printf
 
+#define _hashfn(dev,block) (((unsigned)(dev^block))%NR_HASH)
+#define hash(hash_table, dev,block) (hash_table)[_hashfn(dev,block)]
+
 // common memory 16M,  buffer_end -> 4M
 // [0]<----kernel-- ->[buffer_start]<----buffer--->[BIOS&DisplayMem]<--buffer-->[buffer_end]<------high Mem ----->[mem_end]
 // [0]<----kernel-- ->[		   192K]<----buffer--->[640K<------->1M]<--buffer-->[        4M]<------high Mem ----->[    16M]
@@ -75,4 +78,22 @@ void buffer_show(buffer_t * ptr){
         printf("[%ld] buffer head :\n", i + 1);
         buffer_head_show_with_offset(h, (unsigned int)ptr->buf);
     }
+}
+
+static buffer_head_t * find_buffer(buffer_t * ptr, unsigned int dev, unsigned int blocknr){
+    buffer_head_t * bh = hash(ptr->hash_table,dev, blocknr);
+    for(; bh != NULL; bh = bh->b_next){
+        if(bh->b_dev == dev && bh->b_blocknr == blocknr)
+            return bh;
+    }
+    return NULL;
+}
+
+// count = 0, dirt == 0, locked = not_used --> only one thread to do it 
+buffer_head_t * buffer_head_get(buffer_t * ptr){
+    // 1.get free block from hash(dev, nrblock); if ok -> ret
+    // 2.find count == 0 ;  if ok -> ret
+    // 3.find dirt block, and write it; find count == 0 ?
+    // repeat do it 
+    return NULL;
 }

@@ -1,6 +1,9 @@
+#include <stdio.h>
+/*  
 #include "test_device.h"
 #include "test_boot.h"
 
+#include "strcmp_test.h"
 
 typedef union {
 	int i;
@@ -42,14 +45,22 @@ static void test_buffer(){
 	buffer_show(ptr);
     buffer_free(ptr);
 }
+*/
+
 
 int main(int argc, char * argv[])
 {
-    test_device();
-    test_boot();
-    test_fat();
-    test_dentry();
-
-	test_buffer();
+//    test_device();
+//    test_boot();
+//    test_fat();
+//    test_dentry();
+//
+//	  test_buffer();
+ //   test_strcmp();
+ 
+    int i = 5+1;
+    for( ; i ; --i){
+        printf("hello, i[%d]\n", i-1);
+    }
 	return 0;
 }

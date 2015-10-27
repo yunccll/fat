@@ -10,6 +10,7 @@
 #define BIOS_DISPLAY_MEMORY_START  	640*1024
 #define BIOS_DISPLAY_MEMORY_END  	1024*1024
 
+
 typedef struct buffer_head {
 	char * b_data;          /*  pointer to data block (1024 bytes) */
 
@@ -34,7 +35,7 @@ typedef struct buffer_head {
 typedef struct buffer{
 	buffer_head_t * free_list;
 	unsigned int nr_buffer;
-	struct buffer_head_t * hash_table[NR_HASH];
+	buffer_head_t * hash_table[NR_HASH];
 	char buf[BUFFER_LEN];
 }buffer_t ;
 
@@ -43,10 +44,12 @@ typedef struct buffer{
         if(ptr){ free(ptr); ptr = NULL;} \
     }while(0) 
 
-void buffer_init(buffer_t * ptr);
 void buffer_show(buffer_t * ptr);
 void buffer_head_show(buffer_head_t * bh);
 
+
+void buffer_init(buffer_t * ptr);
+buffer_head_t * buffer_head_get(buffer_t * ptr);
 
 
 #endif   /* BUFFER_H */
