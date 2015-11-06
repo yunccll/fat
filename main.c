@@ -43,13 +43,28 @@ static void test_buffer(){
     buffer_free(ptr);
 }
 
+
+
+void test_file_is_exist(){
+    int ret = fat_file_is_exist("path");
+    if(ret == 1){
+        printf("is_exist -- yes\n"); 
+    }
+    else {
+        printf("is_exist -- not\n");
+    }
+}
+
 int main(int argc, char * argv[])
 {
-    test_device();
-    test_boot();
-    test_fat();
-    test_dentry();
+//    test_device();
+//    test_boot();
+//    test_fat();
+//    test_dentry();
+//
+//	test_buffer();
 
-	test_buffer();
+    
+    test_file_is_exist();    
 	return 0;
 }
