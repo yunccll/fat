@@ -37,3 +37,32 @@ void fat_root_entries_print(uchar * root_entries, size_t  re_size)
     }
 }
 
+fat_dentry_t * fat_find_entry_in_sector(uchar * entries, size_t re_size, const char * name){
+
+    size_t idx = index_of(name, '.');
+    if(idx == -1){  
+        FAT_ERROR("index of . in file_name error! name [%s]\n", name);
+        return NULL; 
+    }
+    //fill the val with name 
+    static const char * fmt = "        .   ";
+    char buf[16];
+    memcpy(buf, fmt, strlen(fmt));
+    strncpy(buf, name, idx);
+    strncpy(buf+9, name+idx+1, strlen(name)-idx-1); 
+    FAT_DEBUG("after fill the val with fn:[%s]\n", buf);
+
+
+    size_t i;
+    for( i = 0; i < re_size; i+= 32)
+    {
+        fat_dentry_t * ptr =(fat_dentry_t*) (entries + i);
+        
+        FAT_DEBUG("entry_seq=%lu, fn.ext [%s], sizeof(ptr->name)%lu, sizeof(ptr->ext)%lu\n", i, buf+9, sizeof(ptr->name), sizeof(ptr->ext));
+        int ok = strncmp(buf, ptr->name, sizeof(ptr->name)) == 0 && strncmp(buf + 9, ptr->ext, sizeof(ptr->ext)) == 0;
+        if(ok) 
+            return  ptr;
+    }
+    return NULL;
+}
+

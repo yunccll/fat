@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <assert.h>
 /*  
 #include "test_device.h"
 #include "test_boot.h"
@@ -48,16 +49,19 @@ static void test_buffer(){
 */
 
 
-
-
 void test_file_is_exist(){
-    int ret = fat_file_is_exist("path");
-    if(ret == 1){
-        printf("is_exist -- yes\n"); 
-    }
-    else {
-        printf("is_exist -- not\n");
-    }
+
+
+    int ret = fat_file_is_exist("a.txt");
+    assert(ret == -1);
+
+    ret = fat_file_is_exist("/a/b/c/d//a.txt");
+    ret = fat_file_is_exist("/a/b/c/d/a.txt");
+//    assert(ret == 1);
+//
+//    ret = fat_file_is_exist("/b/ba.txt");
+//    assert(ret == 0);
+
 }
 
 int main(int argc, char * argv[])
@@ -65,7 +69,7 @@ int main(int argc, char * argv[])
 //    test_device();
 //    test_boot();
 //    test_fat();
-//    test_dentry();
+    test_dentry();
 //
 //	  test_buffer();
 //	  test_buffer();

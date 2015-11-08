@@ -24,6 +24,16 @@ static void test_root_entries_print()
     //3. print the entries
 	fat_root_entries_print(pre, re_size);
 
+    const char * fn = "A.TXT";
+    FAT_DEBUG("find the file name is [%s]\n", fn);
+    fat_dentry_t  * ptr =fat_find_entry_in_sector(pre, re_size, fn);
+    if(NULL != ptr){
+        FAT_DEBUG("find the dentry with file_name 0x%X\n", ptr);
+    }
+    else{
+        FAT_DEBUG("can not find the dentry with file_name [%s]\nn",fn);
+    }
+
     //4. free the mem 
 	free(pre); pre = NULL;
     FAT_PRINT("Finished......\n\n");
