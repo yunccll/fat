@@ -46,4 +46,7 @@ typedef struct dentry fat_dentry_t;
 void fat_entry_print(fat_dentry_t * pdentry);
 void fat_root_entries_print(uchar * root_entries, size_t  re_size);
 
+
+
+
 #endif   /* DENTRY_H */

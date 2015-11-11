@@ -1,0 +1,64 @@
+/*
+ * This file is for base requirement testcase
+ *
+ */
+
+path = "/abc/dbc/def/dce/";
+
+void test_is_exist(){
+    int ret = fat_file_is_exist("path");
+    if(ret == 1){
+        print("is_exist -- yes"); 
+    }
+    else {
+        print("is_exist -- not");
+    }
+}
+
+void test_create_file(){
+    File * ptr = fat_file_create("path");
+    if(ptr == NULL){ 
+        error_ret();
+    }
+    fat_close(ptr);
+}
+
+void test_delete_file(){
+    fat_file_delete("path");
+}
+
+
+void test_read_file(){
+    File * ptr = fat_file_open("path", READ|WRITE);
+    if(ptr == NULL){
+        error_ret();
+    }
+    
+    char buf[1024];
+    int ret = fat_file_read(ptr, buf, sizeof(buf));
+    if(ret < 0 ){
+        clear_resource();
+        error_ret();
+    }
+
+    fat_close(ptr);
+}
+
+void test_write_file(){
+    File * ptr = fat_file_open("path", READ|WRITE);
+    if(ptr == NULL){
+        error_ret();
+    }
+    
+    char buf[1024] = {0};
+
+    ret = fat_file_write(ptr, buf, strlen(buf));
+    if(ret < 0){
+        clear_resource();
+        error_ret();
+    }
+
+    fat_close(ptr);
+}
+
+//dir 

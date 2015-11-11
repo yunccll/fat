@@ -48,35 +48,35 @@ void buffer_init(buffer_t * ptr){
 	}
 }
 
-static void buffer_head_show_with_offset(buffer_head_t * bh, unsigned int addr){
-    printf("\tbuffer address: [0x%08x]    offset [0x%08x]\n", (unsigned int)(bh)               ,(unsigned int)(bh)-addr              );
-    printf("\tb_data          [0x%08x]    offset [0x%08x]\n", (unsigned int)bh->b_data         ,(unsigned int)(bh->b_data) - addr    );
-    printf("\tb_prev          [0x%08x]    offset [0x%08x]\n", (unsigned int)bh->b_prev         ,(unsigned int)(0)    );
-    printf("\tb_next          [0x%08x]    offset [0x%08x]\n", (unsigned int)bh->b_next         ,(unsigned int)(0)    );
-    printf("\tb_prev_free     [0x%08x]    offset [0x%08x]\n", (unsigned int)bh->b_prev_free    ,(unsigned int)(bh->b_prev_free) - addr   );
-    printf("\tb_next_free     [0x%08x]    offset [0x%08x]\n", (unsigned int)bh->b_next_free    ,(unsigned int)(bh->b_next_free) - addr   );
+static void buffer_head_show_with_offset(buffer_head_t * bh, unsigned long addr){
+    printf("\tbuffer address: [0x%08lx]    offset [0x%08lx]\n", (unsigned long)(bh)               ,(unsigned long)(bh)-addr              );
+    printf("\tb_data          [0x%08lx]    offset [0x%08lx]\n", (unsigned long)bh->b_data         ,(unsigned long)(bh->b_data) - addr    );
+    printf("\tb_prev          [0x%08lx]    offset [0x%08lx]\n", (unsigned long)bh->b_prev         ,(unsigned long)(0)    );
+    printf("\tb_next          [0x%08lx]    offset [0x%08lx]\n", (unsigned long)bh->b_next         ,(unsigned long)(0)    );
+    printf("\tb_prev_free     [0x%08lx]    offset [0x%08lx]\n", (unsigned long)bh->b_prev_free    ,(unsigned long)(bh->b_prev_free) - addr   );
+    printf("\tb_next_free     [0x%08lx]    offset [0x%08lx]\n", (unsigned long)bh->b_next_free    ,(unsigned long)(bh->b_next_free) - addr   );
 }
 void buffer_head_show(buffer_head_t * bh){
-    printf("\tbuffer address: [0x%08x]\n", (unsigned int)(bh)               );
-    printf("\tb_data          [0x%08x]\n", (unsigned int)bh->b_data         );
-    printf("\tb_prev          [0x%08x]\n", (unsigned int)bh->b_prev         );
-    printf("\tb_next          [0x%08x]\n", (unsigned int)bh->b_next         );
-    printf("\tb_prev_free     [0x%08x]\n", (unsigned int)bh->b_prev_free    );
-    printf("\tb_next_free     [0x%08x]\n", (unsigned int)bh->b_next_free    );
+    printf("\tbuffer address: [0x%08lx]\n", (unsigned long)(bh)               );
+    printf("\tb_data          [0x%08lx]\n", (unsigned long)bh->b_data         );
+    printf("\tb_prev          [0x%08lx]\n", (unsigned long)bh->b_prev         );
+    printf("\tb_next          [0x%08lx]\n", (unsigned long)bh->b_next         );
+    printf("\tb_prev_free     [0x%08lx]\n", (unsigned long)bh->b_prev_free    );
+    printf("\tb_next_free     [0x%08lx]\n", (unsigned long)bh->b_next_free    );
 }
 
 void buffer_show(buffer_t * ptr){
-	printf("free_list       [0x%08x]\n",        (unsigned int)ptr->free_list);
-	printf("nr_buffer       [0x%08x] [%u]\n",   ptr->nr_buffer,     ptr->nr_buffer);	
-	printf("hash_table      [0x%08x]\n",        (unsigned int)ptr->hash_table);
-	printf("buf first addr  [0x%08x]\n",        (unsigned int)ptr->buf);
+	printf("free_list       [0x%08lx]\n",        (unsigned long)ptr->free_list);
+	printf("nr_buffer       [0x%08x] [%u]\n",    ptr->nr_buffer,     ptr->nr_buffer);	
+	printf("hash_table      [0x%08lx]\n",        (unsigned long)ptr->hash_table);
+	printf("buf first addr  [0x%08lx]\n",        (unsigned long)ptr->buf);
     printf("show buf content: ....\n");
     
     buffer_head_t * h = (buffer_head_t*)ptr->buf;
     long i;
     for(i = 0; i < ptr->nr_buffer; ++i, h++){
         printf("[%ld] buffer head :\n", i + 1);
-        buffer_head_show_with_offset(h, (unsigned int)ptr->buf);
+        buffer_head_show_with_offset(h, (unsigned long)ptr->buf);
     }
 }
 

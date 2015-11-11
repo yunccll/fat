@@ -20,9 +20,9 @@ typedef struct buffer_head {
 	unsigned char b_uptodate;
 	unsigned char b_dirt;       /*  0-clean,1-dirty */
 
-	//unsigned char b_count;      /*  users using this block */
-	//unsigned char b_lock;       /*  0 - ok, 1 -locked */
-	//struct task_struct * b_wait;
+	unsigned char b_count;      /*  users using this block */
+	unsigned char b_lock;       /*  0 - ok, 1 -locked */
+	void * b_wait; //struct task_struct * b_wait;
 
 	struct buffer_head * b_prev;
 	struct buffer_head * b_next;
@@ -46,6 +46,8 @@ typedef struct buffer{
 
 void buffer_show(buffer_t * ptr);
 void buffer_head_show(buffer_head_t * bh);
+
+buffer_head_t * buffer_get_block(buffer_t * ptr, int dev, int nrblock);
 
 
 void buffer_init(buffer_t * ptr);

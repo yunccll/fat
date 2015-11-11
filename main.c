@@ -48,6 +48,18 @@ static void test_buffer(){
 */
 
 
+
+
+void test_file_is_exist(){
+    int ret = fat_file_is_exist("path");
+    if(ret == 1){
+        printf("is_exist -- yes\n"); 
+    }
+    else {
+        printf("is_exist -- not\n");
+    }
+}
+
 int main(int argc, char * argv[])
 {
 //    test_device();
@@ -56,11 +68,10 @@ int main(int argc, char * argv[])
 //    test_dentry();
 //
 //	  test_buffer();
- //   test_strcmp();
+//	  test_buffer();
+//    test_strcmp();
+
+    test_file_is_exist();    
  
-    int i = 5+1;
-    for( ; i ; --i){
-        printf("hello, i[%d]\n", i-1);
-    }
 	return 0;
 }
