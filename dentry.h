@@ -46,6 +46,9 @@ typedef struct dentry fat_dentry_t;
 void fat_entry_print(fat_dentry_t * pdentry);
 void fat_root_entries_print(uchar * root_entries, size_t  re_size);
 
+//TODO
+int fat_find_entry_in_root_entries(uchar * root_entries, const char * name, fat_dentry_t * pout);
+int fat_find_entry_in_sector(uchar * sector, const char * name, fat_dentry_t * pout);
 
 
 
