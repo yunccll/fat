@@ -8,9 +8,11 @@ LIB_PATH= 	$(APP_PATH) \
 #DYNAMIC_LIBS= rt dl
 STATIC_LIBS= 
 
-SRC_NAME = $(patsubst %.cpp, %, $(wildcard *.cpp))   $(patsubst %.c, %, $(wildcard *.c)) 
+SRC_NAME = 	$(patsubst %.cpp, %, $(wildcard *.cpp))   \
+			$(patsubst %.c, %, $(wildcard *.c)) 	\
+			$(patsubst %.c, %, $(wildcard test/*.c))
 
-TARGET= main
+TARGET= bin/main
 
 CC=gcc
 
@@ -27,7 +29,7 @@ $(TARGET):$(OBJS)
 	$(CC) -o $@ $(OBJS) $(LFLAGS) 
 
 %.o:%.c
-	$(CC) $(CFLAGS) -c $<
+	$(CC) $(CFLAGS) -c $< -o $@
 
 %.o:%.cpp
 	$(CC) $(CFLAGS) -c $<
