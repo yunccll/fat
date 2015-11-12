@@ -45,11 +45,3 @@ char * rtrim(char *str) {
     str[j]='\0';
     return str;
 }
-//in: str, ch;
-size_t index_of(const char * str, const char ch){
-    size_t i= 0;
-    for(; str[i] != '\0'; ++i){ 
-        if(str[i] == ch) return i; 
-    }
-    return -1;
-}

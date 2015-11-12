@@ -22,7 +22,7 @@ int fat_file_is_exist(const char * full_path){
 
         char * fld = 0;
         char * ppath = path;
-        while( (fld = strsep(&ppath, PATH_SEP_STR)) != NULL){
+        while( (fld = _strsep(&ppath, PATH_SEP_STR)) != NULL){
             if(strlen(fld) > 0)
                 printf("fld : %s   \n", fld); 
         }
