@@ -22,15 +22,25 @@ __stronger__
 
 
 ####list
+
 *Read
+
 *write
+
 +Green
+
 +Yellow
+
 -Blue
+
 -Brown
 
 1.hello 
+
 2. world
 
-[Baidu](http:://www.baidu.com)
+[Baidu](http://www.baidu.com)
+
 See my[About](./second.md)
+
+
