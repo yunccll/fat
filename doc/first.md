@@ -23,19 +23,19 @@ __stronger__
 
 ####list
 
-*Read
+* Read
 
-*write
+* write
 
-+Green
++ Green
 
-+Yellow
++ Yellow
 
--Blue
+- Blue
 
--Brown
+- Brown
 
-1.hello 
+1. hello 
 
 2. world
 
