@@ -49,6 +49,9 @@ static void test_buffer(){
 */
 
 
+
+
+
 void test_file_is_exist(){
 
 
@@ -64,18 +67,19 @@ void test_file_is_exist(){
 
 }
 
+
+
+
 int main(int argc, char * argv[])
 {
 //    test_device();
 //    test_boot();
 //    test_fat();
-    test_dentry();
+//    test_dentry();
 //
 //	  test_buffer();
 //	  test_buffer();
 //    test_strcmp();
-
-    test_file_is_exist();    
- 
+//    test_file_is_exist();    
 	return 0;
 }
