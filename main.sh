@@ -2,4 +2,5 @@
 
 
 cd ./bin
-./main
+gdb ./main
+#./main

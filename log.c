@@ -1,11 +1,13 @@
 #include "log.h"
+#include <stdlib.h>
+#include <string.h>
 
 #include <time.h>
 #include <stdarg.h>
 
 static char log_buffer[512];
 
-void PrintOut(const int moduleIndex, const int lvl, const char * fileName, const char * funcName, int line, const char * fmt, ...)
+void print_out(const int moduleIndex, const int lvl, const char * fileName, const char * funcName, int line, const char * fmt, ...)
 {
 	static const char * moduleName[]={
 		"FAT12",
@@ -38,4 +40,13 @@ void PrintOut(const int moduleIndex, const int lvl, const char * fileName, const
 		fprintf(stderr, "%s", log_buffer, pos );
 	else
 		fprintf(stdout, "%s", log_buffer, pos );
+}
+
+
+
+void print_n(const char * msg, const char * str, size_t n){
+    char * buf = (char *)calloc(n+1, sizeof(char));
+    memcpy(buf, str, n);
+    FAT_DEBUG("%s:[%s]\n", msg, buf);
+    free(buf);
 }
