@@ -1,5 +1,6 @@
 APP_PATH= .
 INC_PATH= 	$(APP_PATH) \
+			$(APP_PATH)/test
 			#$(APP_PATH)/include
 
 LIB_PATH= 	$(APP_PATH) \

@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include "test_mkfs.h"
 /*  
 #include "test_device.h"
 #include "test_boot.h"
@@ -71,7 +72,7 @@ int main(int argc, char * argv[])
 //	  test_buffer();
 //    test_strcmp();
 
-    test_file_is_exist();    
- 
+//    test_file_is_exist();    
+    test_mkfs_all(); 
 	return 0;
 }

@@ -90,6 +90,13 @@ int fat_boot_read(fat_boot_t * pb, const char * file, fat_offset_t offset)
     fat_dev_destroy(&fdev);
     return 0;
 }
+int fat_boot_write_to_dev(fat_boot_t * pb, fat_dev_t * pdev, fat_offset_t offset){
+    int ret =fat_dev_write(pdev, offset, (const uchar*)pb, sizeof(*pb));
+    if(ret < 0 ){
+        FAT_ERROR("device write failed!\n");
+    }
+    return ret;
+}
 int fat_boot_write(fat_boot_t * pb, const char * file, fat_offset_t offset)
 {
     assert(pb && file);
@@ -99,12 +106,8 @@ int fat_boot_write(fat_boot_t * pb, const char * file, fat_offset_t offset)
     }
 
     DECLARE_DEVICE_W(fdev, file);
-    int ret =fat_dev_write(&fdev, 0, (const uchar*)pb, sizeof(*pb));
-    if(ret < 0 ){
-        FAT_ERROR("device write failed!\n");
-        return -1;
-    }
+    int ret = fat_boot_write_to_dev(pb, &fdev, offset);
     fat_dev_destroy(&fdev);
-    return 0;
+    return ret;
 }
 
