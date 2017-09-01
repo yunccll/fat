@@ -61,8 +61,18 @@ void fat_fat_free(fat_fat_t * pfat){
     if(pfat != NULL) free(pfat);
 }
 
-int fat_fat_init(fat_fat_t * pfat, fat_offset_t start_offset, int number_of_fat, int sectors_per_fat, int bytes_per_sector);
+static void __free_fats_origin_memory(char ** fats, int number){
+    int i = 0;
+    for(; i < number; ++i){
+        if(fats[i] != NULL){
+            free(fats[i]);
+            fats[i] = NULL;
+        }
+    }
+}
+int fat_fat_init(fat_fat_t * pfat, fat_offset_t start_offset, int number_of_fat, int sectors_per_fat, int bytes_per_sector){
     if(pfat == NULL) return -1; 
+
     pfat->start_offset = start_offset;
     pfat->number_of_fat = number_of_fat;
     pfat->sectors_per_fat = sectors_per_fat;
@@ -76,7 +86,7 @@ int fat_fat_init(fat_fat_t * pfat, fat_offset_t start_offset, int number_of_fat,
     }
     int i = 0; 
     for(; i < pfat->number_of_fat; ++i){
-        pfat->fats[i] = (char*)calloc(sizeof(char)*pfats->sectors_per_fat * pfats->bytes_per_sector, 1);
+        pfat->fats[i] = (char*)calloc(sizeof(char)*pfat->sectors_per_fat * pfat->bytes_per_sector, 1);
         if(pfat->fats[i] == NULL){
             FAT_ERROR("malloc the fat[%d] failed\n", i+1);
             break;
@@ -85,19 +95,12 @@ int fat_fat_init(fat_fat_t * pfat, fat_offset_t start_offset, int number_of_fat,
     if(i == pfat->number_of_fat){
         return 0;
     }
-    //if calloc failed, free the alloc memory
-    int j = 0; 
-    for( ; j < i; ++j){
-        free(pfat->fats[i]);
-    }
+    __free_fats_origin_memory(pfat->fats, pfat->number_of_fat);
     return -1;
 }
+
 void fat_fat_destroy(fat_fat_t * pfat){
     if(pfat != NULL){
-        int i = 0; 
-        for(; i < pfat->number_of_fat; ++i){
-            free(pfat->fats[i])
-        }
-        free(pfat->fats);
+        __free_fats_origin_memory(pfat->fats, pfat->number_of_fat);
     }
 }
