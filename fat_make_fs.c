@@ -8,6 +8,10 @@ static int write_boot_sector(fat_dev_t * pdev){
     return fat_boot_write_to_dev(&boot, pdev, 0);
 }
 
+static int write_fat(fat_dev_t * pdev, fat_fat_t * pfat){
+    return -1;
+}
+
 int fat_make_fs(fat_dev_t * pdev){
     //1. write boot sector
     write_boot_sector(pdev);
