@@ -9,6 +9,7 @@
 #define offset_to_clusno(offset)   ( ((offset)%3) ? ((offset)/3*2+1) : ((offset)/3*2) )
 #define clusno_to_offset(clusno)     ((clusno) *3/2)
 
+// cluster 0,1 is not used
 // cluster no(0-based) to  physical sector no(0-based)
 #define clusno_to_sectno(clusno)     ((clusno) + 31)
 #define sectno_to_clusno(sectno)     ((sectno) - 31)
