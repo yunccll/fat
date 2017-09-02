@@ -82,3 +82,36 @@ fat_dentry_t * fat_find_entry_in_sector(uchar * entries, size_t re_size, const c
     }
     return NULL;
 }
+
+void fat_root_entries_free(fat_root_entries_t * proot_entries){
+    if(proot_entries != NULL)
+        free(proot_entries);
+}
+fat_root_entries_t * fat_root_entries_create(){
+    return (fat_root_entries_t *) calloc(sizeof(fat_root_entries_t), 1);
+}
+
+void fat_root_entries_destroy(fat_root_entries_t * proot_entries){
+    if(proot_entries != NULL){
+        if(proot_entries->entries != NULL){
+            free(proot_entries->entries);
+            proot_entries->entries = NULL;
+            proot_entries->number_entries_in_root = 0;
+            proot_entries->start_offset = 0;
+        }
+    }
+}
+int fat_root_entries_init(fat_root_entries_t * proot_entries, fat_offset_t start_offset, int number_entries_in_root){
+    if(proot_entries != NULL){
+        proot_entries->number_entries_in_root = number_entries_in_root;
+        proot_entries->start_offset = start_offset;
+        proot_entries->entries =  (char *)calloc(sizeof(fat_dentry_t), number_entries_in_root);
+        if(proot_entries->entries == NULL){
+            goto err;
+        }
+        return 0;
+    }
+err:
+    fat_root_entries_destroy(proot_entries);
+    return -1;
+}
