@@ -4,6 +4,30 @@
 
 #include "common.h"
 
+struct fat_fat{
+    fat_offset_t start_offset;
+
+    int number_of_fat;
+    int sectors_per_fat;
+    int bytes_per_sector; 
+
+    char ** fats;
+};
+typedef struct fat_fat fat_fat_t;
+
+fat_fat_t * fat_fat_create();
+void fat_fat_free(fat_fat_t * pfat);
+
+int fat_fat_init(fat_fat_t * pfat, fat_offset_t start_offset, int number_of_fat, int sectors_per_fat, int bytes_per_sector);
+void fat_fat_destroy(fat_fat_t * pfat);
+
+#define  DECLARE_FAT_FAT(name, start_offset, number_of_fat, sectors_per_fat, bytes_per_sector) \
+    fat_fat_t name;    \
+    fat_fat_init(&name, start_offset, number_of_fat, sectors_per_fat, bytes_per_sector)
+
+
+
+
 
 // byte offset(0-based) to cluster no(0-based)
 #define offset_to_clusno(offset)   ( ((offset)%3) ? ((offset)/3*2+1) : ((offset)/3*2) )

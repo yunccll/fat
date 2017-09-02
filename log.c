@@ -37,9 +37,11 @@ void print_out(const int moduleIndex, const int lvl, const char * fileName, cons
 	va_end(pArg);
 	// print all out
 	if(lvl <= 1)
-		fprintf(stderr, "%s", log_buffer, pos );
+		//fprintf(stderr, "%s", log_buffer, pos );
+		fprintf(stderr, "%s", log_buffer);
 	else
-		fprintf(stdout, "%s", log_buffer, pos );
+		//fprintf(stdout, "%s", log_buffer, pos );
+		fprintf(stdout, "%s", log_buffer);
 }
 
 

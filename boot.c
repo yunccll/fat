@@ -111,3 +111,5 @@ int fat_boot_write(fat_boot_t * pb, const char * file, fat_offset_t offset)
     return ret;
 }
 
+void fat_boot_destroy(fat_boot_t * pb){
+}
