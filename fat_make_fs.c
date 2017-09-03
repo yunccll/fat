@@ -2,6 +2,7 @@
 #include "boot.h"
 #include "fat.h"
 #include "dentry.h"
+#include "data.h"
 
 
 static int write_boot_sector(fat_dev_t * pdev, fat_boot_t * pboot){
@@ -23,6 +24,17 @@ error:
 static int write_root_entries(fat_dev_t * pdev, fat_root_entries_t * root_entries){
     return fat_dev_write(pdev, root_entries->start_offset, root_entries->entries, root_entries->number_entries_in_root * sizeof(fat_dentry_t)) < 0 ? -1 : 0;
     //TODO: add the . && .. fat_dentry
+}
+static int write_data_blocks(fat_dev_t * pdev, fat_data_t * pdata){
+    int i = 0;
+    for(; i < pdata->sectors_per_data; ++i){
+        int ret = fat_dev_write(pdev, pdata->start_offset + i * pdata->bytes_per_sector,  
+        pdata->data_block, pdata->bytes_per_sector);
+        if(ret < 0){
+            return -1;
+        }
+    }
+    return 0;
 }
 
 #define SECTOR_OF_BOOT      1
@@ -63,8 +75,24 @@ int fat_make_fs(fat_dev_t * pdev){
         ret = -1;
         goto final_root_entries;
     }
-    //4. write the left data block TODO:
 
+    //4. write the left data block
+    fat_data_t data;
+    start_offset = root_entries.start_offset + root_entries.number_entries_in_root * sizeof(fat_dentry_t);
+    ret = fat_data_init(&data, start_offset, 2880-33, fat.bytes_per_sector); //TODO: 
+    if(ret != 0){
+        ret = -1;
+        goto final_data;
+    }
+    ret = write_data_blocks(pdev, &data);
+    if(ret != 0){
+        ret = -1;
+        goto final_data;
+    }
+    return 0;
+
+final_data:
+    fat_data_deinit(&data);
 final_root_entries:
     fat_root_entries_destroy(&root_entries);
 final_fat: 
