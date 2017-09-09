@@ -64,7 +64,7 @@ typedef struct fat_root_entries fat_root_entries_t;
 void fat_root_entries_free(fat_root_entries_t * proot_entries);
 fat_root_entries_t * fat_root_entries_create();
 
-void fat_root_entries_destroy(fat_root_entries_t * proot_entries);
+void fat_root_entries_deinit(fat_root_entries_t * proot_entries);
 int fat_root_entries_init(fat_root_entries_t * proot_enties, fat_offset_t start_offset, int number_entries_in_root);
 
 #endif   /* DENTRY_H */

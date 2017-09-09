@@ -43,8 +43,8 @@ typedef struct fat_boot fat_boot_t;
 void fat_boot_print(fat_boot_t * pb);
 
 
-void fat_boot_init(fat_boot_t * pb);
-void fat_boot_destroy(fat_boot_t * pb);
+int fat_boot_init(fat_boot_t * pb);
+void fat_boot_deinit(fat_boot_t * pb);
 
 void fat_boot_format12(fat_boot_t * pb);
 

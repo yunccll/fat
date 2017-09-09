@@ -99,7 +99,7 @@ int fat_fat_init(fat_fat_t * pfat, fat_offset_t start_offset, int number_of_fat,
     return -1;
 }
 
-void fat_fat_destroy(fat_fat_t * pfat){
+void fat_fat_deinit(fat_fat_t * pfat){
     if(pfat != NULL){
         __free_fats_origin_memory(pfat->fats, pfat->number_of_fat);
     }

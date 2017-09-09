@@ -19,7 +19,7 @@ fat_fat_t * fat_fat_create();
 void fat_fat_free(fat_fat_t * pfat);
 
 int fat_fat_init(fat_fat_t * pfat, fat_offset_t start_offset, int number_of_fat, int sectors_per_fat, int bytes_per_sector);
-void fat_fat_destroy(fat_fat_t * pfat);
+void fat_fat_deinit(fat_fat_t * pfat);
 
 #define  DECLARE_FAT_FAT(name, start_offset, number_of_fat, sectors_per_fat, bytes_per_sector) \
     fat_fat_t name;    \

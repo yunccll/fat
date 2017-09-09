@@ -5,6 +5,136 @@
 #include "data.h"
 
 
+/*  
+procedure is :
+    1. format the boot_sector
+    2. create super from boot_block
+    3. create fat_block and write it
+    4. create root_entry_block and write it
+    5. create data_block  and write it
+*/
+
+
+/*   the boot info  to classed 
+    __u8          jmp[3];           // 0xeb 0x3c 0x90
+    __u8          sys_id[8];        // system id 
+    struct msdos_volume_info vi;    //  msdos volumn info
+    __u8   boot_code[BOOTCODE_SIZE];//  boot code 
+    __u16        boot_sign;         //  boot sign 0x AA 55 low -> high
+
+    //disk info
+    __u16         secs_track;       //  sectors per track
+    __u16         heads;            //  number of heads
+
+    //global info
+    __u8          media;            //  media code (unused)
+    __u8          sector_size[2];   //  bytes per logical sector
+    __u8          cluster_size;     //  sectors per cluster
+
+    __u32         hidden;           //  hidden sectors (unused)
+
+
+    __u16         reserved;         //  reserved sectors
+    __u8          sectors[2];       //  number of sectors
+    __u32         total_sect;       //  number of sectors (if sectors == 0)
+
+    //fat info
+    __u8          fats;             //  number of FATs
+    __u16         fat_length;       //  sectors per FAT
+    
+    //root_entries
+	__u8          dir_entries[2];   //  root directory entries
+*/
+
+
+struct fat_super {
+    int bytes_per_sector;
+    //int total_sectors; //TODO: 
+    //int reserved_sectors;
+    //int hidden_sectors;
+
+    int boot_offset;
+    //int sectors_of_boot;
+    fat_boot_t boot;
+
+    int fat_offset;
+    //int numbers_of_fat;
+    //int sector_per_fat;
+    fat_fat_t fat;
+
+    int root_entries_offset;
+    //int entries_per_root;
+    //int bytes_per_entry;
+    fat_root_entries_t root_entry;
+
+    int data_offset;
+    //int sector_of_boot;
+    fat_data_t data;
+};
+typedef struct fat_super fat_super_t;
+
+fat_super_t * fat_super_free(fat_super_t * super){
+    if(super){
+        free(super);
+    }
+    return NULL;
+}
+fat_super_t * fat_super_alloc(){
+    return (fat_super_t*)calloc(sizeof(fat_super_t), 1);
+}
+
+void fat_super_deinit(fat_super_t * super){
+    if(super){
+        fat_data_deinit(&(super->data));
+        fat_root_entries_deinit(&(super->root_entry));
+        fat_fat_deinit(&(super->fat));
+        fat_boot_deinit(&(super->boot));
+    }
+}
+/* 
+int fat_super_init(fat_super_t * super){
+    //TODO: set super info
+    super->boot_offset = 0;
+    super->sectors_of_boot = 1;
+    super->bytes_per_sector = two_bytes_to_short(super->boot.sector_size);
+
+    if(fat_boot_init(&(super->boot))){
+        goto err_ret;
+    }
+    //TODO: init the super from the boot sectors
+
+    super->fat_offset = super->sectors_of_boot * super->bytes_per_sector;
+    if(fat_fat_init(&(super->fat), super->fat_offset, super->boot.fats, super->boot.fat_length, super->bytes_per_sector)){
+        goto deinit_boot;
+    }
+
+    super->root_entries_offset = super->fat_offset + super->fat.number_of_fat * super->fat.sectors_per_fat * super->bytes_per_sector;
+    if(fat_root_entries_init(&(super->root_entries), super->root_entries_offset, two_bytes_to_short(super->boot.dir_entries))){
+        goto deinit_fat;
+    }
+
+    super->data_offset = super->root_entries_offset + super->root_entries.number_entries_in_root * sizeof(fat_dentry_t);
+    if(fat_data_init(&(super->data), super->data_offset, 2880-33, super->bytes_per_sector)){
+        goto deinit_root_entries; 
+    }
+    return 0;
+
+deinit_root_entries:
+    fat_root_entries_deinit(&(super->root_entries));
+deinit_fat:
+    fat_fat_deinit(&(super->fat));
+deinit_boot:
+    fat_boot_deinit(&(super->boot));
+err_ret:
+    return -1;
+}
+*/
+
+/*  TODO 
+int fat_super_mkfs(fat_super_t * super, fat_dev_t * pdev);
+*/
+
+
 static int write_boot_sector(fat_dev_t * pdev, fat_boot_t * pboot){
     fat_boot_format12(pboot);
     return fat_boot_write_to_dev(pboot, pdev, 0) < 0 ? -1 : 0;
@@ -94,11 +224,11 @@ int fat_make_fs(fat_dev_t * pdev){
 final_data:
     fat_data_deinit(&data);
 final_root_entries:
-    fat_root_entries_destroy(&root_entries);
+    fat_root_entries_deinit(&root_entries);
 final_fat: 
-    fat_fat_destroy(&fat);
+    fat_fat_deinit(&fat);
 final_boot:
-    fat_boot_destroy(&boot);
+    fat_boot_deinit(&boot);
     return ret;
 }
 

@@ -91,7 +91,7 @@ fat_root_entries_t * fat_root_entries_create(){
     return (fat_root_entries_t *) calloc(sizeof(fat_root_entries_t), 1);
 }
 
-void fat_root_entries_destroy(fat_root_entries_t * proot_entries){
+void fat_root_entries_deinit(fat_root_entries_t * proot_entries){
     if(proot_entries != NULL){
         if(proot_entries->entries != NULL){
             free(proot_entries->entries);
@@ -112,6 +112,6 @@ int fat_root_entries_init(fat_root_entries_t * proot_entries, fat_offset_t start
         return 0;
     }
 err:
-    fat_root_entries_destroy(proot_entries);
+    fat_root_entries_deinit(proot_entries);
     return -1;
 }

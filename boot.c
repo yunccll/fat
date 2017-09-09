@@ -67,10 +67,11 @@ void fat_boot_format12(fat_boot_t * pb)
     pb->boot_sign = 0xAA55;
 }
 
-void fat_boot_init(fat_boot_t * pb)
+int fat_boot_init(fat_boot_t * pb)
 {
     assert(pb);
     memset(pb, 0, sizeof(fat_boot_t));
+    return 0;
 }
 
 int fat_boot_read(fat_boot_t * pb, const char * file, fat_offset_t offset)
@@ -111,5 +112,5 @@ int fat_boot_write(fat_boot_t * pb, const char * file, fat_offset_t offset)
     return ret;
 }
 
-void fat_boot_destroy(fat_boot_t * pb){
+void fat_boot_deinit(fat_boot_t * pb){
 }
