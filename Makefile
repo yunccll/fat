@@ -1,10 +1,8 @@
 APP_PATH= .
 INC_PATH= 	$(APP_PATH) \
 			$(APP_PATH)/test
-			#$(APP_PATH)/include
 
-LIB_PATH= 	$(APP_PATH) \
-			#$(APP_PATH)/lib
+LIB_PATH= 	$(APP_PATH)
 
 #DYNAMIC_LIBS= rt dl
 STATIC_LIBS= 
@@ -17,11 +15,10 @@ TARGET= bin/main
 
 CC=gcc
 
-DEBUG_FLAGS= -g -Werror #-std=gnu99#-Wwrite-strings -Werror
+DEBUG_FLAGS= -g -Werror
 
 CFLAGS= $(addprefix -I, $(INC_PATH)) $(DEBUG_FLAGS)
 LFLAGS= $(DEBUG_FLAGS) $(addprefix -L, $(LIB_PATH))  $(addprefix -l, $(STATIC_LIBS))
-#LFLAGS= $(DEBUG_FLAGS)
 OBJS=$(addsuffix .o, $(SRC_NAME))
 
 all:$(TARGET)
