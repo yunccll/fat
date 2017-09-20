@@ -1,6 +1,6 @@
 APP_PATH= .
 INC_PATH= 	$(APP_PATH) \
-			$(APP_PATH)/test
+			$(APP_PATH)/unittest
 
 LIB_PATH= 	$(APP_PATH)
 
@@ -9,7 +9,7 @@ STATIC_LIBS=
 
 SRC_NAME = 	$(patsubst %.cpp, %, $(wildcard *.cpp))   \
 			$(patsubst %.c, %, $(wildcard *.c)) 	\
-			$(patsubst %.c, %, $(wildcard test/*.c))
+			$(patsubst %.c, %, $(wildcard unittest/*.c))
 
 TARGET= bin/main
 
@@ -33,6 +33,7 @@ $(TARGET):$(OBJS)
 	$(CC) $(CFLAGS) -c $<
 
 clean:
-	@rm -f $(TARGET) $(OBJS) *.o 
+	@rm -frv $(TARGET) $(OBJS) *.o 
+	@rm -frv $(APP_PATH)/bin/*
 
 
