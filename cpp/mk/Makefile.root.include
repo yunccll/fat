@@ -1,0 +1,129 @@
+#TODO: static && dynamic libs
+
+
+#-- alias
+ECHO = echo
+HIDE = @
+MV	= mv
+MKDIR = mkdir -p
+FIND  = find 
+LN	  = ln
+
+OS_PLATFORM=$(shell uname)
+OS_ARCH=$(shell uname)-$(shell arch)
+
+#-- deduce the abspath of the project root
+MK_ROOT_INC_DIR := $(dir $(word 2, $(MAKEFILE_LIST)))
+MK_ROOT_INC_RELATE_TO_SRC_ROOT := ..
+PROJ_ROOT_SRC_PATH := $(abspath $(MK_ROOT_INC_DIR)$(MK_ROOT_INC_RELATE_TO_SRC_ROOT))
+
+
+PROJ_CFLAGS 	= 	#c compile flags
+PROJ_CXXFLAGS 	= 	#cxx  compile flags
+PROJ_LDFLAGS 	=  	#ld compile flags
+PROJ_INC_PATHES =	#inc pathes for compile
+PROJ_LIB_PATHES = 	#libs pathes for link
+PROJ_LIB_NAMES 	=   # libXXX.a or libXXX.so format
+PROJ_LIB_FULL_NAMES =  # whole name for libs
+
+PROJ_STATIC_LIBS	=  #static lib names
+PROJ_DYNAMIC_LIBS  	=  #dynamic lib names
+
+#-- customer rules
+PROJ_CXXFLAGS += -g -Wall -Werror -pipe -Wno-shadow -fPIC -std=c++11
+#PROJ_CXXFLAGS += -g -w -pipe -Wno-shadow -fPIC -std=c++11
+PROJ_CXXFLAGS += $(addprefix -I, $(PROJ_INC_PATHES)) -I$(PROJ_ROOT_SRC_PATH)
+PROJ_CFLAGS += -fPIC
+PROJ_CFLAGS += $(addprefix -I, $(PROJ_INC_PATHES)) -I$(PROJ_ROOT_SRC_PATH)
+
+#add customer rule for default variable
+CXXFLAGS 	+= $(PROJ_CXXFLAGS) 
+CFLAGS 		+= $(PROJ_CFLAGS)
+LDFLAGS 	+= $(PROJ_LDFLAGS)
+LOADLIBES 	+= $(addprefix -L, $(PROJ_LIB_PATHES)) 
+LDLIBS   	+= $(addprefix -l, $(PROJ_LIB_NAMES)) \
+				$(PROJ_LIB_FULL_NAMES) \
+				$(addprefix -l, $(PROJ_STATIC_LIBS))\
+				$(add prefix -l, $(PROJ_DYNAMIC_LIBS))
+
+#-- source code && objects
+CXX_OBJS	= $(patsubst %.cpp,%.o, $(wildcard *.cpp))
+C_OBJS		= $(patsubst %.c,%.o, $(wildcard *.c))
+OBJS 		= $(CXX_OBJS) $(C_OBJS)
+TARGET_BIN 	= main.bin
+TARGET_LIB_NAME = main.lib
+TARGET_STATIC_LIB_BIN =lib$(TARGET_LIB_NAME).a
+TARGET_DYNAMIC_LIB_BIN =lib$(TARGET_LIB_NAME).so
+
+
+#-- unittest related variable
+UT_TARGET_BIN 	= main.ut.bin
+UT_DEST_ALL_OBJS = $(patsubst %.cpp,%.o, $(wildcard ../*.cpp)) \
+				   $(patsubst %.c,%.o, $(wildcard ../*.c))
+UT_DEST_OBJS 	= $(filter-out $(UT_DEST_EXCLUDE_OBJS), $(UT_DEST_ALL_OBJS)) 
+UT_DEST_EXCLUDE_OBJS := 
+
+#-- TODO install rule
+PROJ_INSTALL_ROOT = $(PROJ_ROOT_SRC_PATH)/install
+
+
+
+
+ARFLAGS 	= r
+#-- DO Operations
+#---- echo && ar | link
+EO_AR_TARGET 	= $(HIDE)$(ECHO) "archieving [$@] ..."
+DO_AR_TARGET	= $(HIDE)$(AR) $(ARFLAGS) $@ $^
+
+EO_SO_TARGET 	= $(HIDE)$(ECHO) "linking [$@] ..."
+DO_SO_TARGET	= $(HIDE)$(LINK.c) $^ --shared $(LOADLIBES) $(LDLIBS) -o $@
+
+EO_CPP_TARGET 	+= $(HIDE)$(ECHO) "linking [$@] ..."
+DO_CPP_TARGET 	+= $(HIDE)$(LINK.cpp) $^ $(LOADLIBES) $(LDLIBS) -o $@
+
+EO_C_TARGET 	= $(HIDE)$(ECHO) "linking [$@] ..."
+DO_C_TARGET 	= $(HIDE)$(LINK.c) $^ $(LOADLIBES) $(LDLIBS) -o $@
+
+#---- echo && clean 
+EO_AR_CLEAN 	= $(HIDE)$(ECHO) "clean archieving ===> :"
+DO_AR_CLEAN		= $(HIDE)$(RM) -rv $(TARGET_STATIC_LIB_BIN) $(OBJS)
+
+EO_SO_CLEAN 	= $(HIDE)$(ECHO) "clean executable ===> :"
+DO_SO_CLEAN		= $(HIDE)$(RM) -rv $(TARGET_DYNAMIC_LIB_BIN) $(OBJS)
+
+EO_CLEAN 		= $(HIDE)$(ECHO) "clean files ===> :"
+DO_CLEAN 		= $(HIDE)$(RM) -rv $(TARGET_BIN) $(OBJS)
+
+EO_CLEAN_LOG 	= $(HIDE)$(ECHO) "clean logs ===> :"
+DO_CLEAN_LOG	= $(HIDE)$(FIND) . -name "*.log" | xargs $(RM) -rv 
+
+EO_CALL_MK_UT		= $(HIDE)$(ECHO) "making unittest ===> :"
+DO_CALL_MK_UT		= $(HIDE)$(MAKE) -C unittest
+
+EO_CALL_MK_UT_CLEAN		= $(HIDE)$(ECHO) "making unittest clean ===> :"
+DO_CALL_MK_UT_CLEAN		= $(HIDE)$(MAKE) -C unittest clean
+
+
+EO_UT_CLEAN 	= $(HIDE)$(ECHO) "clean ut target ===> :"
+DO_UT_CLEAN 	= $(HIDE)$(RM) -rv $(UT_TARGET_BIN) $(OBJS)
+
+EO_THIRD_LIB 	= $(HIDE)$(ECHO) "ln the third libs ===> :"
+DO_THIRD_LIB	= $(HIDE)$(MAKE) -C $(PROJ_ROOT_SRC_PATH)/third
+
+
+THIRD_TARGET_DIR = $(addprefix $(PROJ_ROOT_SRC_PATH)/third/, $(shell ls $(PROJ_ROOT_SRC_PATH)/third/$(OS_ARCH)) )
+
+$(PROJ_ROOT_SRC_PATH)/third/%:$(PROJ_ROOT_SRC_PATH)/third/$(OS_ARCH)/%/
+	$(HIDE)$(LN) -s $< $@
+
+
+
+%.o: %.cc
+	$(HIDE)$(ECHO) "building [$<] ..."
+	$(HIDE)$(COMPILE.cc) $(OUTPUT_OPTION) $<
+%.o: %.cpp
+	$(HIDE)$(ECHO) "building [$<] ..."
+	$(HIDE)$(COMPILE.cpp) $(OUTPUT_OPTION) $<
+%.o: %.c
+	$(HIDE)$(ECHO) "building [$<] ..."
+	$(HIDE)$(COMPILE.c) $(OUTPUT_OPTION) $(CFLAGS) $<

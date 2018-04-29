@@ -1,0 +1,35 @@
+
+#-- gtest
+GTEST_HOME_PATH		:= $(PROJ_ROOT_SRC_PATH)/third/gtest
+GTEST_INC_PATH	:= $(GTEST_HOME_PATH)/include
+GTEST_LIB_PATH		:= $(GTEST_HOME_PATH)/lib
+GTEST_LIB_NAME		:= gtest
+GTEST_LIB_FULL_NAME	:= $(GTEST_LIB_PATH)/$(GTEST_LIB_NAME).a
+
+
+#-- gmock
+GMOCK_HOME_PATH		:= $(PROJ_ROOT_SRC_PATH)/third/gmock
+GMOCK_INC_PATH	:= $(GMOCK_HOME_PATH)/include
+GMOCK_LIB_PATH		:= $(GMOCK_HOME_PATH)/lib
+GMOCK_LIB_NAME		:= gmock
+GMOCK_LIB_FULL_NAME	:= $(GMOCK_LIB_PATH)/$(GMOCK_LIB_NAME).a
+
+#-- grpc && protobuf
+GRPC_HOME_PATH		:= $(PROJ_ROOT_SRC_PATH)/third/grpc
+GRPC_INC_PATH	:= $(GRPC_HOME_PATH)/include
+GRPC_LIB_PATH		:= $(GRPC_HOME_PATH)/lib
+GRPC_LIB_NAME		:= grpc++ grpc z 
+#---- protobuf
+GPROTOBUF_INC_PATH	:= $(GRPC_HOME_PATH)/include/protobuf
+GPROTOBUF_LIB_PATH		:= $(GRPC_HOME_PATH)/lib/protobuf
+GPROTOBUF_LIB_NAME		:= protobuf
+#---- bin
+GRPC_BIN_PATH			:= $(GRPC_HOME_PATH)/bin
+PROTOC_BIN 				:= $(GRPC_BIN_PATH)/protobuf/protoc
+PROTOC_CPP_PLUGIN_BIN 	:= $(GRPC_BIN_PATH)/grpc_cpp_plugin
+
+#-- leveldb
+LEVELDB_HOME_PATH	:= $(PROJ_ROOT_SRC_PATH)/third/leveldb
+LEVELDB_INC_PATH	:= $(LEVELDB_HOME_PATH)/include
+LEVELDB_LIB_PATH	:= $(LEVELDB_HOME_PATH)/lib
+LEVELDB_LIB_NAME	:= leveldb

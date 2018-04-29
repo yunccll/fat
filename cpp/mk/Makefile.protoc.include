@@ -1,0 +1,36 @@
+PROTOC_IDL_NAME =
+PROTOC_INC_PATH = .
+PROTOC_GRPC_OUT_DIR = .
+
+#-- rules
+PROTOC_IDL 	= $(addsuffix .proto, $(PROTOC_IDL_NAME))
+
+PROTOC_OUTPUT_PB_INC 	= $(addsuffix .pb.h, $(PROTOC_IDL_NAME))
+PROTOC_OUTPUT_PB_SRC	= $(addsuffix .pb.cc, $(PROTOC_IDL_NAME))
+PROTOC_OUTPUT_PB 		= $(PROTOC_OUTPUT_PB_SRC) $(PROTOC_OUTPUT_PB_INC) 
+
+
+PROTOC_OUTPUT_GRPC_INC 	= $(addsuffix .grpc.pb.h, $(PROTOC_IDL_NAME))
+PROTOC_OUTPUT_GRPC_SRC	= $(addsuffix .grpc.pb.cc, $(PROTOC_IDL_NAME))
+PROTOC_OUTPUT_GRPC 		=  $(PROTOC_OUTPUT_GRPC_SRC) $(PROTOC_OUTPUT_GRPC_INC)
+
+PROTOC_OUTPUT = $(PROTOC_OUTPUT_PB) $(PROTOC_OUTPUT_GRPC)
+
+#-- objs for pb.cc grpc.pb.cc
+PROTOC_OUTPUT_PB_OBJS = $(patsubst %.cc,%.o, $(PROTOC_OUTPUT_PB_SRC))
+PROTOC_OUTPUT_GRPC_OBJS = $(patsubst %.cc,%.o, $(PROTOC_OUTPUT_GRPC_SRC))
+PROTOC_OBJS = $(PROTOC_OUTPUT_PB_OBJS) $(PROTOC_OUTPUT_GRPC_OBJS)
+
+
+PROTOC_INC_OPTION	= $(addprefix -I, $(PROTOC_INC_PATH))
+
+%.pb.cc: %.proto
+	$(HIDE)$(ECHO) "building pb [$<] ..."
+	$(HIDE)$(PROTOC_BIN) $(PROTOC_INC_OPTION) --cpp_out=$(PROTOC_GRPC_OUT_DIR) $(PROTOC_IDL)
+%.grpc.pb.cc: %.proto
+	$(HIDE)$(ECHO) "building grpc [$<] ..."
+	$(HIDE)$(PROTOC_BIN)  $(PROTOC_INC_OPTION) --grpc_out=$(PROTOC_GRPC_OUT_DIR) --plugin=protoc-gen-grpc=$(PROTOC_CPP_PLUGIN_BIN)  $(PROTOC_IDL)
+
+
+EO_PROTOC_CLEAN	= $(HIDE)$(ECHO) "clean tmp files ===> :"
+DO_PROTOC_CLEAN	= $(HIDE)$(RM) -rv $(PROTOC_OUTPUT) 
