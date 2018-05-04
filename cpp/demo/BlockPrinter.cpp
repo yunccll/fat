@@ -1,10 +1,14 @@
 #include "BlockPrinter.h"
 
-
-
 void test(){
 
     Blocks  * blks = new BlocksFat12Blocks;
+
+    FsPrinter printer = new FsPrinter();
+    Fat12Parser parser = new Fat12Parser(printer)
+    parser.parse(blks);
+    Fs fs = printer.getResult()
+
 
     BlockPrinter * bp = new Fat12BlockPrinter;
     bp.setBlocks(blks){
