@@ -1,25 +1,13 @@
 #include "BlockPrinter.h"
 
 void test(){
-
     Blocks  * blks = new BlocksFat12Blocks;
 
-    FsPrinter printer = new FsPrinter();
-    Fat12Parser parser = new Fat12Parser(printer)
+    FsStringBuilder builder = new FsStringBuilder();
+    Fat12Parser parser = new Fat12Parser(builder)
     parser.parse(blks);
-    Fs fs = printer.getResult()
+    FsString fs = builder.getResult()
+    std::cout << fs.toString() << std::endl;
 
-
-    BlockPrinter * bp = new Fat12BlockPrinter;
-    bp.setBlocks(blks){
-        check(blks.length);
-    }
-    bp.print(std::cout & out){
-        Fat12InfoPrinter(blks[0]).print(out);
-        Fat12RootDirectoryPrinter(blks[18:20]).print(out);
-        Fat12FileAllocatorPrinter(blks[1:9]).print(out);
-    }
-
-    delete bp;
     delete blks;
 }
