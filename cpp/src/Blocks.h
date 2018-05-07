@@ -12,6 +12,8 @@ public:
     Block(const char * buf, size_t len);
     ~Block();
 
+    char * get(){return _buf;}
+
 private:
     char _buf[BLOCK_SIZE];
 };
@@ -28,6 +30,8 @@ public:
     size_t size() { return _blocks.size();}
 
     std::string toString();
+
+    Block * getBlocks(size_t offset) {return  offset < size() ? _blocks[offset] : NULL; }
 
     static void test();
 private:

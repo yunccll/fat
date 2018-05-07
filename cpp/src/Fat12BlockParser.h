@@ -1,6 +1,7 @@
 #ifndef  FAT12BLOCKPARSER_H
 #define  FAT12BLOCKPARSER_H
 
+#include <cstddef>
 
 class Blocks;
 
@@ -10,18 +11,12 @@ public:
 
     void parse(Blocks * blocks);
 
-    void parseFsMeta(Blocks * blocks, size_t offset,  size_t len);
-    void parseFileAllocator(Blocks * blocks, size_t offset, size_t len);
-    void parseRootDirectory(Blocks * blocks, size_t offset, size_t len);
-    void parseData(Blocks * blocks, size_t offset, size_t len);
+    int parseFsMeta(Blocks * blocks, size_t offset,  size_t len);
+    int parseFileAllocator(Blocks * blocks, size_t offset, size_t len);
+    int parseRootDirectory(Blocks * blocks, size_t offset, size_t len);
+    int parseData(Blocks * blocks, size_t offset, size_t len);
 
 private:
-    struct F12Meta {
-    };
-    struct F12FileAllocator{
-    };
-    struct F12RootDirector{
-    }
 };
 
 
