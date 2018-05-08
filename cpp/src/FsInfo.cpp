@@ -16,21 +16,25 @@ FsInfo::FsInfo(int64_t totalSector, int bytesPerSector,
     this->_rootEntryCount = rootEntryCount;
     this->_bytesPerEntry = bytesPerEntry;
     this->_media = media;
+
+    this._firstSectorOfData = calcFirstSectorOfData
 }
 
 std::string FsInfo::toString(){
     std::ostringstream  ss;
     ss << "FsInfo:"                 << std::endl;
-    ss << "\ttotalBytes(K):"        << totalBytes()/1024 << std::endl;
-    ss << "\tnumberOfDataSector:"   << numberOfDataSector() << std::endl;
-    ss << "\ttotalSector:"          << _totalSector << std::endl;
-    ss << "\tbytesPerSector:"       << _bytesPerSector << std::endl;
-    ss << "\treservedSectorCount:"  << _reservedSectorCount << std::endl;
-    ss << "\tnumberOfFats:"         << _numberOfFats << std::endl;
-    ss << "\tsectorPerFat:"         << _sectorPerFat << std::endl;
-    ss << "\tsectorPerCluster:"     << _sectorPerCluster << std::endl;
-    ss << "\trootEntryCount:"       << _rootEntryCount << std::endl;
-    ss << "\tmedia:0x"                << std::hex << _media << std::endl;
+    ss << "\t totalBytes(K):"        << totalBytes()/1024 << std::endl;
+    ss << "\t numberOfDataSector:"   << numberOfDataSector() << std::endl;
+    ss << "\t totalSector:"          << _totalSector << std::endl;
+    ss << "\t bytesPerSector:"       << _bytesPerSector << std::endl;
+    ss << "\t reservedSectorCount:"  << _reservedSectorCount << std::endl;
+    ss << "\t numberOfFats:"         << _numberOfFats << std::endl;
+    ss << "\t sectorPerFat:"         << _sectorPerFat << std::endl;
+    ss << "\t sectorPerCluster:"     << _sectorPerCluster << std::endl;
+    ss << "\t rootEntryCount:"       << _rootEntryCount << std::endl;
+    ss << "\t numberOfRootEntrySector:"  << numberOfRootEntrySector() << std::endl;
+    ss << "\t firstSectorOfData:"  << firstSectorOfData() << std::endl;
+    ss << "\t media:0x"              << std::hex << _media << std::endl;
     return ss.str();
 }
 

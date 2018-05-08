@@ -49,11 +49,27 @@ public:
     int64_t  numberOfDataSector(){
         return _totalSector - ( _reservedSectorCount + _numberOfFats * _sectorPerFat + numberOfRootEntrySector());
     }
+
     int numberOfRootEntrySector(){
         return (_rootEntryCount * _bytesPerEntry + (_bytesPerSector - 1))/_bytesPerSector;
     }
 
+    int firstSectorOfData(){
+        return _firstSectorOfData;
+    }
+    int64_t sectorNumberOfclustor(int64_t clustorNo){
+        return _firstSectorOfData + (clustorNo - 2);
+    }
+    int64_t clustorNoOfSector(int64_t sectorNo){
+        return (sectorNo - _firstSectorOfData) + 2;
+    }
+
     std::string toString();
+
+private:
+    int calcFirstSectorOfData(){
+        return (_reservedSectorCount + _numberOfFats * _sectorPerFat + numberOfRootEntrySector());
+    }
 private:
     int64_t _totalSector;
     int _bytesPerSector;        //512
@@ -68,6 +84,8 @@ private:
     int _bytesPerEntry;  //const 32
 
     int _media;// 0xF8 -> fixed media; 0xF0 --> removable media
+
+    int _firstSectorOfData;
 };
 
 class FsInfoBuilder {
