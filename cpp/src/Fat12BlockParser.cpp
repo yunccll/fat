@@ -1,10 +1,22 @@
 #include "Fat12BlockParser.h"
 
-#include "FileDevice.h"
-#include "Blocks.h"
+
 
 #include <cassert>
 #include <iostream>
+
+#include "FileDevice.h"
+#include "Blocks.h"
+#include "FsInfo.h"
+
+Fat12BlockParser::~Fat12BlockParser(){
+    if(_fsInfo){
+        delete _fsInfo;
+        _fsInfo = NULL;
+    }
+}
+
+
 
 #pragma pack(1)
 
@@ -18,7 +30,7 @@ struct Fat {
 };
 
 struct Fat32 {
-    uint32_t sectorPerFAT;      //only for Fat32
+    uint32_t sectorPerFAT32;      //only for Fat32
     uint16_t extendFlag;        //bits 0-3: zero-based number of active Fat, 4-6: reserved, 7: 0/1 8-15: reserved
     uint16_t fileSystemVersion; // 0:0
     uint32_t clusterNumberOfRootDirectory;  // 2
@@ -31,7 +43,7 @@ struct Fat32 {
 struct BiosParameterBlock{
     uint16_t bytesPerSector;        //512
     unsigned char sectorPerCluster; // TODO: ??
-    uint16_t reserveSectorCount;    // 1 -> fat12/16  32 -> fat32
+    uint16_t reservedSectorCount;    // 1 -> fat12/16  32 -> fat32
     unsigned char numberOfFats;     // 2
     uint16_t rootEntryCount;        // 0 --> fat32 512 --> fat16   220 --> fat12 1.44M
     uint16_t totalSector16;         // must 0 --> FAT32,  real-count for fat12/16
@@ -55,14 +67,34 @@ struct BootSector{
 
 
 int Fat12BlockParser::parseFsMeta(Blocks * blocks, size_t offset, size_t len){
-    assert(len == 1);
     BootSector * bootSector = (BootSector*)(blocks->getBlocks(0)->get());
-    std::cout << bootSector->oemName << std::endl;
-    std::cout << bootSector->bpb.special.fatBootSector.fileSystemType << std::endl;
-    //FsInfoBuilder builder;
-    //_fsInfo = builder.bytesPerSector(512).sectorPerCluster(1);
+    BiosParameterBlock * bpb = &(bootSector->bpb);
+
+/*  
+    std::cout << "totalSector16:" << (int)bpb->totalSector16 << std::endl;
+    std::cout << "bytesPerSector:" << bpb->bytesPerSector << std::endl;
+    std::cout << "reservedSectorCount:" << bpb->reservedSectorCount << std::endl;
+    std::cout << "numberOfFats:" << (int)bpb->numberOfFats << std::endl;
+    std::cout << "sectorPerFat:" << bpb->sectorPerFat << std::endl;
+    std::cout << "sectorPerCluster:" << (int)bpb->sectorPerCluster << std::endl;
+    std::cout << "rootEntryCount:" << bpb->rootEntryCount << std::endl;
+    std::cout << "media:" << std::hex << (int)bpb->media << std::endl;
+*/
+
+    FsInfoBuilder builder;
+    _fsInfo = builder.totalSector(bpb->totalSector16)
+        .bytesPerSector(bpb->bytesPerSector)
+        .reservedSectorCount(bpb->reservedSectorCount)
+        .numberOfFats(bpb->numberOfFats)
+        .sectorPerFat(bpb->sectorPerFat)
+        .sectorPerCluster(bpb->sectorPerCluster)
+        .rootEntryCount(bpb->rootEntryCount)
+        .media(bpb->media)
+        .make();
+    std::cout << _fsInfo->toString() << std::endl;
     return 0;
 }
+
 //TODO:
 int Fat12BlockParser::parseFileAllocator(Blocks * blocks, size_t offset, size_t len){
     assert(len == 18);
@@ -80,18 +112,21 @@ int Fat12BlockParser::parseData(Blocks * blocks, size_t offset, size_t len){
     return 0;
 }
 
-void Fat12BlockParser::parse(Blocks * blocks){
+int Fat12BlockParser::parse(Blocks * blocks){
     size_t offset = 0;
     parseFsMeta(blocks, offset, 1); 
 
-    offset += 1;
-    parseFileAllocator(blocks, offset, 18); 
+    if(_fsInfo == NULL) return -1;
+    offset += _fsInfo->reservedSectorCount();
+    size_t fatLen = _fsInfo->numberOfFats() * _fsInfo->sectorPerFat();
+    parseFileAllocator(blocks, offset, fatLen); 
     
-    offset += 18;
-    parseRootDirectory(blocks, offset, 14); 
+    offset += fatLen;
+    parseRootDirectory(blocks, offset, _fsInfo->numberOfRootEntrySector()); 
 
-    offset += 14;
+    offset += _fsInfo->numberOfRootEntrySector();
     parseData(blocks, offset, blocks->size() - offset); 
+    return 0;
 }
 
 void Fat12BlockParser::test(){

@@ -3,13 +3,15 @@
 
 #include <cstddef>
 
+class FsInfo;
 class Blocks;
 
 class Fat12BlockParser {
 public:
     static void test();
+    ~Fat12BlockParser();
 
-    void parse(Blocks * blocks);
+    int parse(Blocks * blocks);
 
     int parseFsMeta(Blocks * blocks, size_t offset,  size_t len);
     int parseFileAllocator(Blocks * blocks, size_t offset, size_t len);
@@ -17,6 +19,7 @@ public:
     int parseData(Blocks * blocks, size_t offset, size_t len);
 
 private:
+    FsInfo * _fsInfo;
 };
 
 
