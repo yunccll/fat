@@ -99,6 +99,7 @@ int Fat12BlockParser::parseFsMeta(Blocks * blocks, size_t offset, size_t len){
 int Fat12BlockParser::parseFileAllocator(Blocks * blocks, size_t offset, size_t len){
     assert(len == 18);
     //offset -->  & len;
+    //_fileAllocator = FileAllocator::parseFromBuffer(blocks,, offset, len);
     return 0;
 }
 //TODO:

@@ -17,7 +17,7 @@ FsInfo::FsInfo(int64_t totalSector, int bytesPerSector,
     this->_bytesPerEntry = bytesPerEntry;
     this->_media = media;
 
-    this._firstSectorOfData = calcFirstSectorOfData
+    this->_firstSectorOfData = calcFirstSectorOfData();
 }
 
 std::string FsInfo::toString(){
