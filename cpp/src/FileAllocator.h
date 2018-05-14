@@ -14,30 +14,32 @@ class FileAllocator{
     */
 
 
-    static const uint32_t EndOfClusterChain = (uint32_t)-1;
-    static const uint32_t EmptyCluster = 0;
+    static const int32_t MaxCapacity = 0x7fffffff;
+    static const int32_t EndOfClusterChain = -1;
+    static const int32_t EmptyCluster = 0;
 public:
-    FileAllocator(uint32_t capacity);
+    FileAllocator(size_t capacity);
     ~FileAllocator();
 
-    uint32_t allocate();
-    void free(uint32_t noCluster);
+    int32_t allocate();
+    void free(int32_t noCluster);
 
-    bool isFree(uint32_t noCluster) const;
-    bool isUsed(uint32_t noCluster) const {return !isFree(noCluster);}
-    bool isLastCluster(uint32_t noCluster) const;
+    bool isFree(int32_t noCluster) const;
+    bool isUsed(int32_t noCluster) const {return !isFree(noCluster);}
+    bool isLastCluster(int32_t noCluster) const;
 
-    uint32_t getNextCluster(uint32_t noCluster); //TODO:
-    void setNextCluster(uint32_t noCluster, uint32_t nextCluster); //TODO:
+    int32_t getNextCluster(int32_t noCluster);
+    void setNextCluster(int32_t noCluster, int32_t noNextCluster);
+    void setLastCluster(int32_t noCluster) {return setNextCluster(noCluster, EndOfClusterChain);}
 
-
-    uint32_t size()const {return _clusterMap.size();}
+    size_t size()const {return _clusterMap.size();}
 
     static void test();
+    static void testAlloc();
 
 private:
-    std::vector<uint32_t> _clusterMap;
-    //std::list<uint32_t> _deletedClusters;
+    std::vector<int32_t> _clusterMap;
+    //std::list<int32_t> _deletedClusters;
 };
 
 

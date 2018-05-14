@@ -5,10 +5,13 @@
 
 class FsInfo;
 class Blocks;
+class FileAllocator;
 
 class Fat12BlockParser {
 public:
     static void test();
+
+    Fat12BlockParser();
     ~Fat12BlockParser();
 
     int parse(Blocks * blocks);
@@ -20,6 +23,7 @@ public:
 
 private:
     FsInfo * _fsInfo;
+    FileAllocator * _fileAllocator;
 };
 
 

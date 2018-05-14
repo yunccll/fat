@@ -8,14 +8,23 @@
 #include "FileDevice.h"
 #include "Blocks.h"
 #include "FsInfo.h"
+#include "FileAllocator.h"
 
+Fat12BlockParser::Fat12BlockParser()
+: _fsInfo(NULL)
+, _fileAllocator(NULL)
+{
+}
 Fat12BlockParser::~Fat12BlockParser(){
+    if(_fileAllocator){
+        delete _fileAllocator;
+        _fileAllocator = NULL;
+    }
     if(_fsInfo){
         delete _fsInfo;
         _fsInfo = NULL;
     }
 }
-
 
 
 #pragma pack(1)
@@ -95,11 +104,18 @@ int Fat12BlockParser::parseFsMeta(Blocks * blocks, size_t offset, size_t len){
     return 0;
 }
 
-//TODO:
 int Fat12BlockParser::parseFileAllocator(Blocks * blocks, size_t offset, size_t len){
     assert(len == 18);
-    //offset -->  & len;
-    //_fileAllocator = FileAllocator::parseFromBuffer(blocks,, offset, len);
+    _fileAllocator = new FileAllocator(len*2/3);
+    
+    _fileAllocator->setLastCluster(0);
+    _fileAllocator->setLastCluster(1);
+
+    /* TODO:
+    for( int i = 2; i < _fsInfo->noOfCluster+2; ++i){
+        _fileAllocator.setNextCluster(cluster(i), blocks.getUint16(cluster(i)));
+    }
+    */
     return 0;
 }
 //TODO:
