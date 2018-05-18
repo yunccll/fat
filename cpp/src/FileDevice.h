@@ -2,6 +2,7 @@
 #define  FILEDEVICE_H
 
 #include <string>
+
 class Blocks;
 
 class FileDevice {
@@ -18,10 +19,9 @@ public:
     Blocks * getBlocks(){
         return _blocks;
     }
-
 private:
     std::string _path;
-    Blocks * _blocks;
+    Blocks  * _blocks;
 };
 
 #endif   /* FILEDEVICE_H */

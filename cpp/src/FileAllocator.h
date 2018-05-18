@@ -3,7 +3,10 @@
 #define  FILEALLOCATOR_H
 
 #include <cstdint>
+#include <cstddef>
 #include <vector>
+
+// free, allocated, used, 
 
 class FileAllocator{
 
