@@ -51,6 +51,7 @@ void FileAllocator::setNextCluster(int32_t noCluster, int32_t noNextCluster){
 
 
 void FileAllocator::testAlloc(){
+
     FileAllocator fa(9*512*2/3);
     fa.setNextCluster(0, FileAllocator::EndOfClusterChain);
     fa.setNextCluster(1, FileAllocator::EndOfClusterChain);
