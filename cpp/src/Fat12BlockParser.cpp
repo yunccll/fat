@@ -136,7 +136,14 @@ int Fat12BlockParser::parseFileAllocator(Blocks * blocks, size_t offset, size_t 
         else {
             _fileAllocator->setLastCluster(clusterNo);
         }
-//        std::cout << std::hex << clusterBytesOffset << " " << clusterVal << " " << value << std::endl;
+        uint32_t offsetOfThisCluster = (_fsInfo->firstSectorOfData() + clusterNo-2) * _fsInfo->bytesPerSector();
+        std::cout << std::dec << "clusterNo: " <<  clusterNo
+                << std::hex << "\tclusterBytesOffset: 0x" << clusterBytesOffset
+                << "\tuin16_t clusterVal: 0x" << clusterVal
+                << "\tvalue: 0x" << value  << std::endl
+                << "offsetOfThisCluster: " << offsetOfThisCluster
+                << "\toffsetOfThisCluster: " << _fileAllocator->getNextCluster(clusterNo)
+                << std::endl;
     }
     return 0;
 }
@@ -169,7 +176,8 @@ int Fat12BlockParser::parse(Blocks * blocks){
 }
 
 void Fat12BlockParser::test(){
-    std::string path("a.img");
+    std::string path("floppy.img");
+    //std::string path("a.img");
 
     auto parser = new Fat12BlockParser;
 
