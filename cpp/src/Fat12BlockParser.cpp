@@ -76,7 +76,7 @@ struct BootSector{
 
 
 int Fat12BlockParser::parseFsMeta(Blocks * blocks, size_t offset, size_t len){
-    BootSector * bootSector = (BootSector*)(blocks->getBlocks(0)->get());
+    BootSector * bootSector = (BootSector*)(blocks->getBlock(0)->get());
     BiosParameterBlock * bpb = &(bootSector->bpb);
 
 /*  
@@ -104,18 +104,40 @@ int Fat12BlockParser::parseFsMeta(Blocks * blocks, size_t offset, size_t len){
     return 0;
 }
 
+
+
 int Fat12BlockParser::parseFileAllocator(Blocks * blocks, size_t offset, size_t len){
-    assert(len == 18);
-    _fileAllocator = new FileAllocator(len*2/3);
+    //assert(len == 18);
+    _fileAllocator = new FileAllocator((len/2) * 512 * 2/3);
     
     _fileAllocator->setLastCluster(0);
     _fileAllocator->setLastCluster(1);
 
-    /* TODO:
-    for( int i = 2; i < _fsInfo->noOfCluster+2; ++i){
-        _fileAllocator.setNextCluster(cluster(i), blocks.getUint16(cluster(i)));
+    int byteOffsetOfFat = offset * _fsInfo->bytesPerSector();
+    int totalClusters =  _fsInfo->totalClusters();
+    std::cout << "parseFileAllocator:" << std::endl 
+        << "\tfirst offset " << byteOffsetOfFat  << std::endl
+        << "\tfirstSectorOfData " <<  _fsInfo->firstSectorOfData()  << std::endl
+        << "\tfile allocator size() " << _fileAllocator->size() << std::endl
+        << "\ttotalClusters:  " << totalClusters << std::endl;
+
+    for(int clusterNo = 2; clusterNo < totalClusters + 2; ++clusterNo){
+        int byteIndex = (clusterNo + clusterNo/2);
+        int clusterBytesOffset = byteOffsetOfFat + byteIndex;
+        uint16_t clusterVal = blocks->getUint16(clusterBytesOffset);
+        uint16_t value = (clusterNo & 0x01) ?  clusterVal >> 4 : clusterVal & 0xfff;
+
+        if(value < BadCluster){
+            _fileAllocator->setNextCluster(clusterNo, value);
+        }
+        else if(value == BadCluster){
+            _fileAllocator->setBadCluster(clusterNo);
+        } 
+        else {
+            _fileAllocator->setLastCluster(clusterNo);
+        }
+//        std::cout << std::hex << clusterBytesOffset << " " << clusterVal << " " << value << std::endl;
     }
-    */
     return 0;
 }
 //TODO:

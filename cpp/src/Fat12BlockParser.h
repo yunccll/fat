@@ -2,12 +2,15 @@
 #define  FAT12BLOCKPARSER_H
 
 #include <cstddef>
-
+#include <cstdint>
 class FsInfo;
 class Blocks;
 class FileAllocator;
 
 class Fat12BlockParser {
+
+    static const uint16_t BadCluster = 0x0ff7;
+    static const uint16_t EndOfClusterChain = 0x0fff;
 public:
     static void test();
 

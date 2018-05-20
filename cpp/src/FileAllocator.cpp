@@ -35,6 +35,10 @@ bool FileAllocator::isLastCluster(int32_t noCluster) const{
     assert(noCluster >= 0 && noCluster <= MaxCapacity);
     return _clusterMap[noCluster] == EndOfClusterChain;
 }
+bool FileAllocator::isBadCluster(int32_t noCluster) const{
+    assert(noCluster >= 0 && noCluster <= MaxCapacity);
+    return _clusterMap[noCluster] == BadCluster;
+}
 
 int32_t FileAllocator::getNextCluster(int32_t noCluster){
     assert(noCluster >= 0 && noCluster <= MaxCapacity);
@@ -54,7 +58,7 @@ void FileAllocator::testAlloc(){
     {
         int32_t noCluster = fa.allocate();
         assert(noCluster != -1 && noCluster > 1);
-        std::cout << "allocated no cluster is: " << noCluster << std::endl;
+        //std::cout << "allocated no cluster is: " << noCluster << std::endl;
 
         fa.setNextCluster(noCluster, EndOfClusterChain);
         assert(fa.isLastCluster(noCluster));

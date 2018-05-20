@@ -14,6 +14,9 @@ public:
 
     char * get(){return _buf;}
 
+
+    uint16_t getUint16(size_t bytesInBlock);
+
 private:
     char _buf[BLOCK_SIZE];
 };
@@ -31,7 +34,9 @@ public:
 
     std::string toString();
 
-    Block * getBlocks(size_t offset) {return  offset < size() ? _blocks[offset] : NULL; }
+    Block * getBlock(size_t blockIndex) {return  blockIndex < size() ? _blocks[blockIndex] : NULL; }
+
+    uint16_t getUint16(size_t bytesOffset);
 
     static void test();
 private:

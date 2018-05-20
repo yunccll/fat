@@ -13,6 +13,9 @@ Block::Block(const char * buf, size_t len)
 Block::~Block(){
 }
 
+uint16_t Block::getUint16(size_t bytesInBlock){
+    return *((uint16_t *) (_buf + bytesInBlock));
+}
 
 Blocks::Blocks()
 {
@@ -40,4 +43,10 @@ void Blocks::test(){
     char buffer[Block::BLOCK_SIZE] = {};
     blks.append(buffer, Block::BLOCK_SIZE);
     std::cout <<  "blocks 's size is :" << blks.size() << std::endl;
+}
+
+uint16_t Blocks::getUint16(size_t bytesOffset){
+    size_t blockIndex = bytesOffset/Block::BLOCK_SIZE;
+    size_t offsetInBlock = bytesOffset%Block::BLOCK_SIZE;
+    return getBlock(blockIndex)->getUint16(offsetInBlock);
 }

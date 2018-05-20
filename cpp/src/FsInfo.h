@@ -49,6 +49,9 @@ public:
     int64_t  numberOfDataSector(){
         return _totalSector - ( _reservedSectorCount + _numberOfFats * _sectorPerFat + numberOfRootEntrySector());
     }
+    int64_t totalClusters(){
+        return numberOfDataSector()/_sectorPerCluster;
+    }
 
     int numberOfRootEntrySector(){
         return (_rootEntryCount * _bytesPerEntry + (_bytesPerSector - 1))/_bytesPerSector;
@@ -57,10 +60,10 @@ public:
     int firstSectorOfData(){
         return _firstSectorOfData;
     }
-    int64_t sectorNumberOfclustor(int64_t clustorNo){
-        return _firstSectorOfData + (clustorNo - 2);
+    int64_t sectorNumberOfcluster(int64_t clusterNo){
+        return _firstSectorOfData + (clusterNo - 2);
     }
-    int64_t clustorNoOfSector(int64_t sectorNo){
+    int64_t clusterNoOfSector(int64_t sectorNo){
         return (sectorNo - _firstSectorOfData) + 2;
     }
 
