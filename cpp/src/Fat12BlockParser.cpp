@@ -105,28 +105,32 @@ int Fat12BlockParser::parseFsMeta(Blocks * blocks, size_t offset, size_t len){
 }
 
 
+static uint16_t getNextClusterNoFromFat(BlockView * bv, size_t clusterNo){
+    uint16_t clusterVal = bv->getUint16(clusterNo + clusterNo/2);
+    return (clusterNo & 0x01) ?  clusterVal >> 4 : clusterVal & 0xfff;
+}
 
 int Fat12BlockParser::parseFileAllocator(Blocks * blocks, size_t offset, size_t len){
-    //assert(len == 18);
+
+    BlockView * bv = blocks->getView(offset, len);
+
+    std::cout << "parseFileAllocator:" << std::endl 
+        << "\tfirst offset " << bv->bOffset() << "\t bytes length " << bv->bLength() << std::endl
+        << "\tfirstSectorOfData " <<  _fsInfo->firstSectorOfData()  << std::endl
+        << "\ttotalClusters:  " << _fsInfo->totalClusters() << std::endl;
+
+
+
     _fileAllocator = new FileAllocator((len/2) * 512 * 2/3);
+    std::cout << "\tfile allocator size() " << _fileAllocator->size() << std::endl;
     
     _fileAllocator->setLastCluster(0);
     _fileAllocator->setLastCluster(1);
 
-    int byteOffsetOfFat = offset * _fsInfo->bytesPerSector();
-    int totalClusters =  _fsInfo->totalClusters();
-    std::cout << "parseFileAllocator:" << std::endl 
-        << "\tfirst offset " << byteOffsetOfFat  << std::endl
-        << "\tfirstSectorOfData " <<  _fsInfo->firstSectorOfData()  << std::endl
-        << "\tfile allocator size() " << _fileAllocator->size() << std::endl
-        << "\ttotalClusters:  " << totalClusters << std::endl;
+    size_t totalClusters =  _fsInfo->totalClusters();
+    for(size_t clusterNo = 2; clusterNo < totalClusters + 2; ++clusterNo){
 
-    for(int clusterNo = 2; clusterNo < totalClusters + 2; ++clusterNo){
-        int byteIndex = (clusterNo + clusterNo/2);
-        int clusterBytesOffset = byteOffsetOfFat + byteIndex;
-        uint16_t clusterVal = blocks->getUint16(clusterBytesOffset);
-        uint16_t value = (clusterNo & 0x01) ?  clusterVal >> 4 : clusterVal & 0xfff;
-
+        uint16_t value = getNextClusterNoFromFat(bv, clusterNo);
         if(value < BadCluster){
             _fileAllocator->setNextCluster(clusterNo, value);
         }
@@ -136,20 +140,27 @@ int Fat12BlockParser::parseFileAllocator(Blocks * blocks, size_t offset, size_t 
         else {
             _fileAllocator->setLastCluster(clusterNo);
         }
-        uint32_t offsetOfThisCluster = (_fsInfo->firstSectorOfData() + clusterNo-2) * _fsInfo->bytesPerSector();
+
         std::cout << std::dec << "clusterNo: " <<  clusterNo
-                << std::hex << "\tclusterBytesOffset: 0x" << clusterBytesOffset
-                << "\tuin16_t clusterVal: 0x" << clusterVal
-                << "\tvalue: 0x" << value  << std::endl
-                << "offsetOfThisCluster: " << offsetOfThisCluster
-                << "\toffsetOfThisCluster: " << _fileAllocator->getNextCluster(clusterNo)
-                << std::endl;
+            << std::hex << "\tfat[clusterNo]: 0x" << value 
+            << "\tfileAllocator.getNextCluster: 0x" << _fileAllocator->getNextCluster(clusterNo)
+            << std::endl;
     }
+    delete bv;
     return 0;
 }
 //TODO:
-int Fat12BlockParser::parseRootDirectory(Blocks * blocks, size_t offset, size_t len){
-    assert(len == 14);
+int Fat12BlockParser::parseRootDirectory(Blocks * blocks, size_t offset, size_t noBlock){
+    assert(noBlock == 14);
+
+    /*  
+    BlocksView * bv = blocks.getView(offset, noBlock);
+    size_t bytes = noBlock * _fsInfo->bytesPerSector();
+    for(size_t bOffset = 0; i < bytes; bOffset += 32){
+        std::cout << std::hex << bv->getByte(bOffset) << std::endl;
+    }
+    delete bv;
+    */
     return 0;
 }
 //TODO:
@@ -178,6 +189,7 @@ int Fat12BlockParser::parse(Blocks * blocks){
 void Fat12BlockParser::test(){
     std::string path("floppy.img");
     //std::string path("a.img");
+    std::cout << "this image path is :     " <<  path << std::endl;
 
     auto parser = new Fat12BlockParser;
 

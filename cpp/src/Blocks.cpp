@@ -13,9 +13,16 @@ Block::Block(const char * buf, size_t len)
 Block::~Block(){
 }
 
-uint16_t Block::getUint16(size_t bytesInBlock){
-    return *((uint16_t *) (_buf + bytesInBlock));
+uint16_t Block::getUint16(size_t bOffset){
+    return *((uint16_t *) (_buf + bOffset));
 }
+
+uint8_t Block::getUint8(size_t bOffset){
+    return uint8_t (*(_buf + bOffset));
+}
+
+
+
 
 Blocks::Blocks()
 {
@@ -37,6 +44,15 @@ std::string Blocks::toString(){
     ss << "Blocks size:" << size();
     return ss.str();
 }
+BlockView * Blocks::getView(size_t index, size_t len){
+    if(index < size()){
+        if(index + len > size()){
+            len = size() - index;
+        }
+        return new BlockView(this, index, len);
+    }
+    return NULL;
+}
 
 void Blocks::test(){
     Blocks blks;
@@ -45,8 +61,33 @@ void Blocks::test(){
     std::cout <<  "blocks 's size is :" << blks.size() << std::endl;
 }
 
-uint16_t Blocks::getUint16(size_t bytesOffset){
-    size_t blockIndex = bytesOffset/Block::BLOCK_SIZE;
-    size_t offsetInBlock = bytesOffset%Block::BLOCK_SIZE;
-    return getBlock(blockIndex)->getUint16(offsetInBlock);
+
+
+
+
+
+
+
+
+BlockView::BlockView(Blocks * blocks, size_t blockIndex, size_t blockLen)
+:_blocks(blocks)
+,_blockIndex(blockIndex)
+,_blockLen(blockLen)
+{
+}
+
+BlockView::~BlockView(){
+    _blockLen = 0;
+    _blocks = NULL;
+}
+
+uint16_t BlockView::getUint16(size_t bOffset){
+    auto block = _blocks->getBlock(_blockIndex + (bOffset / _blocks->blockSize()));
+    assert(block);
+    return block->getUint16(bOffset % _blocks->blockSize());
+}
+uint8_t BlockView::getUint8(int bOffset){
+    auto block = _blocks->getBlock(_blockIndex + (bOffset/_blocks->blockSize()));
+    assert(block);
+    return block->getUint8(bOffset % _blocks->blockSize());
 }
