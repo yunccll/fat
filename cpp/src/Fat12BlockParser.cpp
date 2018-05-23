@@ -75,8 +75,10 @@ struct BootSector{
 #pragma pack()
 
 
-int Fat12BlockParser::parseFsMeta(Blocks * blocks, size_t offset, size_t len){
-    BootSector * bootSector = (BootSector*)(blocks->getBlock(0)->get());
+int Fat12BlockParser::parseFsMeta(BlockView  * bv){
+    assert(bv->numberOfBlocks() == 1);
+
+    BootSector * bootSector = (BootSector*)(bv->get(0));
     BiosParameterBlock * bpb = &(bootSector->bpb);
 
 /*  
@@ -110,9 +112,8 @@ static uint16_t getNextClusterNoFromFat(BlockView * bv, size_t clusterNo){
     return (clusterNo & 0x01) ?  clusterVal >> 4 : clusterVal & 0xfff;
 }
 
-int Fat12BlockParser::parseFileAllocator(Blocks * blocks, size_t offset, size_t len){
-
-    BlockView * bv = blocks->getView(offset, len);
+int Fat12BlockParser::parseFileAllocator(BlockView * bv){
+    assert(bv->numberOfBlocks() == 18);
 
     std::cout << "parseFileAllocator:" << std::endl 
         << "\tfirst offset " << bv->bOffset() << "\t bytes length " << bv->bLength() << std::endl
@@ -121,8 +122,8 @@ int Fat12BlockParser::parseFileAllocator(Blocks * blocks, size_t offset, size_t 
 
 
 
-    _fileAllocator = new FileAllocator((len/2) * 512 * 2/3);
-    std::cout << "\tfile allocator size() " << _fileAllocator->size() << std::endl;
+    _fileAllocator = new FileAllocator(_fsInfo->totalClusters() + 2);
+    std::cout << "\tfat12 allocator size(): " << _fileAllocator->size() << std::endl;
     
     _fileAllocator->setLastCluster(0);
     _fileAllocator->setLastCluster(1);
@@ -146,21 +147,18 @@ int Fat12BlockParser::parseFileAllocator(Blocks * blocks, size_t offset, size_t 
             << "\tfileAllocator.getNextCluster: 0x" << _fileAllocator->getNextCluster(clusterNo)
             << std::endl;
     }
-    delete bv;
     return 0;
 }
-//TODO:
-int Fat12BlockParser::parseRootDirectory(Blocks * blocks, size_t offset, size_t noBlock){
-    assert(noBlock == 14);
-
-    /*  
-    BlocksView * bv = blocks.getView(offset, noBlock);
-    size_t bytes = noBlock * _fsInfo->bytesPerSector();
-    for(size_t bOffset = 0; i < bytes; bOffset += 32){
-        std::cout << std::hex << bv->getByte(bOffset) << std::endl;
+int Fat12BlockParser::parseRootDirectory(BlockView * bv){
+    assert(bv->numberOfBlocks() == 14);
+    std::cout << "parseRootDirectory : " 
+        << std::dec << "\tbytes: " << bv->bLength() 
+        << "\tblocks: " << bv->numberOfBlocks() 
+        << std::endl;
+    size_t bytes = bv->bLength();
+    for(size_t bOffset = 0; bOffset < bytes; bOffset += 32){
+        std::cout << std::hex << (int)bv->getUint8(bOffset) << std::endl;
     }
-    delete bv;
-    */
     return 0;
 }
 //TODO:
@@ -171,17 +169,30 @@ int Fat12BlockParser::parseData(Blocks * blocks, size_t offset, size_t len){
 
 int Fat12BlockParser::parse(Blocks * blocks){
     size_t offset = 0;
-    parseFsMeta(blocks, offset, 1); 
 
-    if(_fsInfo == NULL) return -1;
-    offset += _fsInfo->reservedSectorCount();
-    size_t fatLen = _fsInfo->numberOfFats() * _fsInfo->sectorPerFat();
-    parseFileAllocator(blocks, offset, fatLen); 
+    {
+        BlockView bv(blocks, offset, 1);
+        parseFsMeta(&bv);
+        offset += 1;
+    }
+
+    {
+        if(_fsInfo == NULL){ 
+            printf("Error: parse FsInfo failded\n");
+            return -1;
+        }
+        size_t fatLen = _fsInfo->numberOfFats() * _fsInfo->sectorPerFat();
+        BlockView bv(blocks, offset, fatLen);
+        parseFileAllocator(&bv);
+        offset += fatLen;
+    }
     
-    offset += fatLen;
-    parseRootDirectory(blocks, offset, _fsInfo->numberOfRootEntrySector()); 
+    {
+        BlockView bv(blocks, offset, _fsInfo->numberOfRootEntrySector()); 
+        parseRootDirectory(&bv);
+        offset += _fsInfo->numberOfRootEntrySector();
+    }
 
-    offset += _fsInfo->numberOfRootEntrySector();
     parseData(blocks, offset, blocks->size() - offset); 
     return 0;
 }

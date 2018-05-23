@@ -55,11 +55,12 @@ public:
     BlockView(Blocks * blocks, size_t blockIndex, size_t blockLen);
     ~BlockView();
 
+    char * get(size_t blkOffset);
     uint16_t getUint16(size_t bOffset);
     uint8_t getUint8(int bOffset);
 
     size_t indexInBlocks() const {return _blockIndex;}
-    size_t numberOfBocks() const {return _blockLen;}
+    size_t numberOfBlocks() const {return _blockLen;}
 
     size_t bOffset() const  {return _blockIndex * _blocks->blockSize();}
     size_t bLength() const {return _blockLen * _blocks->blockSize(); }

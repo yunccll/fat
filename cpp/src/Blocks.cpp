@@ -91,3 +91,8 @@ uint8_t BlockView::getUint8(int bOffset){
     assert(block);
     return block->getUint8(bOffset % _blocks->blockSize());
 }
+char * BlockView::get(size_t blkOffset){
+    auto block = _blocks->getBlock(_blockIndex + blkOffset);
+    assert(block);
+    return block->get();
+}
