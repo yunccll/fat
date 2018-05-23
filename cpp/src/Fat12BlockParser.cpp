@@ -72,6 +72,22 @@ struct BootSector{
     char oemName[8];
     struct BiosParameterBlock bpb;
 };
+
+struct dir{
+    char  name[11];
+    uint8_t attribute;
+    uint8_t reserved;
+    uint8_t createTimeMilisecondTenth;//milisecond
+    uint16_t createTime;
+    uint16_t createDate;
+    uint16_t lastAccessDate;
+    uint16_t firstClusterHigh;
+    uint16_t writeTime;
+    uint16_t writeDate;
+    uint16_t firstClusterLow;
+    uint32_t fileSize;
+};
+
 #pragma pack()
 
 
@@ -120,8 +136,6 @@ int Fat12BlockParser::parseFileAllocator(BlockView * bv){
         << "\tfirstSectorOfData " <<  _fsInfo->firstSectorOfData()  << std::endl
         << "\ttotalClusters:  " << _fsInfo->totalClusters() << std::endl;
 
-
-
     _fileAllocator = new FileAllocator(_fsInfo->totalClusters() + 2);
     std::cout << "\tfat12 allocator size(): " << _fileAllocator->size() << std::endl;
     
@@ -149,6 +163,8 @@ int Fat12BlockParser::parseFileAllocator(BlockView * bv){
     }
     return 0;
 }
+
+
 int Fat12BlockParser::parseRootDirectory(BlockView * bv){
     assert(bv->numberOfBlocks() == 14);
     std::cout << "parseRootDirectory : " 
