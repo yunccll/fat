@@ -171,9 +171,29 @@ int Fat12BlockParser::parseRootDirectory(BlockView * bv){
         << std::dec << "\tbytes: " << bv->bLength() 
         << "\tblocks: " << bv->numberOfBlocks() 
         << std::endl;
+
     size_t bytes = bv->bLength();
     for(size_t bOffset = 0; bOffset < bytes; bOffset += 32){
-        std::cout << std::hex << (int)bv->getUint8(bOffset) << std::endl;
+        dir * entry = (dir *)bv->get(bOffset);
+
+        std::cout << std::hex << (uint32_t)(entry->name[0])
+            << " entry name:" << std::string(entry->name, 11)
+            << std::endl;
+
+        if(entry->name[0] == 0x00) { //finished flag
+            std::cout << "\tparse entry finished" << std::endl;
+            break;
+        }
+        else if(entry->name[0] == 0xE5){ // free after used
+            std::cout << "\tattribute " << entry->attribute << std::endl;
+        }
+        else if(entry->name[0] < 0x20){
+            std::cout << "\terror   " << std::endl;
+        }
+        else {
+            std::cout <<  "\tnormal" << std::endl;
+        }
+
     }
     return 0;
 }
