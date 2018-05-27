@@ -11,8 +11,8 @@
 #include "FileAllocator.h"
 
 Fat12BlockParser::Fat12BlockParser()
-: _fsInfo(NULL)
-, _fileAllocator(NULL)
+    : _fsInfo(NULL)
+      , _fileAllocator(NULL)
 {
 }
 Fat12BlockParser::~Fat12BlockParser(){
@@ -97,16 +97,16 @@ int Fat12BlockParser::parseFsMeta(BlockView  * bv){
     BootSector * bootSector = (BootSector*)(bv->get(0));
     BiosParameterBlock * bpb = &(bootSector->bpb);
 
-/*  
-    std::cout << "totalSector16:" << (int)bpb->totalSector16 << std::endl;
-    std::cout << "bytesPerSector:" << bpb->bytesPerSector << std::endl;
-    std::cout << "reservedSectorCount:" << bpb->reservedSectorCount << std::endl;
-    std::cout << "numberOfFats:" << (int)bpb->numberOfFats << std::endl;
-    std::cout << "sectorPerFat:" << bpb->sectorPerFat << std::endl;
-    std::cout << "sectorPerCluster:" << (int)bpb->sectorPerCluster << std::endl;
-    std::cout << "rootEntryCount:" << bpb->rootEntryCount << std::endl;
-    std::cout << "media:" << std::hex << (int)bpb->media << std::endl;
-*/
+    /*  
+        std::cout << "totalSector16:" << (int)bpb->totalSector16 << std::endl;
+        std::cout << "bytesPerSector:" << bpb->bytesPerSector << std::endl;
+        std::cout << "reservedSectorCount:" << bpb->reservedSectorCount << std::endl;
+        std::cout << "numberOfFats:" << (int)bpb->numberOfFats << std::endl;
+        std::cout << "sectorPerFat:" << bpb->sectorPerFat << std::endl;
+        std::cout << "sectorPerCluster:" << (int)bpb->sectorPerCluster << std::endl;
+        std::cout << "rootEntryCount:" << bpb->rootEntryCount << std::endl;
+        std::cout << "media:" << std::hex << (int)bpb->media << std::endl;
+        */
 
     FsInfoBuilder builder;
     _fsInfo = builder.totalSector(bpb->totalSector16)
@@ -138,7 +138,7 @@ int Fat12BlockParser::parseFileAllocator(BlockView * bv){
 
     _fileAllocator = new FileAllocator(_fsInfo->totalClusters() + 2);
     std::cout << "\tfat12 allocator size(): " << _fileAllocator->size() << std::endl;
-    
+
     _fileAllocator->setLastCluster(0);
     _fileAllocator->setLastCluster(1);
 
@@ -156,10 +156,12 @@ int Fat12BlockParser::parseFileAllocator(BlockView * bv){
             _fileAllocator->setLastCluster(clusterNo);
         }
 
-        std::cout << std::dec << "clusterNo: " <<  clusterNo
-            << std::hex << "\tfat[clusterNo]: 0x" << value 
-            << "\tfileAllocator.getNextCluster: 0x" << _fileAllocator->getNextCluster(clusterNo)
-            << std::endl;
+        /*
+           std::cout << std::dec << "clusterNo: " <<  clusterNo
+           << std::hex << "\tfat[clusterNo]: 0x" << value 
+           << "\tfileAllocator.getNextCluster: 0x" << _fileAllocator->getNextCluster(clusterNo)
+           << std::endl;
+           */
     }
     return 0;
 }
@@ -176,23 +178,48 @@ int Fat12BlockParser::parseRootDirectory(BlockView * bv){
     for(size_t bOffset = 0; bOffset < bytes; bOffset += 32){
         dir * entry = (dir *)bv->get(bOffset);
 
-        std::cout << std::hex << (uint32_t)(entry->name[0])
-            << " entry name:" << std::string(entry->name, 11)
-            << std::endl;
+        uint32_t head = ((uint32_t)(entry->name[0]) & 0xff);
+        std::cout << std::hex <<  head;
 
-        if(entry->name[0] == 0x00) { //finished flag
-            std::cout << "\tparse entry finished" << std::endl;
+        if(head == 0x00) { //finished flag
             break;
         }
-        else if(entry->name[0] == 0xE5){ // free after used
-            std::cout << "\tattribute " << entry->attribute << std::endl;
+        else if(head == 0xe5){ // free after used
+            std::cout << "\tfree entry" << std::endl;
         }
-        else if(entry->name[0] < 0x20){
+        else if(head == 0x05){
+            std::cout << "name 0x05->0xE5";
+
+            if(entry->attribute == 0x0F){
+                std::cout << "\tlong name";
+            }
+            else{
+                std::cout << "\tshort name";
+            }
+            std::cout << std::endl;
+        }
+        else if(head < 0x20){
             std::cout << "\terror   " << std::endl;
         }
         else {
-            std::cout <<  "\tnormal" << std::endl;
+            if(entry->attribute == 0x0F){
+                std::cout << "\tlong name";
+                if( (0xf0 & head ) == 0x40){
+                    std::cout <<  "\tlast long entry, order:" << (head & 0x0f) << std::endl;
+                }
+                else{
+                    std::cout << "\torder: " << (head & 0x0f) << std::endl;
+                }
+            }
+            else{
+                printf("\ts_nm:[%s], sz:[%u], start_clus:[%d], crt_ts:[%x %x %x], w_ts:[%x %x], last_ac:[%x]\n"
+                    , entry->name, entry->fileSize, entry->firstClusterLow
+                    , entry->createDate, entry->createTime, entry->createTimeMilisecondTenth
+                    , entry->writeDate, entry->writeTime
+                    , entry->lastAccessDate);
+            }
         }
+        //std::cout << "\tname:" << std::string(entry->name, 11) << std::endl;
 
     }
     return 0;
@@ -222,7 +249,7 @@ int Fat12BlockParser::parse(Blocks * blocks){
         parseFileAllocator(&bv);
         offset += fatLen;
     }
-    
+
     {
         BlockView bv(blocks, offset, _fsInfo->numberOfRootEntrySector()); 
         parseRootDirectory(&bv);
