@@ -88,7 +88,9 @@ struct dir{
     uint32_t fileSize;
 };
 
+
 #pragma pack()
+
 
 
 int Fat12BlockParser::parseFsMeta(BlockView  * bv){
@@ -167,6 +169,25 @@ int Fat12BlockParser::parseFileAllocator(BlockView * bv){
 }
 
 
+static int __snprintfDate(char * dateBuf, size_t cap, uint16_t date){
+    struct Date{
+        uint16_t day : 5;
+        uint16_t month : 4;
+        uint16_t year : 7;
+    };
+    Date * d = (Date*)&date;
+    return snprintf(dateBuf, cap, "%04d-%02d-%02d", d->year+1980, d->month, d->day);
+}
+static int __snprintfTime(char * timeBuf, size_t cap, uint16_t time){
+    struct Time {
+        uint16_t second : 5;
+        uint16_t minute : 6;
+        uint16_t hour   : 5;
+    };
+    Time * t = (Time*)&time;
+    return snprintf(timeBuf, cap, "%02d:%02d:%02d", t->hour, t->minute, t->second* 2);
+}
+
 int Fat12BlockParser::parseRootDirectory(BlockView * bv){
     assert(bv->numberOfBlocks() == 14);
     std::cout << "parseRootDirectory : " 
@@ -212,11 +233,25 @@ int Fat12BlockParser::parseRootDirectory(BlockView * bv){
                 }
             }
             else{
-                printf("\ts_nm:[%s], sz:[%u], start_clus:[%d], crt_ts:[%x %x %x], w_ts:[%x %x], last_ac:[%x]\n"
+
+                char crtDate[16]= {0};
+                __snprintfDate(crtDate, sizeof(crtDate), entry->createDate);
+                char crtTime[16] = {0};
+                __snprintfTime(crtTime, sizeof(crtTime), entry->createTime);
+
+                char wrtDate[16]= {0};
+                __snprintfDate(wrtDate, sizeof(wrtDate), entry->writeDate);
+                char wrtTime[16] = {0};
+                __snprintfTime(wrtTime, sizeof(wrtTime), entry->writeTime);
+
+                char acDate[16]= {0};
+                __snprintfDate(acDate, sizeof(acDate), entry->lastAccessDate);
+
+                printf("\ts_nm:[%s], sz:[%u], start_clus:[%d], crt_ts:[%s %s %x], w_ts:[%s %s], last_ac:[%s]\n"
                     , entry->name, entry->fileSize, entry->firstClusterLow
-                    , entry->createDate, entry->createTime, entry->createTimeMilisecondTenth
-                    , entry->writeDate, entry->writeTime
-                    , entry->lastAccessDate);
+                    , crtDate, crtTime, entry->createTimeMilisecondTenth
+                    , wrtDate, wrtTime
+                    , acDate);
             }
         }
         //std::cout << "\tname:" << std::string(entry->name, 11) << std::endl;
