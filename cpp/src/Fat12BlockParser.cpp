@@ -188,6 +188,28 @@ static int __snprintfTime(char * timeBuf, size_t cap, uint16_t time){
     return snprintf(timeBuf, cap, "%02d:%02d:%02d", t->hour, t->minute, t->second* 2);
 }
 
+static void printEntryInfo(dir * entry){
+        char crtDate[16]= {0};
+        __snprintfDate(crtDate, sizeof(crtDate), entry->createDate);
+        char crtTime[16] = {0};
+        __snprintfTime(crtTime, sizeof(crtTime), entry->createTime);
+
+        char wrtDate[16]= {0};
+        __snprintfDate(wrtDate, sizeof(wrtDate), entry->writeDate);
+        char wrtTime[16] = {0};
+        __snprintfTime(wrtTime, sizeof(wrtTime), entry->writeTime);
+
+        char acDate[16]= {0};
+        __snprintfDate(acDate, sizeof(acDate), entry->lastAccessDate);
+
+        printf("\t attr:%x, s_nm:[%s], sz:[%u], start_clus:[%d], crt_ts:[%s %s %x], w_ts:[%s %s], last_ac:[%s]\n"
+            , entry->attribute
+            , entry->name, entry->fileSize, entry->firstClusterLow
+            , crtDate, crtTime, entry->createTimeMilisecondTenth
+            , wrtDate, wrtTime
+            , acDate);
+}
+
 int Fat12BlockParser::parseRootDirectory(BlockView * bv){
     assert(bv->numberOfBlocks() == 14);
     std::cout << "parseRootDirectory : " 
@@ -232,26 +254,13 @@ int Fat12BlockParser::parseRootDirectory(BlockView * bv){
                     std::cout << "\torder: " << (head & 0x0f) << std::endl;
                 }
             }
+            else if( (((uint32_t)entry->attribute) & 0x10) == 0x10){//directory
+                std::cout << "this is directory";
+                printEntryInfo(entry);
+                //TODO: get the cluster block --> recursion to visit the 
+            }
             else{
-
-                char crtDate[16]= {0};
-                __snprintfDate(crtDate, sizeof(crtDate), entry->createDate);
-                char crtTime[16] = {0};
-                __snprintfTime(crtTime, sizeof(crtTime), entry->createTime);
-
-                char wrtDate[16]= {0};
-                __snprintfDate(wrtDate, sizeof(wrtDate), entry->writeDate);
-                char wrtTime[16] = {0};
-                __snprintfTime(wrtTime, sizeof(wrtTime), entry->writeTime);
-
-                char acDate[16]= {0};
-                __snprintfDate(acDate, sizeof(acDate), entry->lastAccessDate);
-
-                printf("\ts_nm:[%s], sz:[%u], start_clus:[%d], crt_ts:[%s %s %x], w_ts:[%s %s], last_ac:[%s]\n"
-                    , entry->name, entry->fileSize, entry->firstClusterLow
-                    , crtDate, crtTime, entry->createTimeMilisecondTenth
-                    , wrtDate, wrtTime
-                    , acDate);
+                printEntryInfo(entry);
             }
         }
         //std::cout << "\tname:" << std::string(entry->name, 11) << std::endl;
