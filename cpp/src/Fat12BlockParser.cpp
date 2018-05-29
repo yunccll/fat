@@ -202,12 +202,14 @@ static void printEntryDetail(dir * entry){
         char acDate[16]= {0};
         __snprintfDate(acDate, sizeof(acDate), entry->lastAccessDate);
 
-        printf("\tattr:%x, s_nm:[%s], sz:[%u], start_clus:[%d], crt_ts:[%s %s %x], w_ts:[%s %s], last_ac:[%s]\n"
+        printf("\tattr:%x s_nm:[%s] sz:[%u] clus:[%d] crt:[%s %s %x] wrt:[%s %s] last_ac:[%s]\n"
             , entry->attribute
             , entry->name, entry->fileSize, entry->firstClusterLow
             , crtDate, crtTime, entry->createTimeMilisecondTenth
             , wrtDate, wrtTime
             , acDate);
+
+      //TODO: print the cluster chain info
 }
 
 
@@ -224,9 +226,6 @@ void Fat12BlockParser::printEntry(dir * entry, uint32_t head, BlockView * bv, in
     else if( (((uint32_t)entry->attribute) & 0x10) == 0x10){//directory
         std::cout << "\tdirectory";
         printEntryDetail(entry);
-        //TODO: get the cluster block --> recursion to visit the 
-        //std::cout << std::dec << "clusterNo: " << entry->firstClusterLow 
-        //    << "sectorNumber: " << _fsInfo->sectorNumberOfcluster(entry->firstClusterLow);
         if( (uint32_t)(entry->name[0]) != 0x2e){
             BlockView * dirBv = bv->blocks()->getView(_fsInfo->sectorNumberOfcluster(entry->firstClusterLow), 1);
             visitInternalDirectory(dirBv, prefix + 1);
