@@ -44,12 +44,12 @@ std::string Blocks::toString(){
     ss << "Blocks size:" << size();
     return ss.str();
 }
-BlockView * Blocks::getView(size_t index, size_t len){
-    if(index < size()){
-        if(index + len > size()){
-            len = size() - index;
+BlockView * Blocks::getView(size_t blockIndex, size_t len){
+    if(blockIndex < size()){
+        if(blockIndex + len > size()){
+            len = size() - blockIndex;
         }
-        return new BlockView(this, index, len);
+        return new BlockView(this, blockIndex, len);
     }
     return NULL;
 }

@@ -188,7 +188,7 @@ static int __snprintfTime(char * timeBuf, size_t cap, uint16_t time){
     return snprintf(timeBuf, cap, "%02d:%02d:%02d", t->hour, t->minute, t->second* 2);
 }
 
-static void printEntryInfo(dir * entry){
+static void printEntryDetail(dir * entry){
         char crtDate[16]= {0};
         __snprintfDate(crtDate, sizeof(crtDate), entry->createDate);
         char crtTime[16] = {0};
@@ -202,12 +202,74 @@ static void printEntryInfo(dir * entry){
         char acDate[16]= {0};
         __snprintfDate(acDate, sizeof(acDate), entry->lastAccessDate);
 
-        printf("\t attr:%x, s_nm:[%s], sz:[%u], start_clus:[%d], crt_ts:[%s %s %x], w_ts:[%s %s], last_ac:[%s]\n"
+        printf("\tattr:%x, s_nm:[%s], sz:[%u], start_clus:[%d], crt_ts:[%s %s %x], w_ts:[%s %s], last_ac:[%s]\n"
             , entry->attribute
             , entry->name, entry->fileSize, entry->firstClusterLow
             , crtDate, crtTime, entry->createTimeMilisecondTenth
             , wrtDate, wrtTime
             , acDate);
+}
+
+
+void Fat12BlockParser::printEntry(dir * entry, uint32_t head, BlockView * bv, int prefix){
+    if(entry->attribute == 0x0F){
+        std::cout << "\tlong name";
+        if( (0xf0 & head ) == 0x40){
+            std::cout <<  "\tlast long entry, order:" << (head & 0x0f) << std::endl;
+        }
+        else{
+            std::cout << "\torder: " << (head & 0x0f) << std::endl;
+        }
+    }
+    else if( (((uint32_t)entry->attribute) & 0x10) == 0x10){//directory
+        std::cout << "\tdirectory";
+        printEntryDetail(entry);
+        //TODO: get the cluster block --> recursion to visit the 
+        //std::cout << std::dec << "clusterNo: " << entry->firstClusterLow 
+        //    << "sectorNumber: " << _fsInfo->sectorNumberOfcluster(entry->firstClusterLow);
+        if( (uint32_t)(entry->name[0]) != 0x2e){
+            BlockView * dirBv = bv->blocks()->getView(_fsInfo->sectorNumberOfcluster(entry->firstClusterLow), 1);
+            visitInternalDirectory(dirBv, prefix + 1);
+            delete dirBv;
+        }
+    }
+    else{
+        printEntryDetail(entry);
+    }
+
+}
+
+void Fat12BlockParser::visitInternalDirectory(BlockView * bv, int prefix){
+    size_t bytes = bv->bLength();
+    for(size_t bOffset = 0; bOffset < bytes; bOffset += 32){
+        dir * entry = (dir *)bv->get(bOffset);
+
+        for(int i = 0 ; i < prefix; ++i){
+            std::cout << "--";
+        }
+        uint32_t head = ((uint32_t)(entry->name[0]) & 0xff);
+        std::cout << std::hex <<  head;
+
+        if(head == 0x00) { //finished flag
+            std::cout << std::endl;
+            break;
+        }
+        else if(head == 0xe5){ // free after used
+            std::cout << "\tfree entry" << std::endl;
+        }
+        else if(head == 0x05){
+            std::cout << "name 0x05->0xE5";
+            printEntry(entry, head, bv, prefix);
+        }
+        else if(head < 0x20){
+            std::cout << "\terror   " << std::endl;
+        }
+        else {
+            printEntry(entry, head, bv, prefix);
+        }
+        //std::cout << "\tname:" << std::string(entry->name, 11) << std::endl;
+
+    }
 }
 
 int Fat12BlockParser::parseRootDirectory(BlockView * bv){
@@ -216,56 +278,7 @@ int Fat12BlockParser::parseRootDirectory(BlockView * bv){
         << std::dec << "\tbytes: " << bv->bLength() 
         << "\tblocks: " << bv->numberOfBlocks() 
         << std::endl;
-
-    size_t bytes = bv->bLength();
-    for(size_t bOffset = 0; bOffset < bytes; bOffset += 32){
-        dir * entry = (dir *)bv->get(bOffset);
-
-        uint32_t head = ((uint32_t)(entry->name[0]) & 0xff);
-        std::cout << std::hex <<  head;
-
-        if(head == 0x00) { //finished flag
-            break;
-        }
-        else if(head == 0xe5){ // free after used
-            std::cout << "\tfree entry" << std::endl;
-        }
-        else if(head == 0x05){
-            std::cout << "name 0x05->0xE5";
-
-            if(entry->attribute == 0x0F){
-                std::cout << "\tlong name";
-            }
-            else{
-                std::cout << "\tshort name";
-            }
-            std::cout << std::endl;
-        }
-        else if(head < 0x20){
-            std::cout << "\terror   " << std::endl;
-        }
-        else {
-            if(entry->attribute == 0x0F){
-                std::cout << "\tlong name";
-                if( (0xf0 & head ) == 0x40){
-                    std::cout <<  "\tlast long entry, order:" << (head & 0x0f) << std::endl;
-                }
-                else{
-                    std::cout << "\torder: " << (head & 0x0f) << std::endl;
-                }
-            }
-            else if( (((uint32_t)entry->attribute) & 0x10) == 0x10){//directory
-                std::cout << "this is directory";
-                printEntryInfo(entry);
-                //TODO: get the cluster block --> recursion to visit the 
-            }
-            else{
-                printEntryInfo(entry);
-            }
-        }
-        //std::cout << "\tname:" << std::string(entry->name, 11) << std::endl;
-
-    }
+    visitInternalDirectory(bv, 0);
     return 0;
 }
 //TODO:
