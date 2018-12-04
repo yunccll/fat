@@ -55,7 +55,10 @@ public:
     BlockView(Blocks * blocks, size_t blockIndex, size_t blockLen);
     ~BlockView();
 
-    char * get(size_t blkOffset);
+    char * getBlockAddress(size_t blkOffset);
+
+    char * get(size_t bOffset);
+
     uint16_t getUint16(size_t bOffset);
     uint8_t getUint8(int bOffset);
 

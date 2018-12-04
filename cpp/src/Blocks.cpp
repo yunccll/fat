@@ -44,12 +44,12 @@ std::string Blocks::toString(){
     ss << "Blocks size:" << size();
     return ss.str();
 }
-BlockView * Blocks::getView(size_t index, size_t len){
-    if(index < size()){
-        if(index + len > size()){
-            len = size() - index;
+BlockView * Blocks::getView(size_t blockIndex, size_t len){
+    if(blockIndex < size()){
+        if(blockIndex + len > size()){
+            len = size() - blockIndex;
         }
-        return new BlockView(this, index, len);
+        return new BlockView(this, blockIndex, len);
     }
     return NULL;
 }
@@ -81,18 +81,27 @@ BlockView::~BlockView(){
     _blocks = NULL;
 }
 
+static inline Block * __getBlock(Blocks * blocks, size_t blockIndex, size_t bOffset){
+    return blocks->getBlock(blockIndex + (bOffset / blocks->blockSize()));
+}
+
 uint16_t BlockView::getUint16(size_t bOffset){
-    auto block = _blocks->getBlock(_blockIndex + (bOffset / _blocks->blockSize()));
+    auto block = __getBlock(_blocks, _blockIndex, bOffset);
     assert(block);
     return block->getUint16(bOffset % _blocks->blockSize());
 }
 uint8_t BlockView::getUint8(int bOffset){
-    auto block = _blocks->getBlock(_blockIndex + (bOffset/_blocks->blockSize()));
+    auto block = __getBlock(_blocks, _blockIndex, bOffset);
     assert(block);
     return block->getUint8(bOffset % _blocks->blockSize());
 }
-char * BlockView::get(size_t blkOffset){
+char * BlockView::getBlockAddress(size_t blkOffset){
     auto block = _blocks->getBlock(_blockIndex + blkOffset);
     assert(block);
     return block->get();
+}
+char * BlockView::get(size_t bOffset){
+    auto block = __getBlock(_blocks, _blockIndex, bOffset);
+    assert(block);
+    return block->get() + bOffset % _blocks->blockSize();
 }

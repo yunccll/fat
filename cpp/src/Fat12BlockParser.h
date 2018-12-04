@@ -7,6 +7,7 @@ class FsInfo;
 class Blocks;
 class FileAllocator;
 class BlockView;
+struct dir;
 
 class Fat12BlockParser {
 
@@ -25,6 +26,9 @@ public:
     int parseRootDirectory(BlockView * bv);
     int parseData(Blocks * blocks, size_t offset, size_t len);
 
+private:
+    void printEntry(dir * entry, uint32_t head, BlockView * bv, int prefix);
+    void visitInternalDirectory(BlockView * bv, int prefix);
 private:
     FsInfo * _fsInfo;
     FileAllocator * _fileAllocator;
