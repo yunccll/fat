@@ -2,5 +2,5 @@
 
 
 cd ./bin
-gdb ./main
+gdb main
 #./main
