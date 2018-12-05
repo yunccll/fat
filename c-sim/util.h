@@ -9,6 +9,9 @@
 #include <string.h>
 #include <errno.h>
 #include <stdlib.h>
+#include <assert.h>
+
+#include "types.h"
 
 //#define NO_LOG  1
 #ifdef NO_LOG   

@@ -28,12 +28,17 @@ super
 
 3. design
     
-   fs->info, fat1, fat2, cluster
+   fs-> member....
+        fat1, 
+        fat2 -> cluster
+        Root_direntry
+        container<Data-cluster>
                      
          fat_item,   entry, name,   Container<data-cluster>
    boot; fat1,fat2;  root_direntry; data;  
    container<block>
    device
+
 
 
 3.1 fat_print
@@ -43,10 +48,18 @@ super
     print_fat2
     print_root_direntry
 
-    3.1.1 ls / | ls [path]
-    3.1.2 tree / tree [path]
-    3.1.3 find / -name "name"
-    3.1.4 
+demo:
+    fat_fs * fs = fat_fs_load("a.img");
+    fat_fs_print(fs);{
+        fat_boot_print(fs);
+        fat_fat_print(fs->fat);
+        fat_fat_print(fs->fat_bak);
+        fat_root_direntry_print(fs->root);
+        fat_data_print(fs->data);
+    }
+    fat_fs_destroy(fs);
+
+
 
 3.2 fat_mkfs
     mk_mbr
@@ -54,9 +67,13 @@ super
     mk_fat2
     mk_root_direntry
 
-    mkfs_fat if=a.txt  of=a.img
 
 
+4.app case
 
-
-
+4.1 ls / | ls [path]
+4.2 tree / tree [path]
+4.3 find / -name "name"
+4.4.cp file  file
+4.5 cp path path
+4.6 mkfs_fat if=a.txt  of=a.img

@@ -9,12 +9,12 @@ static void test_device(void){
     assert(ptr);
 
     char buf [512] = {0x11, 0x22, 0x33, 0x44};
-    int ret = fat_dev_write(ptr, 0, (const uchar *)buf, sizeof(buf));
+    int ret = fat_dev_write(ptr, 0, (const char *)buf, sizeof(buf));
     assert(ret == sizeof(buf));
 
 
     char new_buf[512] = {0};
-    ret = fat_dev_read(ptr, 0, (uchar *)new_buf, sizeof(new_buf));
+    ret = fat_dev_read(ptr, 0, (char *)new_buf, sizeof(new_buf));
     assert(ret == sizeof(new_buf));
 
     assert(new_buf[0] == buf[0]);

@@ -39,7 +39,7 @@ error:
     return NULL;
 }
 
-int fat_dev_write(fat_dev_t * ptr, fat_offset_t offset,const uchar * block, int bytes){
+int fat_dev_write(fat_dev_t * ptr, fat_offset_t offset,const char * block, int bytes){
     IF_TRUE_RETURN( ptr->_fd == INVALID_FD, -1, "open device first\n");
 
     int ret = lseek(ptr->_fd, offset, SEEK_SET);
@@ -51,7 +51,7 @@ int fat_dev_write(fat_dev_t * ptr, fat_offset_t offset,const uchar * block, int 
     return ret;
 }
 
-int fat_dev_read(fat_dev_t * ptr, fat_offset_t offset, uchar * block, int bytes){
+int fat_dev_read(fat_dev_t * ptr, fat_offset_t offset, char * block, int bytes){
     IF_TRUE_RETURN( ptr->_fd == INVALID_FD, -1, "open device first\n");
 
     int ret = lseek(ptr->_fd, offset, SEEK_SET);
@@ -61,4 +61,11 @@ int fat_dev_read(fat_dev_t * ptr, fat_offset_t offset, uchar * block, int bytes)
     IF_TRUE_RETURN(ret < 0,  ret, "read file failed! err:%s\n", strerror(errno)); 
 
     return ret;
+}
+
+int fat_dev_is_open(fat_dev_t * ptr){
+    return ptr->_is_connected == 1;
+}
+const char * fat_dev_fname(fat_dev_t * ptr){
+    return ptr->_fname;
 }
