@@ -39,10 +39,10 @@ error:
     return NULL;
 }
 
-int fat_dev_write(fat_dev_t * ptr, fat_offset_t offset,const char * block, int bytes){
+long long fat_dev_write(fat_dev_t * ptr, fat_offset_t offset,const char * block, long long bytes){
     IF_TRUE_RETURN( ptr->_fd == INVALID_FD, -1, "open device first\n");
 
-    int ret = lseek(ptr->_fd, offset, SEEK_SET);
+    long long ret = lseek(ptr->_fd, offset, SEEK_SET);
     IF_TRUE_RETURN(ret < 0, ret, "lseek file failed! err:%s\n", strerror(errno));
 
     ret = write(ptr->_fd, block, bytes);
@@ -51,15 +51,15 @@ int fat_dev_write(fat_dev_t * ptr, fat_offset_t offset,const char * block, int b
     return ret;
 }
 
-int fat_dev_read(fat_dev_t * ptr, fat_offset_t offset, char * block, int bytes){
+long long  fat_dev_read(fat_dev_t * ptr, fat_offset_t offset, char * block, long long bytes){
     IF_TRUE_RETURN( ptr->_fd == INVALID_FD, -1, "open device first\n");
 
-    int ret = lseek(ptr->_fd, offset, SEEK_SET);
+    long long ret = lseek(ptr->_fd, offset, SEEK_SET);
     IF_TRUE_RETURN(ret < 0, ret, "lseek file failed! err:%s\n", strerror(errno));
-
+        
+    //TRACE_PRINT("fd:%d, is_connected:%d, fname:%s, block:%p, bytes:%llu\n", ptr->_fd, ptr->_is_connected, ptr->_fname, block, bytes);
     ret = read(ptr->_fd, block, bytes);
     IF_TRUE_RETURN(ret < 0,  ret, "read file failed! err:%s\n", strerror(errno)); 
-
     return ret;
 }
 
@@ -68,4 +68,8 @@ int fat_dev_is_open(fat_dev_t * ptr){
 }
 const char * fat_dev_fname(fat_dev_t * ptr){
     return ptr->_fname;
+}
+
+void fat_dev_print(fat_dev_t * ptr){
+    TRACE_PRINT("fd:%d, is_connected:%d, name:%s\n", ptr->_fd, ptr->_is_connected, ptr->_fname);
 }

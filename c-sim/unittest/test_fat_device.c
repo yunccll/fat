@@ -5,7 +5,7 @@
 
 static void test_device(void){
     
-    fat_dev_t * ptr = fat_dev_create_file("hello.img");
+    fat_dev_t * ptr = fat_dev_create_file("hello_rw.img");
     assert(ptr);
 
     char buf [512] = {0x11, 0x22, 0x33, 0x44};
