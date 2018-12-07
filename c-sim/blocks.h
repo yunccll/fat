@@ -14,6 +14,7 @@ void fat_blocks_destroy(fat_blocks_t * ptr);
 int fat_blocks_read_all(fat_blocks_t * ptr);
 
 fat_block_view_t * fat_blocks_get(fat_blocks_t * ptr, long long  block_index);
+int fat_blocks_fill_block_view(fat_blocks_t * ptr, long long block_index, fat_block_view_t * bv);
 
 void fat_blocks_set_block_count(fat_blocks_t * ptr, long long block_count);
 long long fat_blocks_get_block_count(fat_blocks_t * ptr);
@@ -33,5 +34,7 @@ struct fat_block_view_s {
 
 fat_block_view_t * fat_block_view_create(long long block_index, char * offset, int block_size);
 void fat_block_view_free(fat_block_view_t * ptr);
+
+void fat_block_view_print(fat_block_view_t * ptr);
 
 #endif   /* BLOCKS_H */

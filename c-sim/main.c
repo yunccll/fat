@@ -24,7 +24,7 @@ void test_block(){
 
 #include "fs.h"
 void test_fs(){
-    fat_fs_t * fs = fat_fs_create("a.img");
+    fat_fs_t * fs = fat_fs_create("../a.img");
     assert(fs);
     fat_fs_load_data(fs); //read data, parse data 
     fat_fs_print(fs);
@@ -44,7 +44,7 @@ void test_fs(){
 int main(int argc, char * argv[])
 {
     printf("hello test\n");
-    test_block();
+    //test_block();
     //test_fat_device();
     test_fs();
 	return 0;

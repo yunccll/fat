@@ -97,3 +97,21 @@ fat_block_view_t * fat_blocks_get(fat_blocks_t * ptr, long long block_index){
     ERROR_PRINT("data not read from dev; or block_index[%lld] < 0\n", block_index);
     return NULL;
 }
+
+
+int fat_blocks_fill_block_view(fat_blocks_t * ptr, long long block_index, fat_block_view_t * bv){
+    if(ptr->_data && block_index >= 0 && bv){
+        bv->_index = block_index;
+        bv->_offset = ptr->_data + block_index * ptr->_block_size;
+        bv->_size = ptr->_block_size;
+        return 0;
+    }
+    ERROR_PRINT("data not read from dev; or block_index[%lld] < 0\n", block_index);
+    return -1;
+}
+void fat_block_view_print(fat_block_view_t * ptr){
+    DEBUG_PRINT("block index: %d ", ptr->_index);
+    DEBUG_PRINT("block offset: %p ", ptr->_offset);
+    DEBUG_PRINT("block_size: %d ", ptr->_size);
+    DEBUG_PRINT("\n");
+}
