@@ -4,9 +4,7 @@
 #include "blocks.h"
 void test_block(){
     fat_dev_t *  dev = fat_dev_create_file("../a.img");  //for readonly
-
-    fat_blocks_t  * blocks = fat_blocks_create(dev);
-    fat_blocks_set_block_count(blocks, 2880);
+fat_blocks_t  * blocks = fat_blocks_create(dev); fat_blocks_set_block_count(blocks, 2880);
     fat_blocks_set_block_size(blocks, 512);
 
     assert( 0 == fat_blocks_read_all(blocks));
@@ -39,7 +37,7 @@ void test_fs(){
 }
 
 
-
+#include <unistd.h>
 #include "test_fat_device.h"
 int main(int argc, char * argv[])
 {
@@ -47,5 +45,7 @@ int main(int argc, char * argv[])
     //test_block();
     //test_fat_device();
     test_fs();
+    sleep(100);
 	return 0;
 }
+
