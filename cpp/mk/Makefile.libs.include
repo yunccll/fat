@@ -1,10 +1,9 @@
 
 #-- gtest
-GTEST_HOME_PATH		:= $(PROJ_ROOT_SRC_PATH)/third/gtest
-GTEST_INC_PATH	:= $(GTEST_HOME_PATH)/include
-GTEST_LIB_PATH		:= $(GTEST_HOME_PATH)/lib
-GTEST_LIB_NAME		:= gtest
-GTEST_LIB_FULL_NAME	:= $(GTEST_LIB_PATH)/$(GTEST_LIB_NAME).a
+GTEST_HOME_PATH		:= /home/chenglun/dev/third/gtest
+GTEST_INC_PATH		:= $(GTEST_HOME_PATH)
+GTEST_LIB_PATH		:= $(GTEST_HOME_PATH)
+GTEST_LIB_NAME		:= gtest_main
 
 
 #-- gmock

@@ -1,0 +1,90 @@
+
+文件系统相关：
+    mount, 
+    umount, 
+    umount2, 
+    sysfs,  
+    statfs,  
+    fstatfs,  
+    fstatfs64, 
+   ustat
+目录相关：
+    chroot，
+    pivot_root，
+    chdir，
+    fchdir，
+    getcwd，
+    mkdir，
+    rmdir，
+    getdents，
+    getdents64，
+    readdir，
+    link，
+    unlink，
+    rename，
+    lookup_dcookie
+链接相关：
+    readlink，
+    symlink
+文件相关：
+    chown， 
+    fchown，
+    lchown，
+    chown16，
+    fchown16，
+    lchown16，
+    hmod，
+    fchmod，
+    utime，
+    stat，
+    fstat，
+    lstat，
+    acess，
+    oldstat，
+    oldfstat，
+    oldlstat，
+    stat64，
+    lstat64，
+    lstat64，
+    open，
+    close，
+    creat，
+    umask，
+    dup，
+    dup2，
+    fcntl， 
+    fcntl64，
+    select，
+    poll，
+    truncate，
+    ftruncate，
+    truncate64，
+    ftruncate64，
+    lseek，
+    llseek，
+    read，
+    write，
+    readv，
+    writev，
+    sendfile，
+    sendfile64，
+    readahead
+
+file :
+    create();
+    open();
+    close();
+    stat 
+    truncate
+    lseek
+    read
+    write
+dir:
+    mkdir，
+    rmdir，
+    getdents，
+    readdir，
+    link，
+    unlink，
+    rename，
+
