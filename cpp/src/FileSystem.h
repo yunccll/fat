@@ -6,6 +6,9 @@
 
 namespace fat {
 
+class FsInfo;
+
+
 class FileSystem {
 
 public:
@@ -16,10 +19,17 @@ public:
     Status isExist(const std::string & path, bool & exist);
     Status mount();
     Status unmount();
-    Status stat();
+    Status stat(FsInfo & fsInfo );
+
+private:
+    Status loadMeta();
 
 private:
     std::string name;
+
+    //FileDevice device;
+
+
     static std::shared_ptr<FileSystem> __inst;
 };
 

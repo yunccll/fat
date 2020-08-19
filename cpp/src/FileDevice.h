@@ -12,7 +12,8 @@ public:
 
 
     FileDevice(const std::string & path);
-    ~FileDevice();
+    virtual ~FileDevice();
+
 
     int readBlocks();
 

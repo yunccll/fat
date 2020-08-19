@@ -1,29 +1,7 @@
-#include <iostream>
-
-#include "FileDevice.h"
-#include "Blocks.h"
-#include "Fat12BlockParser.h"
-#include "FileAllocator.h"
-
 #include "gtest/gtest.h"
+
+#include <iostream>
 #include <memory>
-
-#include "FileSystem.h"
-
-
-using namespace fat;
-TEST(FileSystemTest, use)
-{
-    auto fs = std::make_shared<FileSystem>("chenglun.img");
-    auto s = fs->mount();
-    ASSERT_TRUE(s.isOk());
-    bool exist = false;
-    s = fs->isExist("/chenglun.txt", exist);
-    ASSERT_TRUE(s.isOk() && exist == false);
-
-    s = fs->unmount();
-    ASSERT_TRUE(s.isOk());
-}
 
 
 /*  
@@ -127,13 +105,14 @@ TEST(FileReaderTest, sequence){
 }
 */
 
-/* 
-int main(int argc, char * argv[]){
+#include "FileDevice.h"
+#include "Blocks.h"
+#include "Fat12BlockParser.h"
+#include "FileAllocator.h"
+TEST(MainTest, use){
     std::cout << "hello world" << std::endl;
     Blocks::test();
     FileDevice::test();
     Fat12BlockParser::test();
     FileAllocator::test();
-    return 0;
 }
-*/

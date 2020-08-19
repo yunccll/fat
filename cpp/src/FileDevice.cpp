@@ -21,21 +21,21 @@ FileDevice::~FileDevice()
 
 int FileDevice::readBlocks()
 {
-        std::ifstream in;
-        in.open(_path, ios::in|ios::binary);
-        if(!in){
-            std::cout << "open file [" << _path << "] error!" << std::endl;
-            return  -1;
-        }
+    std::ifstream in;
+    in.open(_path, ios::in|ios::binary);
+    if(!in){
+        std::cout << "open file [" << _path << "] error!" << std::endl;
+        return  -1;
+    }
 
-        _blocks = new Blocks;
-        char buf[Block::BLOCK_SIZE];
-        while(!in.eof()){
-            in.read(buf, Block::BLOCK_SIZE);
-            if(in)
-                _blocks->append(buf, Block::BLOCK_SIZE);
-        }
-        in.close();
+    _blocks = new Blocks;
+    char buf[Block::BLOCK_SIZE];
+    while(!in.eof()){
+        in.read(buf, Block::BLOCK_SIZE);
+        if(in)
+            _blocks->append(buf, Block::BLOCK_SIZE);
+    }
+    in.close();
     return (int)_blocks->size();
 }
 
