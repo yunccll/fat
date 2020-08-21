@@ -6,7 +6,7 @@
 #include <vector>
 
 
-
+namespace fat {
 
 class Block{
 public:
@@ -77,5 +77,6 @@ private:
     size_t _blockIndex;
     size_t _blockLen;
 };
+} //end of namespace fat
 
 #endif   /* BLOCKS_H */

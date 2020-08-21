@@ -5,6 +5,8 @@
 #include "Blocks.h"
 using namespace std;
 
+namespace fat {
+
 FileDevice::FileDevice(const std::string & path)
 :_path(path)
 ,_blocks(NULL)
@@ -57,3 +59,5 @@ void FileDevice::test(){
         delete dev;
     }
 }
+
+} //end of namespace fat

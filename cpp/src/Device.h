@@ -31,7 +31,7 @@ private:
 
 class BlockDevice  : public Device {
 public:
-    BlockDevice(const std::string & name, const int blockSize)
+    BlockDevice(const std::string & name, const size_t blockSize)
     : Device(name)
     , blockSize(blockSize)
     {
@@ -40,7 +40,7 @@ public:
     ~BlockDevice()override {
     }
 
-    const int getBlockSize() const {
+    const size_t getBlockSize() const {
         return blockSize;
     }
 
@@ -56,13 +56,13 @@ protected:
     virtual Status writeBlock(uint64_t blockIndex, const Slice & from) = 0;
 
 private:
-    const int blockSize;
+    const size_t blockSize;
 };
 
 
 class BlockDeviceFileImp : public BlockDevice {
 public:
-    BlockDeviceFileImp(const std::string & name, const int blockSize = 512);
+    BlockDeviceFileImp(const std::string & name, const size_t blockSize = 512u);
     ~BlockDeviceFileImp() override ;
 
     Status open() override;
@@ -79,7 +79,6 @@ protected:
 private:
     int fd; 
     char * readBuffer;
-    char * writeBuffer;
 };
 
 

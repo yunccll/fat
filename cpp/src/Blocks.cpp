@@ -5,6 +5,8 @@
 #include <cassert>
 #include <sstream>
 
+namespace fat {
+
 Block::Block(const char * buf, size_t len)
 {
     assert(len == BLOCK_SIZE);
@@ -105,3 +107,5 @@ char * BlockView::get(size_t bOffset){
     assert(block);
     return block->get() + bOffset % _blocks->blockSize();
 }
+
+} //end of namespace fat

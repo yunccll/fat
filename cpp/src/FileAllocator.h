@@ -8,6 +8,8 @@
 
 // free, allocated, used, 
 
+namespace fat {
+
 class FileAllocator{
 
     /*  Move to Parser
@@ -47,5 +49,6 @@ private:
     //std::list<int32_t> _deletedClusters;
 };
 
+} //end of namespace fat
 
 #endif   /* FILEALLOCATOR_H */

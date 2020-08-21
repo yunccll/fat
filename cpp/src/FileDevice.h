@@ -3,6 +3,8 @@
 
 #include <string>
 
+namespace fat {
+
 class Blocks;
 
 class FileDevice {
@@ -24,5 +26,7 @@ private:
     std::string _path;
     Blocks  * _blocks;
 };
+
+} //end of namespace fat
 
 #endif   /* FILEDEVICE_H */

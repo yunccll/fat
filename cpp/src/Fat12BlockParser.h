@@ -3,6 +3,12 @@
 
 #include <cstddef>
 #include <cstdint>
+
+#include <string>
+
+
+namespace fat {
+
 class FsInfo;
 class Blocks;
 class FileAllocator;
@@ -26,6 +32,11 @@ public:
     int parseRootDirectory(BlockView * bv);
     int parseData(Blocks * blocks, size_t offset, size_t len);
 
+
+    //* ********************* */
+    //Status parseMeta(const slice & block, FsInfo ** fsInfo);
+    //Status parseFileAllocator(const slice & blocks, FileAllocator ** fileAllocator);
+
 private:
     void printEntry(dir * entry, uint32_t head, BlockView * bv, int prefix);
     void visitInternalDirectory(BlockView * bv, int prefix);
@@ -34,5 +45,6 @@ private:
     FileAllocator * _fileAllocator;
 };
 
+} //end of namespace fat
 
 #endif   /* FAT12BLOCKPARSER_H */

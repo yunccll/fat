@@ -109,6 +109,8 @@ TEST(FileReaderTest, sequence){
 #include "Blocks.h"
 #include "Fat12BlockParser.h"
 #include "FileAllocator.h"
+using namespace fat;
+
 TEST(MainTest, use){
     std::cout << "hello world" << std::endl;
     Blocks::test();

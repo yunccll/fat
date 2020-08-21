@@ -1,6 +1,8 @@
 #include "FsInfo.h"
 #include <sstream>
 
+namespace fat {
+
 FsInfo::FsInfo(int64_t totalSector, int bytesPerSector, 
     int reservedSectorCount, int numberOfFats, 
     int sectorPerFat, int sectorPerCluster, 
@@ -17,10 +19,10 @@ FsInfo::FsInfo(int64_t totalSector, int bytesPerSector,
     this->_bytesPerEntry = bytesPerEntry;
     this->_media = media;
 
-    this->_firstSectorOfData = calcFirstSectorOfData();
+    calcFirstSectorOfAll();
 }
 
-std::string FsInfo::toString(){
+std::string FsInfo::toString() const{
     std::ostringstream  ss;
     ss << "FsInfo:"                 << std::endl;
     ss << "\t totalBytes(K):"        << totalBytes()/1024 << std::endl;
@@ -33,6 +35,10 @@ std::string FsInfo::toString(){
     ss << "\t sectorPerCluster:"     << _sectorPerCluster << std::endl;
     ss << "\t rootEntryCount:"       << _rootEntryCount << std::endl;
     ss << "\t numberOfRootEntrySector:"  << numberOfRootEntrySector() << std::endl;
+    ss << "\t firstSectorOfMbr:"  << firstSectorOfMbr() << std::endl;
+    ss << "\t firstSectorOfFat:"  << firstSectorOfFat() << std::endl;
+    ss << "\t firstSectorOfFatBackup:"  << firstSectorOfFatBackup() << std::endl;
+    ss << "\t firstSectorOfRootEntry:"  << firstSectorOfRootEntry() << std::endl;
     ss << "\t firstSectorOfData:"  << firstSectorOfData() << std::endl;
     ss << "\t media:0x"              << std::hex << _media << std::endl;
     return ss.str();
@@ -57,3 +63,4 @@ FsInfoBuilder::FsInfoBuilder(){
     this->_media = 0xF0;
 }
 
+} //end of namespace fat

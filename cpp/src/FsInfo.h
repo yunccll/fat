@@ -5,9 +5,16 @@
 #include <cstdint>
 
 #include <string>
+#include <cstring>
 
-class FsInfo {
+
+namespace fat {
+
+struct FsInfo {
 public:
+    FsInfo(){
+        memset(this, 0, sizeof(FsInfo));
+    }
     FsInfo(int64_t totalSector, int bytesPerSector, 
         int reservedSectorCount, int numberOfFats, 
         int sectorPerFat, int sectorPerCluster, 
@@ -43,35 +50,51 @@ public:
         return this->_media;
     }
 
-    int64_t totalBytes(){
+    int64_t totalBytes() const{
         return _totalSector * _bytesPerSector;
     }
-    int64_t  numberOfDataSector(){
+    int64_t  numberOfDataSector() const{
         return _totalSector - ( _reservedSectorCount + _numberOfFats * _sectorPerFat + numberOfRootEntrySector());
     }
-    int64_t totalClusters(){
+    int64_t totalClusters() const{
         return numberOfDataSector()/_sectorPerCluster;
     }
 
-    int numberOfRootEntrySector(){
+    int numberOfRootEntrySector() const{
         return (_rootEntryCount * _bytesPerEntry + (_bytesPerSector - 1))/_bytesPerSector;
     }
 
-    int firstSectorOfData(){
+    int firstSectorOfMbr() const {
+        return _firstSectorOfMbr;
+    }
+    int firstSectorOfFat() const {
+        return _firstSectorOfFat;
+    }
+    int firstSectorOfFatBackup() const {
+        return _firstSectorOfFatBackup;
+    }
+    int firstSectorOfRootEntry() const {
+        return _firstSectorOfRootEntry;
+    }
+    int firstSectorOfData() const{
         return _firstSectorOfData;
     }
-    int64_t sectorNumberOfcluster(int64_t clusterNo){
+    int64_t sectorNumberOfcluster(int64_t clusterNo) const{
         return _firstSectorOfData + (clusterNo - 2);
     }
-    int64_t clusterNoOfSector(int64_t sectorNo){
+    int64_t clusterNoOfSector(int64_t sectorNo) const{
         return (sectorNo - _firstSectorOfData) + 2;
     }
 
-    std::string toString();
+    std::string toString() const;
 
 private:
-    int calcFirstSectorOfData(){
-        return (_reservedSectorCount + _numberOfFats * _sectorPerFat + numberOfRootEntrySector());
+    void calcFirstSectorOfAll() {
+        _firstSectorOfMbr = 0;
+        _firstSectorOfFat = firstSectorOfMbr() + reservedSectorCount();
+        _firstSectorOfFatBackup = firstSectorOfFat() + sectorPerFat();
+        _firstSectorOfRootEntry = firstSectorOfFatBackup() + sectorPerFat();
+        _firstSectorOfData = firstSectorOfRootEntry() + numberOfRootEntrySector();
     }
 private:
     int64_t _totalSector;
@@ -88,7 +111,12 @@ private:
 
     int _media;// 0xF8 -> fixed media; 0xF0 --> removable media
 
+    int _firstSectorOfMbr;
+    int _firstSectorOfFat;
+    int _firstSectorOfFatBackup;
+    int _firstSectorOfRootEntry;
     int _firstSectorOfData;
+
 };
 
 class FsInfoBuilder {
@@ -152,6 +180,7 @@ private:
     int _media;
 };
 
+} //end of namespace fat
 
 
 #endif   /* FSINFO_H */

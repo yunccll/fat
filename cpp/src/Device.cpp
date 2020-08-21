@@ -1,27 +1,25 @@
 #include "Device.h"
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
+
 
 #include <iostream>
 
 namespace fat {
 
 
-BlockDeviceFileImp::BlockDeviceFileImp(const std::string & name, const int blockSize)
+BlockDeviceFileImp::BlockDeviceFileImp(const std::string & name, const size_t blockSize)
 : BlockDevice(name, blockSize) 
 , fd(-1)
 , readBuffer(new char[blockSize])
-, writeBuffer(new char[blockSize])
 {
     //Check blockSize is times of 512 (a sector)
 }
 
 BlockDeviceFileImp::~BlockDeviceFileImp() {
-    if(writeBuffer != nullptr){
-        delete [] writeBuffer;
-    }
     if(readBuffer != nullptr){
         delete [] readBuffer;
     }
@@ -45,28 +43,38 @@ uint64_t BlockDeviceFileImp::blockIndexFrom(uint64_t offset){
 }
 
 Status BlockDeviceFileImp::readBlock(uint64_t blockIndex, std::string & to){
-    // blockIndex -> offset
     uint64_t offset = offsetFrom(blockIndex);
-    std::cout << "fd:" << fd  << " offset:" << offset << std::endl;
     // lseek
-    int64_t ret = ::lseek(fd, offset, SEEK_SET);
-    if(ret >= 0){
+    int64_t pos = ::lseek(fd, offset, SEEK_SET);
+    if(pos >= 0){
         // read it 
-        ssize_t ret = ::read(fd, readBuffer, getBlockSize());
-        return (ret >= 0) ? Status::OK() : Status::Failed("read file failed");
+        ssize_t bytes = ::read(fd, readBuffer, getBlockSize());
+        if((size_t)bytes == getBlockSize()){
+            to.append(readBuffer, bytes);
+            return Status::OK();
+        }
+        return (bytes < 0) ? Status::IOErrorWithErrno("read from file failed") 
+            : Status::IOError("Cann't read a block from file");
     }
     else{
-        //TODO: get error_no & msg
-        return Status::Failed("lseek failed");
+        return Status::IOErrorWithErrno("lseek failed");
     }
 }
 
 Status BlockDeviceFileImp::writeBlock(uint64_t blockIndex, const Slice & from){
-    //TODO: 
-    // blockIndex -> offset
+    assert(from.size() == getBlockSize());
+
+    uint64_t offset = offsetFrom(blockIndex);
     // lseek 
-    // write it
-    return Status::OK();
+    int64_t pos = ::lseek(fd, offset, SEEK_SET);
+    if(pos >= 0){
+        // write it
+        ssize_t bytes = ::write(fd, from.data(), from.size());
+        return (bytes>= 0 && ((size_t)bytes) == getBlockSize()) 
+            ? Status::OK() 
+            : Status::IOErrorWithErrno("write block to file failed!");
+    }
+    return Status::IOErrorWithErrno("lseek failed");
 }
 
 } //end of namespace fat

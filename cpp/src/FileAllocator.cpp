@@ -2,6 +2,9 @@
 #include <iostream>
 #include <cassert>
 
+
+namespace fat {
+
 FileAllocator::FileAllocator(size_t capacity){
     _clusterMap.resize(capacity);
 }
@@ -92,3 +95,5 @@ void FileAllocator::test(){
     //TODO: fa.toBuffer(buffer);
     //TODO: fa = FileAllocator::fromBuffer()
 }
+
+} //end of namespace fat

@@ -52,6 +52,10 @@ public:
     static Status IOError(const char * msg = nullptr){
         return Status(ErrorCode::ecIOError, msg);
     }
+    static Status IOErrorWithErrno(const char * msg = nullptr){
+        std::string str = getErrorString(msg);
+        return Status(ErrorCode::ecIOError, str.data());
+    }
     static Status ErrorFormat(const char * msg = nullptr){
         return Status(ErrorCode::ecErrorFormat, msg);
     }
@@ -79,6 +83,10 @@ public:
     bool operator==(const Status& rhs) const;
     bool operator!=(const Status& rhs) const;
 
+    operator bool() const {
+        return isOk();
+    }
+
     //For debug
     std::string toString() const;
 
@@ -89,6 +97,7 @@ protected:
     explicit Status(ErrorCode code, const char * msg = nullptr);
     static const char * copyMessage(const char * msg);
 private:
+    static std::string getErrorString(const char * msg);
     ErrorCode code;
     const char * msg;
 };
@@ -135,5 +144,4 @@ inline bool Status::operator==(const Status& rhs) const{
 inline bool Status::operator!=(const Status& rhs) const{
     return !this->operator==(rhs);
 }
-
 } //end of namespace fat

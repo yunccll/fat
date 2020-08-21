@@ -10,6 +10,8 @@
 #include "FsInfo.h"
 #include "FileAllocator.h"
 
+namespace fat {
+
 Fat12BlockParser::Fat12BlockParser()
     : _fsInfo(NULL)
       , _fileAllocator(NULL)
@@ -331,3 +333,5 @@ void Fat12BlockParser::test(){
     delete dev;
     delete parser;
 }
+
+} //end of namespace fat
