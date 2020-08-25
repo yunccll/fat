@@ -2,51 +2,45 @@
 
 #include <cassert>
 #include <sstream>
+#include <iostream>
 
 namespace fat {
 
-struct Date{
-    uint16_t day : 5;
-    uint16_t month : 4;
-    uint16_t year : 7;
-};
-struct Time {
-    uint16_t second : 5;
-    uint16_t minute : 6;
-    uint16_t hour   : 5;
-};
-static std::ostream & operator << (std::ostream & os, const Date & date){
-    os << (uint64_t)(date.year + 1980) <<  "-"  << date.month << "-" << date.day;
-    return os;
+void dateOut(std::ostream & os, uint16_t date){
+    os << (date>>9) + 1980  << "-" << std::max(1, (date >> 5) & 0xf) << "-" << std::max(1, date & 0x1f) - 1;
 }
-static std::ostream & operator << (std::ostream & os, const Time & time){
-    os << time.hour << ":" << time.minute << ":" << time.second;
-    return os;
+void timeOut(std::ostream & os, uint16_t time){
+    os << (time >> 11)  << ":" << ((time >> 5) & 0x3f) << ":" <<  ((time & 0x1f) << 1);
 }
-
-
 std::string Entry::getCreateTimeStamp() const{
     std::ostringstream oss;
-    oss << *reinterpret_cast<const Date*>(&(item.createDate));
+    dateOut(oss, item->createDate);
     oss << " " ;
-    oss << *reinterpret_cast<const Time*>(&(item.createTime));
+    timeOut(oss, item->createTime);
     return oss.str();
 }
 std::string Entry::getLastAccessDate() const{ //read or write date
     std::ostringstream oss;
-    oss << *reinterpret_cast<const Date*>(&(item.lastAccessDate));
+    dateOut(oss, item->lastAccessDate);
     return oss.str();
 }
 std::string Entry::getWriteTimeStamp() const{
     std::ostringstream oss;
-    oss << *reinterpret_cast<const Date*>(&(item.writeDate));
+    dateOut(oss, item->writeDate);
     oss << " ";
-    oss << *reinterpret_cast<const Time*>(&(item.writeTime));
+    timeOut(oss, item->writeTime);
     return oss.str();
 }
 
 std::ostream & operator<< (std::ostream & os, const Entry & entry){
-    //TODO: 
+    os << "Name:["              << entry.getName().ToString() 
+       << "] Attrbute:["        << (int)entry.getAttribute() 
+       << "] CreateTimestamp:[" << entry.getCreateTimeStamp() 
+       << "] lastAccessDate:["  << entry.getLastAccessDate() 
+       << "] writeTimestamp:["  << entry.getWriteTimeStamp() 
+       << "] firstCluster:["    << entry.getFirstCluster()
+       << "] fileSize:["        << entry.getFileSize()
+       << "]";
     return os;
 }
 
@@ -82,6 +76,16 @@ RootEntries::EntryPointer RootEntries::modify(const char * path, const RootEntri
         return old;
     }
     return nullptr;
+}
+std::ostream & RootEntries::operator<<(std::ostream & os) const{
+    for(auto & pair : maps){
+        os << "name:[" << pair.first << "], entry:{" << *(pair.second) << "}" << std::endl;
+    }
+    return os;
+}
+std::ostream & operator<< (std::ostream & os, const RootEntries & rootEntries){
+    rootEntries.operator<<(os);
+    return os;
 }
 
 

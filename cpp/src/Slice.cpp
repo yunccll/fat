@@ -19,6 +19,9 @@ std::string Slice::ToString(bool hex) const {
   if (hex) {
     result.reserve(2 * size_);
     for (size_t i = 0; i < size_; ++i) {
+      if( i%16 == 0){
+          result.push_back('\n');
+      }
       unsigned char c = data_[i];
       result.push_back(toHex(c >> 4));
       result.push_back(toHex(c & 0xf));

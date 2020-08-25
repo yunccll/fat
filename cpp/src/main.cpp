@@ -113,8 +113,8 @@ using namespace fat;
 
 TEST(MainTest, use){
     std::cout << "hello world" << std::endl;
-    Blocks::test();
-    FileDevice::test();
-    Fat12BlockParser::test();
-    FileAllocator::test();
+//    Blocks::test();
+//    FileDevice::test();
+//    Fat12BlockParser::test();
+//    FileAllocator::test();
 }

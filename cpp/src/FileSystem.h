@@ -12,6 +12,8 @@ class FsInfo;
 class MbrParser;
 class FileAllocator;
 class FileAllocatorParser;
+class RootEntryArray;
+class RootEntries;
 
 class FileSystem {
     static const uint64_t MbrBlockIndex = 0;
@@ -49,9 +51,9 @@ private:
     FileAllocatorParser * faParser;
     std::string fatBuffer;
 
-    //RootEntries * root;
-    //RootEntriesParser * rootParser;
-    //std::string rootBuffer;
+    RootEntryArray * rootArray;
+    RootEntries * rootUsedMap;
+    std::string rootBuffer;
 
     static std::shared_ptr<FileSystem> __inst;
 };

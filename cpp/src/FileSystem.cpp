@@ -5,6 +5,8 @@
 #include "FileAllocator.h"
 #include "MbrParser.h"
 
+#include "RootEntries.h"
+
 #include <iostream>
 
 namespace fat {
@@ -19,25 +21,22 @@ FileSystem::FileSystem(const std::string & name)
 , mbrParser(new MbrParser())
 , fa(nullptr)
 , faParser(nullptr)
+, rootArray(nullptr)
+, rootUsedMap(new RootEntries)
 {
 }
 
 FileSystem::~FileSystem(){
-    if(faParser != nullptr){
-        delete faParser;
-    }
-    if(fa != nullptr){
-        delete fa;
-    }
-    if(mbrParser != nullptr){
-        delete mbrParser;
-    }
-    if(fsInfo != nullptr){
-        delete fsInfo;
-    }
-    if(device != nullptr){
-        delete device;
-    }
+    delete rootUsedMap;
+    delete rootArray;
+
+    delete faParser;
+    delete fa;
+
+    delete mbrParser;
+    delete fsInfo;
+
+    delete device;
 }
 std::shared_ptr<FileSystem> FileSystem::getDefaultFileSystem(){
     if(__inst != nullptr){
@@ -61,7 +60,7 @@ Status FileSystem::mount(){
     //2. load the fat_allocator
     s = loadFileAllocator();
     if(!s) return s;
-    //3. load the root directory //???
+    //3. load the root directory
     return loadRootDirectory();
 }
 
@@ -82,6 +81,7 @@ Status FileSystem::loadMeta(){
     }
     return s;
 }
+
 /*
 Status FileSystem::flushMeta(){
     auto s = mbrParser->build(fsInfo, mbr);
@@ -99,8 +99,30 @@ Status FileSystem::loadFileAllocator(){
     return faParser->parse(Slice(fatBuffer), fsInfo, &fa);
 }
 
+
 Status FileSystem::loadRootDirectory(){
-    //TODO: 
+    size_t len = fsInfo->numberOfRootEntrySector();
+    for(size_t i = 0; i < len; ++i){
+        auto s = device->read((void*)(fsInfo->firstSectorOfRootEntry() + i), rootBuffer);
+        if(!s) return s;
+    }
+    //std::cout << Slice(rootBuffer).ToString(true) << std::endl;
+    rootArray = new RootEntryArray(rootBuffer.c_str(), rootBuffer.size());
+
+    auto iter = rootArray->begin();
+    for(; iter != rootArray->end(); ++iter){
+        auto e = std::make_shared<Entry>(*iter);
+        if(e->isFirstEmptyEntry()){ //0x00
+            break;
+        }
+        else if(e->isFreeEntryAfterUse()){ //0xe5 
+            continue;
+        }
+        else {
+            rootUsedMap->add(e->getName().ToString().c_str(), e);
+        }
+    }
+    //std::cout << *rootUsedMap << std::endl;
     return Status::OK();
 }
 

@@ -172,26 +172,31 @@ int Fat12BlockParser::parseFileAllocator(BlockView * bv){
 
 
 static int __snprintfDate(char * dateBuf, size_t cap, uint16_t date){
+#pragma pack(1)
     struct Date{
         uint16_t day : 5;
         uint16_t month : 4;
         uint16_t year : 7;
     };
+#pragma pack(0)
     Date * d = (Date*)&date;
     return snprintf(dateBuf, cap, "%04d-%02d-%02d", d->year+1980, d->month, d->day);
 }
 static int __snprintfTime(char * timeBuf, size_t cap, uint16_t time){
+#pragma pack(1)
     struct Time {
         uint16_t second : 5;
         uint16_t minute : 6;
         uint16_t hour   : 5;
     };
+#pragma pack(0)
     Time * t = (Time*)&time;
     return snprintf(timeBuf, cap, "%02d:%02d:%02d", t->hour, t->minute, t->second* 2);
 }
 
 static void printEntryDetail(dir * entry){
         char crtDate[16]= {0};
+        std::cout << std::hex << "TEST>>>>>>>>>>>>>>>>>>>>>>>> " << entry->createDate << std::dec << std::endl;
         __snprintfDate(crtDate, sizeof(crtDate), entry->createDate);
         char crtTime[16] = {0};
         __snprintfTime(crtTime, sizeof(crtTime), entry->createTime);
