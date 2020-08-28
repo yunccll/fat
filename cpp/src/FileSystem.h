@@ -14,6 +14,7 @@ class FileAllocator;
 class FileAllocatorParser;
 class RootEntryArray;
 class RootEntries;
+class Entry;
 
 class FileSystem {
     static const uint64_t MbrBlockIndex = 0;
@@ -33,6 +34,9 @@ public:
     }
 
 
+    //just find in root directory
+    Status findEntry(const std::string & path, std::shared_ptr<Entry> & entry);
+
 private:
     Status loadMeta();
     Status loadFileAllocator();
@@ -50,6 +54,7 @@ private:
     FileAllocator * fa;
     FileAllocatorParser * faParser;
     std::string fatBuffer;
+
 
     RootEntryArray * rootArray;
     RootEntries * rootUsedMap;

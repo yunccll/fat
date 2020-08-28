@@ -6,6 +6,7 @@
 #include <unordered_map>
 
 #include "Slice.h"
+#include "Status.h"
 
 namespace fat {
 
@@ -23,7 +24,6 @@ struct DirItem{
     uint16_t writeDate;
     uint16_t firstClusterLow;
     uint32_t fileSize;
-
 };
 #pragma pack()
 
@@ -43,7 +43,8 @@ public:
     ~Entry(){
     }
 
-    Slice getName() const {
+    Status getName(std::string & name) const;
+    Slice getStorageName() const {
         return Slice(item->name, 11);
     }
     static uint64_t EntrySize() {
@@ -126,9 +127,13 @@ public:
     uint64_t getFileSize() const{
         return item->fileSize;
     }
+    void setFileSize(uint64_t size) {
+         item->fileSize = (uint32_t)size;
+    }
 
 private:
     DirItem * item;
+    std::string name;
 };
 std::ostream & operator<< (std::ostream & os, const Entry & entry);
 
@@ -142,6 +147,11 @@ public:
     EntryPointer remove(const char * path);
     EntryPointer  getEntry(const char * path) const;
     EntryPointer modify(const char * path, const EntryPointer newEntry);
+
+    bool add(const std::string & path, const EntryPointer entry);
+    EntryPointer remove(const std::string & path);
+    EntryPointer  getEntry(const std::string & path) const;
+    EntryPointer modify(const std::string & path, const EntryPointer newEntry);
 
     std::ostream & operator<<(std::ostream & os) const;
 private:

@@ -2,8 +2,10 @@
 
 #include "FileSystem.h"
 #include "FsInfo.h"
+#include "RootEntries.h"
 
 namespace fat {
+
 
 class File {
 public:
@@ -25,21 +27,48 @@ public:
         //TODO: 
         return Status::OK(); 
     }
-    virtual Status create() {
+    virtual Status create(){
         //TODO: 
         return Status::OK();
     }
     virtual Status open() {
+        auto s = fs->findEntry(path, entry);
+        if(s){
+            position = 0;
+        }
+        return s;
+    }
+    virtual Status seek(){
         //TODO: 
         return Status::OK();
     }
     virtual Status close() {
-        //TODO:
+        if(isOpen()){
+            //TODO: return entry->flush(); //Data flush , Meta Flush
+            position = 0;
+        }
         return Status::OK();
+    }
+    virtual Status getSize(uint64_t & size) const {
+        if(isOpen()){
+            size = entry->getFileSize();
+            return Status::OK();
+        }
+        return Status::InvalidArgument("file not opened"); //TODO: Status::FileNotOpened();
+    }
+    virtual int64_t getSize() const {
+        if(isOpen()){
+            return (int64_t)entry->getFileSize();
+        }
+        return -1;
+    }
+    virtual bool isOpen() const{
+        return entry != nullptr;
     }
 private:
     std::string path;
     uint64_t position;
+    std::shared_ptr<Entry> entry;
     std::shared_ptr<FileSystem> fs;
 };
 
@@ -60,15 +89,14 @@ public:
         return Status::OK();
     }
     virtual Status open(){
-        //TODO:  operation_flag =  ???
         return file->open();
     }
     virtual Status close(){
-        //TODO:
         return file->close();
     }
 
 private:
+    uint64_t position;
     std::shared_ptr<File> file;
 };
 
@@ -94,6 +122,7 @@ TEST(FileSystemTest, use)
     auto s = fs->mount();
     ASSERT_TRUE(s.isOk());
 
+    /*  
     {
         std::string path("a.txt");
         auto r = new SequenceFileReader(std::make_shared<File>(path ,fs));
@@ -105,7 +134,7 @@ TEST(FileSystemTest, use)
 
         ASSERT_TRUE(r->close().isOk());
         delete r;
-    }
+    }*/
 
     //std::cout << fs->getInfo()->toString() << std::endl;
    

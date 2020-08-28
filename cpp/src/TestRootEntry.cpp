@@ -45,8 +45,13 @@ protected:
 //prepare one entry buffer
 TEST_F(EntryTest, realEntry){
     Entry entry(realEntry, 32);
-    ASSERT_EQ(std::string("A       TXT"), entry.getName().ToString());
+    ASSERT_EQ(std::string("A       TXT"), entry.getStorageName().ToString());
     ASSERT_EQ(32, entry.getSize());
+
+    std::string name;
+    ASSERT_TRUE(entry.getName(name));
+    ASSERT_EQ(std::string("A.TXT"), name);
+
 
     ASSERT_TRUE(entry.isValidEntry());
     ASSERT_FALSE(entry.isFreeEntry());

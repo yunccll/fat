@@ -12,6 +12,24 @@ void dateOut(std::ostream & os, uint16_t date){
 void timeOut(std::ostream & os, uint16_t time){
     os << (time >> 11)  << ":" << ((time >> 5) & 0x3f) << ":" <<  ((time & 0x1f) << 1);
 }
+Status Entry::getName(std::string & name) const{ //for short entry(8~3)
+    //FileName
+    int i = 0;
+    while(i < 8 && item->name[i] != (char)0x20) ++i;
+    if(i == 0) {
+        return Status::InvalidArgument(); //Invalid entry name
+    }
+    name.assign(item->name, i);
+
+    //Suffix
+    i = 0;
+    while(i < 3 && item->name[8+i] != (char)0x20) ++i;
+    if(i == 0)
+        return Status::InvalidArgument(); //Invalid entry suffix
+    name.append(".");
+    name.append(item->name+8, i);
+    return Status::OK();
+}
 std::string Entry::getCreateTimeStamp() const{
     std::ostringstream oss;
     dateOut(oss, item->createDate);
@@ -33,7 +51,7 @@ std::string Entry::getWriteTimeStamp() const{
 }
 
 std::ostream & operator<< (std::ostream & os, const Entry & entry){
-    os << "Name:["              << entry.getName().ToString() 
+    os << "Name:["              << entry.getStorageName().ToString() 
        << "] Attrbute:["        << (int)entry.getAttribute() 
        << "] CreateTimestamp:[" << entry.getCreateTimeStamp() 
        << "] lastAccessDate:["  << entry.getLastAccessDate() 
@@ -61,6 +79,7 @@ RootEntries::EntryPointer RootEntries::remove(const char * path){
     }
     return nullptr;
 }
+
 RootEntries::EntryPointer RootEntries::getEntry(const char * path) const{
     auto iter = maps.find(path);
     if(iter != maps.end()){
@@ -77,6 +96,40 @@ RootEntries::EntryPointer RootEntries::modify(const char * path, const RootEntri
     }
     return nullptr;
 }
+
+bool RootEntries::add(const std::string & path, const EntryPointer entry){
+    auto iter = maps.find(path);
+    if(iter == maps.end()){
+        maps.insert(std::make_pair(path, entry));
+        return true;
+    }
+    return false;
+}
+RootEntries::EntryPointer RootEntries::remove(const std::string & path){
+    auto iter = maps.find(path);
+    if(iter != maps.end()){
+        maps.erase(iter);
+        return iter->second;
+    }
+    return nullptr;
+}
+RootEntries::EntryPointer RootEntries::getEntry(const std::string & path) const{
+    auto iter = maps.find(path);
+    if(iter != maps.end()){
+        return iter->second;
+    }
+    return nullptr;
+}
+RootEntries::EntryPointer RootEntries::modify(const std::string & path, const EntryPointer newEntry){
+    auto iter = maps.find(path);
+    if(iter != maps.end()){
+        auto old = iter->second;
+        iter->second = newEntry;
+        return old;
+    }
+    return nullptr;
+}
+
 std::ostream & RootEntries::operator<<(std::ostream & os) const{
     for(auto & pair : maps){
         os << "name:[" << pair.first << "], entry:{" << *(pair.second) << "}" << std::endl;

@@ -106,6 +106,7 @@ Status FileSystem::loadRootDirectory(){
         auto s = device->read((void*)(fsInfo->firstSectorOfRootEntry() + i), rootBuffer);
         if(!s) return s;
     }
+
     //std::cout << Slice(rootBuffer).ToString(true) << std::endl;
     rootArray = new RootEntryArray(rootBuffer.c_str(), rootBuffer.size());
 
@@ -119,11 +120,23 @@ Status FileSystem::loadRootDirectory(){
             continue;
         }
         else {
-            rootUsedMap->add(e->getName().ToString().c_str(), e);
+            std::string name;
+            if(e->getName(name))
+                rootUsedMap->add(name, e);
+            else{
+                //TODO: log it 
+                continue;
+            }
+
         }
     }
-    //std::cout << *rootUsedMap << std::endl;
+    std::cout << *rootUsedMap << std::endl;
     return Status::OK();
+}
+
+Status FileSystem::findEntry(const std::string & path ,std::shared_ptr<Entry> & entry){
+    entry = rootUsedMap->getEntry(path);
+    return entry != nullptr ? Status::OK() : Status::NotFound();
 }
 
 } //end of namespace fat
