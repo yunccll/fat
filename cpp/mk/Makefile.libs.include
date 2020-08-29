@@ -1,6 +1,6 @@
 
 #-- gtest
-GTEST_HOME_PATH		:= /home/chenglun/dev/third/gtest
+GTEST_HOME_PATH		:= $(HOME)/dev/third/gtest
 GTEST_INC_PATH		:= $(GTEST_HOME_PATH)
 GTEST_LIB_PATH		:= $(GTEST_HOME_PATH)
 GTEST_LIB_NAME		:= gtest_main

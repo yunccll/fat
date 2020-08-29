@@ -8,13 +8,13 @@
 namespace fat {
 
 class Device;
-class FsInfo;
+struct FsInfo;
 class MbrParser;
 class FileAllocator;
 class FileAllocatorParser;
 class RootEntryArray;
 class RootEntries;
-class Entry;
+struct Entry;
 
 class FileSystem {
     static const uint64_t MbrBlockIndex = 0;

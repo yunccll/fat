@@ -9,7 +9,7 @@
 
 namespace fat {
 
-class FsInfo;
+struct FsInfo;
 class Blocks;
 class FileAllocator;
 class BlockView;

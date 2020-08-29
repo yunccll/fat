@@ -192,7 +192,7 @@ public:
     typedef value_type& reference;
     typedef value_type* pointer;
 
-    const reference operator[](size_t index) const {
+    reference operator[](size_t index) const {
         size_t offset  = index * Entry::EntrySize();
         assert(offset >=0 && offset < len);
         return *reinterpret_cast<pointer>(data+offset);

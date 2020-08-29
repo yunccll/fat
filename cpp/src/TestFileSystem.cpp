@@ -38,10 +38,18 @@ public:
         }
         return s;
     }
-    virtual Status seek(){
-        //TODO: 
-        return Status::OK();
-    }
+    /*
+    virtual Status seek(uint64_t newPos){
+        uint64_t size;
+        auto s = getSize(size);
+        if(!s) return s;
+
+        if(newPos < size){
+            position = newPos;
+            return Status::OK();
+        }
+        return Status::InvalidArgument("newPos >= size");
+    }*/
     virtual Status close() {
         if(isOpen()){
             //TODO: return entry->flush(); //Data flush , Meta Flush
@@ -56,15 +64,22 @@ public:
         }
         return Status::InvalidArgument("file not opened"); //TODO: Status::FileNotOpened();
     }
-    virtual int64_t getSize() const {
-        if(isOpen()){
-            return (int64_t)entry->getFileSize();
-        }
-        return -1;
-    }
     virtual bool isOpen() const{
         return entry != nullptr;
     }
+
+    //Sectors , offset, len
+    virtual Status read(uint64_t offset, const uint64_t expectSize, std::string & result){
+        // offset to numbersOfSector
+        // numbersOfSector validation
+        // read sectors
+        // return Slice(sectors, start, end)
+        return Status::OK();
+    }
+    virtual Status write(uint64_t offset, const Slice & data, uint64_t & outLen){
+        return Status::OK();
+    }
+
 private:
     std::string path;
     uint64_t position;
@@ -96,7 +111,7 @@ public:
     }
 
 private:
-    uint64_t position;
+    //uint64_t position;
     std::shared_ptr<File> file;
 };
 
