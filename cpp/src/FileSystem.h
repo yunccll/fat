@@ -32,7 +32,12 @@ public:
     FsInfo * getInfo() const {
         return fsInfo;
     }
-
+    FileAllocator * getFileAllocator() const {
+        return fa;
+    }
+    Device * getDevice() const {
+        return device;
+    }
 
     //just find in root directory
     Status findEntry(const std::string & path, std::shared_ptr<Entry> & entry);
