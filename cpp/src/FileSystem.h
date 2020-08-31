@@ -8,13 +8,13 @@
 namespace fat {
 
 class Device;
-class FsInfo;
+struct FsInfo;
 class MbrParser;
 class FileAllocator;
 class FileAllocatorParser;
 class RootEntryArray;
 class RootEntries;
-class Entry;
+struct Entry;
 
 class FileSystem {
     static const uint64_t MbrBlockIndex = 0;
@@ -32,7 +32,12 @@ public:
     FsInfo * getInfo() const {
         return fsInfo;
     }
-
+    FileAllocator * getFileAllocator() const {
+        return fa;
+    }
+    Device * getDevice() const {
+        return device;
+    }
 
     //just find in root directory
     Status findEntry(const std::string & path, std::shared_ptr<Entry> & entry);

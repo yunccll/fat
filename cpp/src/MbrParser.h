@@ -7,7 +7,7 @@
 namespace fat {
 
 class Slice;
-class FsInfo;
+struct FsInfo;
 class FileAllocator;
 
 class MbrParser {

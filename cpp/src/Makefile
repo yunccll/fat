@@ -1,5 +1,6 @@
 include ../mk/Makefile.root.include
 include ../mk/Makefile.libs.include
+HIDE=
 
 
 all:$(TARGET_BIN)
