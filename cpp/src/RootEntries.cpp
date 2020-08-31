@@ -1,66 +1,8 @@
 #include "RootEntries.h"
 
-#include <cassert>
-#include <sstream>
-#include <iostream>
+#include "Entry.h"
 
 namespace fat {
-
-void dateOut(std::ostream & os, uint16_t date){
-    os << (date>>9) + 1980  << "-" << std::max(1, (date >> 5) & 0xf) << "-" << std::max(1, date & 0x1f) - 1;
-}
-void timeOut(std::ostream & os, uint16_t time){
-    os << (time >> 11)  << ":" << ((time >> 5) & 0x3f) << ":" <<  ((time & 0x1f) << 1);
-}
-Status Entry::getName(std::string & name) const{ //for short entry(8~3)
-    //FileName
-    int i = 0;
-    while(i < 8 && item->name[i] != (char)0x20) ++i;
-    if(i == 0) {
-        return Status::InvalidArgument(); //Invalid entry name
-    }
-    name.assign(item->name, i);
-
-    //Suffix
-    i = 0;
-    while(i < 3 && item->name[8+i] != (char)0x20) ++i;
-    if(i == 0)
-        return Status::InvalidArgument(); //Invalid entry suffix
-    name.append(".");
-    name.append(item->name+8, i);
-    return Status::OK();
-}
-std::string Entry::getCreateTimeStamp() const{
-    std::ostringstream oss;
-    dateOut(oss, item->createDate);
-    oss << " " ;
-    timeOut(oss, item->createTime);
-    return oss.str();
-}
-std::string Entry::getLastAccessDate() const{ //read or write date
-    std::ostringstream oss;
-    dateOut(oss, item->lastAccessDate);
-    return oss.str();
-}
-std::string Entry::getWriteTimeStamp() const{
-    std::ostringstream oss;
-    dateOut(oss, item->writeDate);
-    oss << " ";
-    timeOut(oss, item->writeTime);
-    return oss.str();
-}
-
-std::ostream & operator<< (std::ostream & os, const Entry & entry){
-    os << "Name:["              << entry.getStorageName().ToString() 
-       << "] Attrbute:["        << (int)entry.getAttribute() 
-       << "] CreateTimestamp:[" << entry.getCreateTimeStamp() 
-       << "] lastAccessDate:["  << entry.getLastAccessDate() 
-       << "] writeTimestamp:["  << entry.getWriteTimeStamp() 
-       << "] firstCluster:["    << entry.getFirstCluster()
-       << "] fileSize:["        << entry.getFileSize()
-       << "]";
-    return os;
-}
 
 bool RootEntries::add(const char * path, const RootEntries::EntryPointer entry){
     assert(path != nullptr);
@@ -139,6 +81,53 @@ std::ostream & RootEntries::operator<<(std::ostream & os) const{
 std::ostream & operator<< (std::ostream & os, const RootEntries & rootEntries){
     rootEntries.operator<<(os);
     return os;
+}
+
+
+
+RootEntryArray::RootEntryArray(const char * data, size_t len)
+: data((uint8_t*)(const_cast<char*>(data)))
+, len(len)
+{
+}
+RootEntryArray::RootEntryArray(char * data, size_t len)
+: data((uint8_t*)data)
+, len(len)
+{
+}
+RootEntryArray::RootEntryArray(uint8_t * data, size_t len)
+: data(data)
+, len(len)
+{
+    assert(data != nullptr);
+    assert(len > 0 && (len % Entry::EntrySize()) == 0);
+}
+RootEntryArray::~RootEntryArray(){
+}
+
+//attribute 
+size_t RootEntryArray::getEntryCount() const{
+    return len / Entry::EntrySize();
+}
+
+RootEntryArray::reference RootEntryArray::operator[](size_t index) const {
+    size_t offset  = index * Entry::EntrySize();
+    assert(offset >=0 && offset < len);
+    return *reinterpret_cast<pointer>(data+offset);
+}
+//read/write
+RootEntryArray::reference RootEntryArray::operator[](size_t index){
+    size_t offset  = index * Entry::EntrySize();
+    assert(offset >=0 && offset < len);
+    return *reinterpret_cast<pointer>(data + offset);
+}
+
+//range read 
+RootEntryArray::iterator RootEntryArray::begin() {
+    return iterator(data, 0, Entry::EntrySize());
+}
+RootEntryArray::iterator RootEntryArray::end(){
+    return iterator(data, len, Entry::EntrySize());
 }
 
 

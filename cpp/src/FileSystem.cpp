@@ -5,6 +5,7 @@
 #include "FileAllocator.h"
 #include "MbrParser.h"
 
+#include "Entry.h"
 #include "RootEntries.h"
 
 #include <iostream>

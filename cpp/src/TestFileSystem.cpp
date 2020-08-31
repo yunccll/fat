@@ -1,99 +1,19 @@
 #include "gtest/gtest.h"
 
 #include "FileSystem.h"
-#include "FsInfo.h"
-#include "RootEntries.h"
+#include "File.h"
 
 
-#include "FileAllocator.h"
+#include "Slice.h"
+#include "Status.h"
 
 namespace fat {
-
-
-class File {
-public:
-    File(const std::string & path, std::shared_ptr<FileSystem> fs)
-    : path(path)
-    , fs(fs){
-    }
-    virtual ~File(){
-    }
-
-    const std::string & getPath() const {
-        return path;
-    }
-    std::shared_ptr<FileSystem> getFileSystem(){
-        return fs;
-    }
-    virtual Status truncate(uint64_t size = 0) {
-        //TODO: 
-        return Status::OK(); 
-    }
-    virtual Status create(){
-        //TODO: 
-        return Status::OK();
-    }
-
-    virtual Status flush(){
-        //TODO: 
-        return Status::OK();
-    }
-
-    virtual Status findEntry(){
-        return fs->findEntry(path, entry);
-    }
-    virtual Status getSize(uint64_t & size) const {
-        if(entry != nullptr){
-            size = entry->getFileSize();
-            return Status::OK();
-        }
-        return Status::IOError("entry not set"); //TODO: Status::IOError(FindEntry First)
-    }
-    uint64_t getMaxBlockIndex() const {
-        return entry->getFileSize() / getBlockBytes();
-    }
-    uint64_t getBlockBytes() const {
-        return fs->getInfo()->bytesPerSector();
-    }
-
-    uint64_t getBlockIndex(uint64_t offset) const{
-        return offset / getBlockBytes();
-    }
-    uint64_t getOffsetInBlock(uint64_t offset) const {
-        return offset % getBlockBytes();
-    }
-    uint64_t getSize() const {
-        return entry->getFileSize();
-    }
-
-    Status readBlock(uint64_t blockIndex, std::string & result, uint64_t * hintClustor){
-        uint64_t cluster = entry->getFirstCluster();
-        std::cout  << "first cluster:"  << cluster << std::endl;
-        for(uint64_t i = 0; i < blockIndex; ++i){
-            cluster = fs->getFileAllocator()->getNextCluster(cluster);
-        }
-        std::cout << "readBlock:" << cluster << std::endl;
-        //fs->getDevice()->read(cluster+14, result);
-        const char * buf = new char[512]{ 0x00, 0x01, 0x02, 0x3, 0x04, 0x05, 0x00};
-        result.append(buf, 6);
-        return Status::OK();
-    }
-
-private:
-    std::string path;
-    std::shared_ptr<Entry> entry;
-    std::shared_ptr<FileSystem> fs;
-};
-
-
-
 
 class SequenceFileReader  {
 public:
     SequenceFileReader(std::shared_ptr<File> file)
     : file(file) 
     , offset(0)
-    , hintClustorNo(0)
     , isOpen(false)
     {
     }
@@ -102,7 +22,7 @@ public:
 
     Status read(const uint64_t expectSize, std::string & result){
         if(!isOpen){
-            return Status::InvalidArgument("not opened"); //TODO: Status::FileNotOpened
+            return Status::FileNotOpen(file->getPath().c_str());
         }
 
         if(offset >= file->getSize()){
@@ -110,20 +30,22 @@ public:
         }
         const uint64_t oldOffset = offset;
 
+        std::string blockBuf;
+        blockBuf.reserve(file->getBlockBytes());
+
         uint64_t leftSize = expectSize;
         while(offset < file->getSize() && leftSize > 0){
             uint64_t blockIndex = file->getBlockIndex(offset);
 
-            std::string buf;
-            auto s = file->readBlock(blockIndex, buf, &hintClustorNo);
+            blockBuf.clear();
+            auto s = file->readBlock(blockIndex, blockBuf); //read sector 
             if(!s) { 
                 offset = oldOffset;
                 return s;
             }
-
             uint64_t offsetInBlock = file->getOffsetInBlock(offset);
             uint64_t len = std::min(leftSize, file->getBlockBytes()-offsetInBlock);
-            result.append(buf, offsetInBlock, len);
+            result.append(blockBuf, offsetInBlock, len); //copy to dest , perf optimal
 
             offset += len;
             leftSize -= len;
@@ -145,60 +67,57 @@ public:
         }
         return Status::OK();
     }
-
 private:
     std::shared_ptr<File> file;
     uint64_t offset;
-    uint64_t hintClustorNo;
     bool isOpen;
 };
 
 
-/*   RandomFile
-Status readPosition(uint64_t offset, const uint64_t expectSize, std::string & result){
-    //TODO:
-    return Status::OK();
-}
-//Seek
-//seekBegin(10)
-//seekEnd(-10)
-//seek(+10), seek(-10)
-*/
+class SequenceFileWriter  {
+public:
+    SequenceFileWriter(std::shared_ptr<File> file)
+    : file(file) 
+    , offset(0)
+    , isOpen(false)
+    {
+    }
+    virtual ~SequenceFileWriter(){
+    }
+
+    Status write(const Slice & data, size_t & outLen){
+        //TODO: 
+        return Status::OK();
+    }
+
+    virtual Status open(){
+        if(!isOpen){
+            isOpen = true;
+            auto s = file->findEntry();
+            if(!s) return s;
+            offset = file->getSize();
+            return s;
+        }
+        return Status::OK();
+    }
+    virtual Status close(){
+        if(isOpen){
+            isOpen = false;
+            offset = 0;
+        }
+        return Status::OK();
+    }
+private:
+    std::shared_ptr<File> file;
+    uint64_t offset;
+    bool isOpen;
+};
+
+
 
 } //end of namespace fat
 
-
-
 using namespace fat;
-
-class FileTest : public testing::Test {
-public:
-    FileTest(){
-        fs = std::make_shared<FileSystem>("zero.img");
-        fs->mount();
-    }
-    ~FileTest(){
-        fs->unmount();
-    }
-
-public:
-    std::shared_ptr<FileSystem> fs;
-};
-
-TEST_F(FileTest, use){
-    //TODO: setting an special file for this testcase ????
-    std::string path("A.TXT");
-    auto file = std::make_shared<File>(path, fs);
-    file->findEntry();
-    uint64_t offset = 0;
-    //Move to File TestCase
-    std::cout << "file Size: " << file->getSize()
-        << " getBlockBytes:" << file->getBlockBytes() 
-        << " maxBlockIndex:" << file->getMaxBlockIndex() 
-        << " Block Index:" << file->getBlockIndex(offset)
-        << " offset in Block:" << file->getOffsetInBlock(offset)
-        << std::endl;
-}
 
 TEST(FileSystemTest, use)
 {
@@ -216,31 +135,49 @@ TEST(FileSystemTest, use)
         ASSERT_TRUE(r->read(5, result).isOk());
         ASSERT_EQ(5, result.size());
 
+        while(r->read(10, result).isOk()) ;
+        std::cout << "size: " << result.size() << " content:" << result << std::endl;
+
         ASSERT_TRUE(r->close().isOk());
         delete r;
     }
+    {
+        std::string path("B.TXT");
+        auto w = new SequenceFileWriter(std::make_shared<File>(path, fs));
+        ASSERT_TRUE(w->open().isOk());
 
-    //std::cout << fs->getInfo()->toString() << std::endl;
-   
+        size_t outLen= 0;
+        ASSERT_TRUE(w->write(Slice("hello"), outLen).isOk());
+        ASSERT_TRUE(outLen == Slice("hello").size());
+        
+        ASSERT_TRUE(w->close().isOk());
+        delete w;
+    }
+
     //bool exist = false;
     //s = fs->isExist("/chenglun.txt", exist);
     //ASSERT_TRUE(s.isOk() && exist == false);
-
 
     s = fs->unmount();
     ASSERT_TRUE(s.isOk());
 }
 
 /*  
+//   RandomFile
+Status readPosition(uint64_t offset, const uint64_t expectSize, std::string & result){
+    //TODO:
+    return Status::OK();
+}
+//Seek
+//seekBegin(10)
+//seekEnd(-10)
+//seek(+10), seek(-10)
+
 class public IoObject {
 public:
     virtual ~IoObject(){}
     Status open() = 0;
     Status close() = 0;
-};
-class Reader {
-public:
-    Status read(const uint64_t expectSize, std::string result);
 };
 class RandomAccessObject : public IoObject {
 public:

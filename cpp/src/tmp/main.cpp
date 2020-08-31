@@ -1,5 +1,9 @@
 #include "gtest/gtest.h"
 
+#include <iostream>
+#include <memory>
+
+
 /*  
 TEST(FsTest, isExist){
     auto fs = std::make_shared<FileSystem>("chenglun.img");
@@ -100,3 +104,17 @@ TEST(FileReaderTest, sequence){
     r->close();
 }
 */
+
+#include "FileDevice.h"
+#include "Blocks.h"
+#include "Fat12BlockParser.h"
+#include "FileAllocator.h"
+using namespace fat;
+
+TEST(MainTest, use){
+    std::cout << "hello world" << std::endl;
+//    Blocks::test();
+//    FileDevice::test();
+//    Fat12BlockParser::test();
+//    FileAllocator::test();
+}

@@ -86,6 +86,10 @@ public:
         return (sectorNo - _firstSectorOfData) + 2;
     }
 
+    uint64_t dataSectorNoFromCluster(uint64_t clusterNo){
+        return (clusterNo -2) * sectorPerCluster()  + firstSectorOfData();
+    }
+
     std::string toString() const;
 
 private:

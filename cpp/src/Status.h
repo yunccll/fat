@@ -17,6 +17,7 @@ public:
         ecAborted,
         ecIOError,
         ecErrorFormat,
+        ecFileNotOpen,
         ecMaxCode,
     };
 
@@ -59,6 +60,9 @@ public:
     static Status ErrorFormat(const char * msg = nullptr){
         return Status(ErrorCode::ecErrorFormat, msg);
     }
+    static Status FileNotOpen(const char * msg = nullptr){
+        return Status(ErrorCode::ecFileNotOpen, msg);
+    }
     //TODO:
     //  ***************************   isXXX
     bool isOk() const { return code == ErrorCode::ecOk;}
@@ -71,6 +75,7 @@ public:
     bool isAborted() const { return code == ErrorCode::ecAborted;}
     bool isIOError() const { return code == ErrorCode::ecIOError;}
     bool isErrorFormat() const { return code == ErrorCode::ecErrorFormat;}
+    bool isFileNotOpen() const { return code == ErrorCode::ecFileNotOpen;}
     //TODO:
 
     //copy
