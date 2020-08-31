@@ -122,7 +122,7 @@ public:
     std::string getWriteTimeStamp() const;
 
     uint64_t getFirstCluster() const{
-        return (((uint64_t)item->firstClusterHigh)<<16)||((uint64_t)item->firstClusterLow);
+        return (((uint64_t)item->firstClusterHigh)<<16)|((uint64_t)item->firstClusterLow);
     }
     uint64_t getFileSize() const{
         return item->fileSize;
