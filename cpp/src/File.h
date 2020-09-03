@@ -4,6 +4,7 @@
 #include <memory>
 #include <string>
 #include "Status.h"
+#include "Slice.h"
 
 namespace fat {
 
@@ -38,6 +39,15 @@ public:
     uint64_t getSize() const ;
 
     Status readBlock(uint64_t blockIndex, std::string & result) const;
+    Status writeBlock(uint64_t blockIndex, const Slice & data, uint64_t & outLen);
+
+
+    uint64_t allocateCluster();
+    void setNextCluster(int32_t noCluster, int32_t noNextCluster);
+    void setLastCluster(int32_t noCluster);
+
+    uint64_t getFirstCluster() const ;
+
 
 private:
     std::string path;

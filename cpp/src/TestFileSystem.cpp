@@ -81,12 +81,69 @@ public:
     , offset(0)
     , isOpen(false)
     {
+        block.reserve(file->getBlockBytes());
     }
     virtual ~SequenceFileWriter(){
     }
 
+
+    bool isNotAlign(uint64_t offset, uint64_t blockSize) const {
+        //assert(blockSize pow of 2)
+        return offset & (blockSize - 1);
+    }
+    bool isAlign(uint64_t offset, uint64_t blockSize) const{
+        return !isNotAlign(offset, blockSize);
+    }
+    uint64_t firstBlockSize(uint64_t offset, uint64_t blockSize) const {
+        return blockSize - (offset & (blockSize-1));
+    }
+
     Status write(const Slice & data, size_t & outLen){
-        //TODO: 
+        uint64_t newOffset = offset;
+        if(data.size() > 0){ 
+            const char * src = data.data(); //TODO: slice += len;
+            uint64_t expectSize = data.size();
+            //1. wirte first block (maybe not a full block)
+            if(isNotAlign(newOffset, file->getBlockBytes())){
+
+                block.clear();
+                auto s = file->readBlock(file->getBlockIndex(newOffset), block);
+                if(!s) return s;
+
+                auto iter = block.begin();
+                std::advance(iter, file->getOffsetInBlock(newOffset));
+
+                uint64_t len = std::min(expectSize, firstBlockSize(newOffset, file->getBlockBytes()));
+                std::copy(src, src+len, iter);
+                size_t writeBytes = 0;
+                s = file->writeBlock(file->getBlockIndex(newOffset), Slice(block), writeBytes);
+                if(!s) return s;
+
+                src += len;         //Source string
+                expectSize -= len;  // source string
+
+                newOffset += len; //FilePos
+            }
+            std::cout << expectSize << std::endl;
+
+            //2. write left blocks
+            uint64_t curClusterNo = file->getFirstCluster();
+            // left blocks 
+            while(expectSize > 0){
+                assert(isAlign(newOffset, file->getBlockBytes()));
+                uint64_t newClusterNo = file->allocateCluster();
+                uint64_t len = std::min(expectSize, file->getBlockBytes());
+                //TODO: 
+                //buffer.copy(newOffset, len);
+                //writeBlock();
+                expectSize -= len;
+                newOffset += len;
+                file->setNextCluster(curClusterNo, newClusterNo);
+                file->setLastCluster(newClusterNo);
+            }
+        }
+        outLen = newOffset - offset;
+        offset = newOffset;
         return Status::OK();
     }
 
@@ -111,6 +168,7 @@ private:
     std::shared_ptr<File> file;
     uint64_t offset;
     bool isOpen;
+    std::string block;
 };
 
 
@@ -142,7 +200,7 @@ TEST(FileSystemTest, use)
         delete r;
     }
     {
-        std::string path("B.TXT");
+        std::string path("A.TXT");
         auto w = new SequenceFileWriter(std::make_shared<File>(path, fs));
         ASSERT_TRUE(w->open().isOk());
 

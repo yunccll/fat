@@ -73,5 +73,25 @@ Status File::readBlock(uint64_t blockIndex, std::string & result) const{
     uint64_t dataSector = fs->getInfo()->dataSectorNoFromCluster(clusterNo);
     return fs->getDevice()->read((void*)dataSector, result);
 }
+Status File::writeBlock(uint64_t blockIndex, const Slice & data, uint64_t & outLen){
+    //TODO:
+    return Status::OK();
+}
+
+void File::setNextCluster(int32_t noCluster, int32_t noNextCluster){
+    fs->getFileAllocator()->setNextCluster(noCluster, noNextCluster);
+}
+void File::setLastCluster(int32_t noCluster){
+    fs->getFileAllocator()->setLastCluster(noCluster);
+}
+
+uint64_t File::allocateCluster(){
+    return fs->getFileAllocator()->allocate();
+}
+
+uint64_t File::getFirstCluster() const {
+    return entry->getFirstCluster();
+}
 
 } //end of namespace fat
+
