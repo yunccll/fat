@@ -25,12 +25,14 @@ public:
     virtual Status truncate(uint64_t size = 0) ;
     virtual Status create();
 
-    virtual Status flush();
 
     virtual Status findEntry();
 
+    Status lastCluster(uint64_t & clusterNo);
+
     //assert findEntry OK at first
     virtual Status getSize(uint64_t & size) const ;
+
     uint64_t getMaxBlockIndex() const ;
     uint64_t getBlockBytes() const ;
 
@@ -39,7 +41,10 @@ public:
     uint64_t getSize() const ;
 
     Status readBlock(uint64_t blockIndex, std::string & result) const;
-    Status writeBlock(uint64_t blockIndex, const Slice & data, uint64_t & outLen);
+
+
+    Status readBlockWithCluster(uint64_t clusterNo, std::string & result);
+    Status writeBlockWithCluster(uint64_t clusterNo, const Slice & data);
 
 
     uint64_t allocateCluster();
@@ -49,10 +54,17 @@ public:
     uint64_t getFirstCluster() const ;
 
 
+    virtual void setSize(uint64_t size);
+    virtual void updateWriteTimestamp();
+    virtual void updateLastTimestamp();
+
+    virtual Status flush();
+
 private:
     std::string path;
     std::shared_ptr<Entry> entry;
     std::shared_ptr<FileSystem> fs;
+    bool isDirty;
 };
 
 } //end of namespace fat

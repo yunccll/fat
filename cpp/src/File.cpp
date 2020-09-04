@@ -8,11 +8,17 @@
 #include "Device.h"
 #include "Entry.h"
 
+#include <iostream>
+#include <algorithm>
+
 namespace fat {
 
 File::File(const std::string & path, std::shared_ptr<FileSystem> fs)
 : path(path)
-, fs(fs){
+, fs(fs)
+, isDirty(false)
+{
+
 }
 
 File::~File(){
@@ -28,7 +34,12 @@ Status File::create(){
 }
 
 Status File::flush(){
-    //TODO: 
+    if(isDirty) {
+        //data is flush when write
+        auto s = fs->flushFat();
+        if(!s) return s;
+        return fs->flushRootDirectory();
+    }
     return Status::OK();
 }
 
@@ -61,7 +72,28 @@ uint64_t File::getOffsetInBlock(uint64_t offset) const {
 uint64_t File::getSize() const {
     return entry->getFileSize();
 }
+void File::setSize(uint64_t size) {
+    if(!isDirty) isDirty = true;
+    entry->setFileSize(size);
+}
+void File::updateWriteTimestamp(){
+    //TODO: 
+    if(!isDirty) isDirty = true;
+}
+void File::updateLastTimestamp(){
+    //TODO: 
+    if(!isDirty) isDirty = true;
+}
 
+
+Status File::lastCluster(uint64_t & clusterNo){
+    auto * fat = fs->getFileAllocator();
+    clusterNo = entry->getFirstCluster();
+    while(!fat->isLastCluster(clusterNo)){
+        clusterNo = fat->getNextCluster(clusterNo);
+    }
+    return Status::OK();    
+}
 
 Status File::readBlock(uint64_t blockIndex, std::string & result) const{
     uint64_t clusterNo = entry->getFirstCluster();
@@ -73,16 +105,15 @@ Status File::readBlock(uint64_t blockIndex, std::string & result) const{
     uint64_t dataSector = fs->getInfo()->dataSectorNoFromCluster(clusterNo);
     return fs->getDevice()->read((void*)dataSector, result);
 }
-Status File::writeBlock(uint64_t blockIndex, const Slice & data, uint64_t & outLen){
-    //TODO:
-    return Status::OK();
-}
+
 
 void File::setNextCluster(int32_t noCluster, int32_t noNextCluster){
     fs->getFileAllocator()->setNextCluster(noCluster, noNextCluster);
+    if(!isDirty) isDirty = true;
 }
 void File::setLastCluster(int32_t noCluster){
     fs->getFileAllocator()->setLastCluster(noCluster);
+    if(!isDirty) isDirty = true;
 }
 
 uint64_t File::allocateCluster(){
@@ -91,6 +122,17 @@ uint64_t File::allocateCluster(){
 
 uint64_t File::getFirstCluster() const {
     return entry->getFirstCluster();
+}
+Status File::readBlockWithCluster(uint64_t clusterNo, std::string & result){
+    uint64_t dataSector = fs->getInfo()->dataSectorNoFromCluster(clusterNo);
+    return fs->getDevice()->read((void*)dataSector, result);
+}
+Status File::writeBlockWithCluster(uint64_t clusterNo, const Slice & data){
+    //std::cout << "clusterNo:" <<  clusterNo << ", data:" << data.ToString() << ", data:size" << data.size()  << std::endl;
+    if(!isDirty) isDirty = true;
+    uint64_t dataSector = fs->getInfo()->dataSectorNoFromCluster(clusterNo);
+    //std::cout << " dataSector: " << dataSector << std::endl;
+    return fs->getDevice()->write((void*)dataSector, data);
 }
 
 } //end of namespace fat

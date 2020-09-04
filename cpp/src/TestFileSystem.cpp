@@ -80,17 +80,19 @@ public:
     : file(file) 
     , offset(0)
     , isOpen(false)
+    , curClusterNo(0)
     {
         block.reserve(file->getBlockBytes());
     }
     virtual ~SequenceFileWriter(){
     }
 
-
+    //Move to utility
     bool isNotAlign(uint64_t offset, uint64_t blockSize) const {
         //assert(blockSize pow of 2)
         return offset & (blockSize - 1);
     }
+    //Move to utility
     bool isAlign(uint64_t offset, uint64_t blockSize) const{
         return !isNotAlign(offset, blockSize);
     }
@@ -98,25 +100,31 @@ public:
         return blockSize - (offset & (blockSize-1));
     }
 
+    //TODO: To be test for offset = 0
     Status write(const Slice & data, size_t & outLen){
         uint64_t newOffset = offset;
+        uint64_t clusterNo = curClusterNo;
         if(data.size() > 0){ 
             const char * src = data.data(); //TODO: slice += len;
             uint64_t expectSize = data.size();
             //1. wirte first block (maybe not a full block)
             if(isNotAlign(newOffset, file->getBlockBytes())){
-
+                //1. read the first writable sector to block
                 block.clear();
-                auto s = file->readBlock(file->getBlockIndex(newOffset), block);
+                auto s = file->readBlockWithCluster(clusterNo, block);
                 if(!s) return s;
 
-                auto iter = block.begin();
-                std::advance(iter, file->getOffsetInBlock(newOffset));
-
+                //set  src data to first writable sector buffer
                 uint64_t len = std::min(expectSize, firstBlockSize(newOffset, file->getBlockBytes()));
-                std::copy(src, src+len, iter);
-                size_t writeBytes = 0;
-                s = file->writeBlock(file->getBlockIndex(newOffset), Slice(block), writeBytes);
+                auto start = file->getOffsetInBlock(newOffset);
+                auto & thisBlock = block;
+                std::for_each(src, src+len, 
+                    [&thisBlock, &start](char c) {
+                        thisBlock[start++] = c;
+                    });
+
+                //write it
+                s = file->writeBlockWithCluster(clusterNo, Slice(block));
                 if(!s) return s;
 
                 src += len;         //Source string
@@ -124,27 +132,44 @@ public:
 
                 newOffset += len; //FilePos
             }
-            std::cout << expectSize << std::endl;
+            std::cout << "expectSize:" << expectSize << " newOffset:" << newOffset << std::endl;
 
             //2. write left blocks
-            uint64_t curClusterNo = file->getFirstCluster();
             // left blocks 
             while(expectSize > 0){
                 assert(isAlign(newOffset, file->getBlockBytes()));
                 uint64_t newClusterNo = file->allocateCluster();
-                uint64_t len = std::min(expectSize, file->getBlockBytes());
-                //TODO: 
-                //buffer.copy(newOffset, len);
-                //writeBlock();
+
+                const uint64_t len = std::min(expectSize, file->getBlockBytes());
+                auto iter = std::copy(src, src + len, block.begin());
+                std::for_each(iter, block.end(), [](std::string::reference & c){ 
+                            c = '\0';
+                    });
+
+                auto s = file->writeBlockWithCluster(newClusterNo, Slice(block));
+                if(!s) return s;
+
+                src += len;
                 expectSize -= len;
+
                 newOffset += len;
-                file->setNextCluster(curClusterNo, newClusterNo);
+                file->setNextCluster(clusterNo, newClusterNo);
                 file->setLastCluster(newClusterNo);
+
+                std::cout << "newClusterNo:" << newClusterNo << "curClusterNo:" << clusterNo 
+                    << " content-len:" << len  
+                    << " offset:" << offset
+                    << " newOffset:" <<  newOffset << std::endl;
             }
         }
         outLen = newOffset - offset;
         offset = newOffset;
+        file->setSize(newOffset);
         return Status::OK();
+    }
+
+    virtual Status flush(){
+        return file->flush();
     }
 
     virtual Status open(){
@@ -152,7 +177,14 @@ public:
             isOpen = true;
             auto s = file->findEntry();
             if(!s) return s;
+
             offset = file->getSize();
+            if(offset != 0){
+                file->lastCluster(curClusterNo);
+            }
+            else{
+                curClusterNo = 0; //size == 0
+            }
             return s;
         }
         return Status::OK();
@@ -161,6 +193,7 @@ public:
         if(isOpen){
             isOpen = false;
             offset = 0;
+            return file->flush();
         }
         return Status::OK();
     }
@@ -169,6 +202,7 @@ private:
     uint64_t offset;
     bool isOpen;
     std::string block;
+    uint64_t curClusterNo;
 };
 
 
@@ -194,7 +228,7 @@ TEST(FileSystemTest, use)
         ASSERT_EQ(5, result.size());
 
         while(r->read(10, result).isOk()) ;
-        std::cout << "size: " << result.size() << " content:" << result << std::endl;
+        //std::cout << "size: " << result.size() << " content:" << result << std::endl;
 
         ASSERT_TRUE(r->close().isOk());
         delete r;
@@ -205,8 +239,11 @@ TEST(FileSystemTest, use)
         ASSERT_TRUE(w->open().isOk());
 
         size_t outLen= 0;
-        ASSERT_TRUE(w->write(Slice("hello"), outLen).isOk());
-        ASSERT_TRUE(outLen == Slice("hello").size());
+        std::string str(513, 's');
+
+        ASSERT_TRUE(w->write(Slice(str), outLen).isOk());
+        ASSERT_TRUE(outLen == str.size());
+        
         
         ASSERT_TRUE(w->close().isOk());
         delete w;
