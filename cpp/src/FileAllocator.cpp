@@ -51,6 +51,10 @@ void FileAllocator::setNextCluster(int32_t noCluster, int32_t noNextCluster){
     assert(noCluster >= 0 && noCluster <= MaxCapacity);
     _clusterMap[noCluster] = noNextCluster;
 }
+int32_t FileAllocator::getClusterValue(uint32_t clusterIndex){
+    assert(clusterIndex >= 0 && clusterIndex < size());
+    return _clusterMap[clusterIndex];
+}
 
 
 void FileAllocator::testAlloc(){

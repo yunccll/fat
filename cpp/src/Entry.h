@@ -130,6 +130,10 @@ public:
     void setFileSize(uint64_t size) {
          item->fileSize = (uint32_t)size;
     }
+    void setFirstCluster(uint64_t clusterNo) {
+        item->firstClusterLow = (uint16_t) (clusterNo & 0xffff);
+        item->firstClusterHigh = ((clusterNo >> 16) & 0xffff);
+    }
 
 private:
     DirItem * item;

@@ -140,19 +140,16 @@ Status FileSystem::findEntry(const std::string & path ,std::shared_ptr<Entry> & 
     return entry != nullptr ? Status::OK() : Status::NotFound();
 }
 Status FileSystem::flushFat(){
-    //TODO:
-    fatBuffer[3] = 0x03;
-    fatBuffer[4] = 0xf0;
-    fatBuffer[5] = 0xff;
-
-    for(int i = 0 ; i < 10; ++i){
-        printf("0x%x, ", (unsigned char)(fatBuffer.c_str()[i]));
-    }
-    printf("\n");
+    faParser->build(fa, fatBuffer);
 
     size_t len = fsInfo->sectorPerFat();
     for(size_t i = 0; i < len; ++i){
         auto s = device->write((void*)(fsInfo->firstSectorOfFat() + i), Slice(fatBuffer.c_str() + i * fsInfo->bytesPerSector(), fsInfo->bytesPerSector()));
+        if(!s) return s;
+    }
+
+    for(size_t i = 0; i < len; ++i){
+        auto s = device->write((void*)(fsInfo->firstSectorOfFatBackup() + i), Slice(fatBuffer.c_str() + i * fsInfo->bytesPerSector(), fsInfo->bytesPerSector()));
         if(!s) return s;
     }
     return Status::OK();

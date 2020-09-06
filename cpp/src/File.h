@@ -28,7 +28,6 @@ public:
 
     virtual Status findEntry();
 
-    Status lastCluster(uint64_t & clusterNo);
 
     //assert findEntry OK at first
     virtual Status getSize(uint64_t & size) const ;
@@ -50,6 +49,8 @@ public:
     uint64_t allocateCluster();
     void setNextCluster(int32_t noCluster, int32_t noNextCluster);
     void setLastCluster(int32_t noCluster);
+    Status findLastCluster(uint64_t & clusterNo);
+    void setFirstCluster(const uint64_t clusterNo);
 
     uint64_t getFirstCluster() const ;
 

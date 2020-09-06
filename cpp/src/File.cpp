@@ -86,9 +86,11 @@ void File::updateLastTimestamp(){
 }
 
 
-Status File::lastCluster(uint64_t & clusterNo){
+Status File::findLastCluster(uint64_t & clusterNo){
     auto * fat = fs->getFileAllocator();
     clusterNo = entry->getFirstCluster();
+    if(clusterNo == 0) return Status::OK();
+
     while(!fat->isLastCluster(clusterNo)){
         clusterNo = fat->getNextCluster(clusterNo);
     }
@@ -133,6 +135,9 @@ Status File::writeBlockWithCluster(uint64_t clusterNo, const Slice & data){
     uint64_t dataSector = fs->getInfo()->dataSectorNoFromCluster(clusterNo);
     //std::cout << " dataSector: " << dataSector << std::endl;
     return fs->getDevice()->write((void*)dataSector, data);
+}
+void File::setFirstCluster(const uint64_t clusterNo){
+    return entry->setFirstCluster(clusterNo);
 }
 
 } //end of namespace fat

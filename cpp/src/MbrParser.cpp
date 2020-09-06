@@ -87,7 +87,10 @@ Status FileAllocatorParser::parse(const Slice & blocks, const FsInfo * fsInfo, F
     assert(fa != nullptr);
 
     *fa = new FileAllocator(fsInfo->totalClusters() + 2);
-//    std::cout << "\tfat12 allocator size(): " << (*fa)->size() << std::endl;
+//    std::cout << "\tfat12 allocator size(): " << (*fa)->size()
+//        << fsInfo->toString() 
+//        << std::endl;
+    
 
     (*fa)->setLastCluster(0);
     (*fa)->setLastCluster(1);
@@ -105,13 +108,51 @@ Status FileAllocatorParser::parse(const Slice & blocks, const FsInfo * fsInfo, F
         else {
             (*fa)->setLastCluster(clusterNo);
         }
-
 //           std::cout << std::dec << "clusterNo: " <<  clusterNo
 //           << std::hex << "\tfat[clusterNo]: 0x" << value 
 //           << "\tfileAllocator.getNextCluster: 0x" << (*fa)->getNextCluster(clusterNo)
 //           << std::endl;
     }
     return Status::OK();
+}
+
+
+int32_t FileAllocatorParser::getClusterValue(FileAllocator * fa, size_t index){
+    if(fa->isLastCluster(index)){
+        return EndOfClusterChain;
+    }
+    else if(fa->isBadCluster(index)){
+        return BadCluster;
+    }
+    else{
+        return fa->getClusterValue(index);
+    }
+}
+
+
+//TODO: need more test  ???????
+Status FileAllocatorParser::build(FileAllocator * fa, std::string & result){
+    assert(result.size() > fa->size() * 3 / 2 + 1);
+
+    size_t len = fa->size();
+    for(size_t i = 0; i < len; ++i){
+        int32_t clusterNo = getClusterValue(fa, i);
+        uint64_t offset = ((i & (~0x1)) >> 1)*3;
+        if( (i & 0x01) == 0x00){ //Even
+            result[offset] = clusterNo&0xff;
+            result[offset+1] =  ((uint8_t)(result[offset+1]) | 0x0f) & (((clusterNo >> 16) & 0x0f) | 0xf0);
+        }
+        else{  //Odd
+            result[offset+1] = ((uint8_t)(result[offset+1]) | 0xf0) & (( ((clusterNo) & 0x0f) << 4) | 0x0f);
+            result[offset+2] = (clusterNo >> 4) & 0xff;
+        }
+        std::cout << std::hex << " i:" << i
+            << " clusterNo:" << clusterNo
+            << " offset:" << offset
+            << " result:" << ((unsigned short)result[offset] & 0xff) <<  ", "  << ((unsigned short)result[offset+1] &0xff) << ", " << ((unsigned short)result[offset+2] & 0xff)
+            << std::endl;
+    }
+    return Status::OK(); 
 }
 
 } //end of namespace fat

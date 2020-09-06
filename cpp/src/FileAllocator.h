@@ -41,6 +41,9 @@ public:
 
     size_t size()const {return _clusterMap.size();}
 
+
+    int32_t getClusterValue(uint32_t clusterIndex);
+
     static void test();
     static void testAlloc();
 
