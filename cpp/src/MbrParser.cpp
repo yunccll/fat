@@ -35,7 +35,7 @@ struct Fat32 {
 };
 struct BiosParameterBlock{
     uint16_t bytesPerSector;        //512
-    unsigned char sectorPerCluster; // TODO: ??
+    unsigned char sectorPerCluster; // 
     uint16_t reservedSectorCount;    // 1 -> fat12/16  32 -> fat32
     unsigned char numberOfFats;     // 2
     uint16_t rootEntryCount;        // 0 --> fat32 512 --> fat16   220 --> fat12 1.44M
@@ -119,7 +119,7 @@ Status FileAllocatorParser::parse(const Slice & blocks, const FsInfo * fsInfo, F
 
 int32_t FileAllocatorParser::getClusterValue(FileAllocator * fa, size_t index){
     if(fa->isLastCluster(index)){
-        return EndOfClusterChain;
+        return FileAllocatorParser::EndOfClusterChain;
     }
     else if(fa->isBadCluster(index)){
         return BadCluster;
@@ -129,22 +129,22 @@ int32_t FileAllocatorParser::getClusterValue(FileAllocator * fa, size_t index){
     }
 }
 
-
-//TODO: need more test  ???????
 Status FileAllocatorParser::build(FileAllocator * fa, std::string & result){
     assert(result.size() > fa->size() * 3 / 2 + 1);
 
+    const int max_print_count = 0xffff;
     size_t len = fa->size();
-    for(size_t i = 0; i < len; ++i){
+    for(size_t i = 0; i < len && i < max_print_count; ++i){
         int32_t clusterNo = getClusterValue(fa, i);
+        if(clusterNo == 0) continue;
         uint64_t offset = ((i & (~0x1)) >> 1)*3;
         if( (i & 0x01) == 0x00){ //Even
-            result[offset] = clusterNo&0xff;
-            result[offset+1] =  ((uint8_t)(result[offset+1]) | 0x0f) & (((clusterNo >> 16) & 0x0f) | 0xf0);
+            result[offset] = (clusterNo&0xff);
+            result[offset+1] =  (((uint8_t)(result[offset+1]) | 0x0f) & (((clusterNo >> 8) & 0x0f) | 0xf0));
         }
         else{  //Odd
-            result[offset+1] = ((uint8_t)(result[offset+1]) | 0xf0) & (( ((clusterNo) & 0x0f) << 4) | 0x0f);
-            result[offset+2] = (clusterNo >> 4) & 0xff;
+            result[offset+1] = (((uint8_t)(result[offset+1]) | 0xf0) & (( ((clusterNo) & 0x0f) << 4) | 0x0f));
+            result[offset+2] = ((clusterNo >> 4) & 0xff);
         }
         std::cout << std::hex << " i:" << i
             << " clusterNo:" << clusterNo

@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <cstddef>
 #include <vector>
+#include <ostream>
 
 // free, allocated, used, 
 
@@ -34,7 +35,7 @@ public:
     bool isLastCluster(int32_t noCluster) const;
     bool isBadCluster(int32_t noCluster) const;
 
-    int32_t getNextCluster(int32_t noCluster);
+    int32_t getNextCluster(int32_t noCluster) const;
     void setNextCluster(int32_t noCluster, int32_t noNextCluster);
     void setLastCluster(int32_t noCluster) {return setNextCluster(noCluster, EndOfClusterChain);}
     void setBadCluster(int32_t noCluster) {return setNextCluster(noCluster, BadCluster);}
@@ -42,7 +43,7 @@ public:
     size_t size()const {return _clusterMap.size();}
 
 
-    int32_t getClusterValue(uint32_t clusterIndex);
+    int32_t getClusterValue(uint32_t clusterIndex) const;
 
     static void test();
     static void testAlloc();
@@ -51,6 +52,8 @@ private:
     std::vector<int32_t> _clusterMap;
     //std::list<int32_t> _deletedClusters;
 };
+
+std::ostream  & operator<<(std::ostream & os, const FileAllocator & fa);
 
 } //end of namespace fat
 

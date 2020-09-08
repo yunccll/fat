@@ -3,6 +3,7 @@
 #include <cassert>
 
 
+
 namespace fat {
 
 FileAllocator::FileAllocator(size_t capacity){
@@ -43,17 +44,29 @@ bool FileAllocator::isBadCluster(int32_t noCluster) const{
     return _clusterMap[noCluster] == BadCluster;
 }
 
-int32_t FileAllocator::getNextCluster(int32_t noCluster){
+int32_t FileAllocator::getNextCluster(int32_t noCluster) const{
+    //std::cout << "noCluster:" << noCluster << std::endl;
     assert(noCluster >= 0 && noCluster <= MaxCapacity);
+
     return _clusterMap[noCluster];
 }
 void FileAllocator::setNextCluster(int32_t noCluster, int32_t noNextCluster){
     assert(noCluster >= 0 && noCluster <= MaxCapacity);
     _clusterMap[noCluster] = noNextCluster;
 }
-int32_t FileAllocator::getClusterValue(uint32_t clusterIndex){
+int32_t FileAllocator::getClusterValue(uint32_t clusterIndex) const{
     assert(clusterIndex >= 0 && clusterIndex < size());
     return _clusterMap[clusterIndex];
+}
+
+std::ostream  & operator<<(std::ostream & os, const FileAllocator & fa){
+    const int max_print_count = 100;
+    for(size_t i = 0; i < fa.size() && i < max_print_count; ++i){
+       os << "i:" << i
+            << "next cluster:"  << fa.getClusterValue(i)
+            << std::endl;
+    }
+    return os;
 }
 
 
@@ -95,9 +108,6 @@ void FileAllocator::testAlloc(){
 
 void FileAllocator::test(){
     testAlloc();
-
-    //TODO: fa.toBuffer(buffer);
-    //TODO: fa = FileAllocator::fromBuffer()
 }
 
 } //end of namespace fat

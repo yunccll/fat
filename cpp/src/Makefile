@@ -14,4 +14,5 @@ $(TARGET_BIN):$(OBJS)
 	$(DO_CPP_TARGET)
 
 clean:
+	cp zero.img.bak zero.img
 	$(DO_CLEAN)

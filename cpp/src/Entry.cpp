@@ -7,7 +7,7 @@
 namespace fat {
 
 void dateOut(std::ostream & os, uint16_t date){
-    os << (date>>9) + 1980  << "-" << std::max(1, (date >> 5) & 0xf) << "-" << std::max(1, date & 0x1f) - 1;
+    os << (date>>9) + 1980  << "-" << std::max(1, (date >> 5) & 0xf) << "-" << std::max(1, date & 0x1f);
 }
 void timeOut(std::ostream & os, uint16_t time){
     os << (time >> 11)  << ":" << ((time >> 5) & 0x3f) << ":" <<  ((time & 0x1f) << 1);
