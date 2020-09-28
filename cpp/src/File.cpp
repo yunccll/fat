@@ -38,7 +38,10 @@ Status File::flush(){
         //data is flush when write
         auto s = fs->flushFat();
         if(!s) return s;
-        return fs->flushRootDirectory();
+        s = fs->flushRootDirectory();
+        if(!s) return s;
+        isDirty = false;
+        return s;
     }
     return Status::OK();
 }
@@ -137,6 +140,7 @@ Status File::writeBlockWithCluster(uint64_t clusterNo, const Slice & data){
     return fs->getDevice()->write((void*)dataSector, data);
 }
 void File::setFirstCluster(const uint64_t clusterNo){
+    if(!isDirty) isDirty = true;
     return entry->setFirstCluster(clusterNo);
 }
 

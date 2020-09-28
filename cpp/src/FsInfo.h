@@ -109,7 +109,7 @@ private:
     int _sectorPerFat;          // 0 -> fat32, 8 -> fat12,
 
 
-    int _sectorPerCluster; // TODO: ??
+    int _sectorPerCluster; //
     int _rootEntryCount;        // 0 --> fat32 512 --> fat16   220 --> fat12 1.44M
     int _bytesPerEntry;  //const 32
 

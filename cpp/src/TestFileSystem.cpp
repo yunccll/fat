@@ -2,6 +2,7 @@
 
 #include "FileSystem.h"
 #include "File.h"
+#include "FileAllocator.h"
 
 
 #include "Slice.h"
@@ -124,12 +125,12 @@ public:
     Status WriteAlignBlocks(const char * src, size_t len, uint64_t & firstClusterNo, uint64_t & lastClusterNo, size_t & outLen){
         uint64_t clusterNo = firstClusterNo;
         while(len > 0){
-            //copy block data
+            block.clear();
+            //insert data
             uint64_t writeBytes = std::min(len, file->getBlockBytes());
-            auto iter = std::copy(src, src + writeBytes, block.begin());
-            std::for_each(iter, block.end(),  [](std::string::reference & c){ 
-                c = '\0';
-                });
+            std::copy(src, src + writeBytes, std::back_inserter(block));
+            if(writeBytes < file->getBlockBytes())
+                block.append(file->getBlockBytes() - writeBytes, '\0');
 
             //write last cluster data
             lastClusterNo = file->allocateCluster();
@@ -140,7 +141,8 @@ public:
             src += writeBytes;
             len -= writeBytes;
             
-            if(curClusterNo == 0){
+            file->setLastCluster(lastClusterNo); //fill the new AllocateCluster
+            if(clusterNo == 0){
                 firstClusterNo = lastClusterNo;
             }
             else{
@@ -181,6 +183,8 @@ public:
         uint64_t firstClusterNo = curClusterNo;
         uint64_t lastClusterNo  = 0;
 
+
+
         std::cout << "Before WriteInteral :\n\tdata size:"  << data.size() 
             << " offset:" << offset
             << " firstClusterNo:" << firstClusterNo
@@ -191,7 +195,7 @@ public:
         auto s = writeInternal(data.data(), data.size(), offset, firstClusterNo, lastClusterNo, outLen); //fat update in this function
         if(!s) return s;
 
-        std::cout << "After WriteInternal: \n\t outLen:" << outLen
+        std::cout << "After WriteInternal:\n\t outLen:" << outLen
             << " firstClusterNo:" << firstClusterNo
             << " lastClusterNo:" << lastClusterNo
             << std::endl;
@@ -204,91 +208,11 @@ public:
         }
         file->setSize(offset);
         file->setLastCluster(lastClusterNo);
+    
+        //std::cout << "file Allocator:" << *(file->getFileSystem()->getFileAllocator()) << std::endl;
 
         return Status::OK();
     }
-
-    /*  
-    Status write(const Slice & data, size_t & outLen){
-
-        uint64_t clusterNo = curClusterNo;
-        if(data.size() > 0){ 
-            const char * src = data.data(); //TODO: slice += len;
-            uint64_t expectSize = data.size();
-            //1. wirte first block (maybe not a full block)
-            if(isNotAlign(offset, file->getBlockBytes())){
-                //1. read the first writable sector to block
-                block.clear();
-                auto s = file->readBlockWithCluster(clusterNo, block);
-                if(!s) return s;
-
-                //set  src data to first writable sector buffer
-                uint64_t len = std::min(expectSize, firstBlockSize(offset, file->getBlockBytes()));
-                auto start = file->getOffsetInBlock(offset);
-                auto & thisBlock = block;
-                std::for_each(src, src+len, 
-                    [&thisBlock, &start](char c) {
-                        thisBlock[start++] = c;
-                    });
-
-                //write it
-                s = file->writeBlockWithCluster(clusterNo, Slice(block));
-                if(!s) return s;
-
-                src += len;         //Source string
-                expectSize -= len;  // source string
-
-            }
-            std::cout << "expectSize:" << expectSize << std::endl;
-
-            //2. write left blocks
-            // left blocks 
-            while(expectSize > 0){
-                //assert(isAlign(newOffset, file->getBlockBytes()));
-
-                //1.copy block data
-                const uint64_t len = std::min(expectSize, file->getBlockBytes());
-                auto iter = std::copy(src, src + len, block.begin());
-                std::for_each(iter, block.end(), [](std::string::reference & c){ 
-                            c = '\0';
-                    });
-
-                //2.1. allocate new Cluster
-                //2.2. write block data to disk
-                uint64_t newClusterNo = file->allocateCluster();
-                auto s = file->writeBlockWithCluster(newClusterNo, Slice(block));
-                if(!s) return s;
-                
-                //3.1 forward src data
-                src += len;
-                expectSize -= len;
-
-                //3.3 set next cluster & lastCluster
-                if(clusterNo == 0){
-                    file->setFirstClusterNo(newClusterNo); //TODO: 
-                 }
-                 else{
-                    file->setNextCluster(clusterNo, newClusterNo);
-                 }
-
-                 std::cout << "newClusterNo:" << newClusterNo << "curClusterNo:" << clusterNo 
-                     << " content-len:" << len  
-                     << " offset:" << offset
-                     << " newOffset:" <<  newOffset << std::endl;
-                 //5. refresh clusterNO to new allocate clusterNO
-                 clusterNo = newClusterNo;
-            }
-            file->setLastCluster(clusterNo);
-        }
-        outLen = data.size();
-
-        //file's thing
-        offset += data.size();
-        curClusterNo = clusterNo;
-        file->setSize(newOffset);
-
-        return Status::OK();
-    }*/
 
     virtual Status flush(){
         return file->flush();
@@ -366,6 +290,23 @@ TEST(FileSystemTest, use)
         delete w;
     }
 
+    {
+        std::string path("B.TXT");
+        auto w = new SequenceFileWriter(std::make_shared<File>(path, fs));
+        ASSERT_TRUE(w->open().isOk());
+
+        size_t outLen= 0;
+        std::string str(513, 's');
+
+        ASSERT_TRUE(w->write(Slice(str), outLen).isOk());
+        ASSERT_TRUE(outLen == str.size());
+        
+        
+        ASSERT_TRUE(w->close().isOk());
+        delete w;
+
+    }
+
     //bool exist = false;
     //s = fs->isExist("/chenglun.txt", exist);
     //ASSERT_TRUE(s.isOk() && exist == false);
@@ -377,27 +318,11 @@ TEST(FileSystemTest, use)
 /*  
 //   RandomFile
 Status readPosition(uint64_t offset, const uint64_t expectSize, std::string & result){
-    //TODO:
-    return Status::OK();
-}
 //Seek
 //seekBegin(10)
 //seekEnd(-10)
 //seek(+10), seek(-10)
 
-class public IoObject {
-public:
-    virtual ~IoObject(){}
-    Status open() = 0;
-    Status close() = 0;
-};
-class RandomAccessObject : public IoObject {
-public:
-    //Seek
-    //seekBegin(10)
-    //seekEnd(-10)
-    //seek(+10), seek(-10)
-};
 
 class FileOperationTest : public testing::Test {
 public:
