@@ -1,0 +1,23 @@
+1. mountpoint  
+    as old filesystem view   mountpoint is an file(dir)
+    as new filesystem view  mountpoint is an root file(dir)
+
+    what the ops of mountpoint directory
+    struct file -- dir_file->f_ops
+    struct inode: -- dir_inode->i_ops
+    struct dentry -- 
+    struct super --
+
+    how  to map the real-ops of the mountpoint from old-to-new ???
+
+2. thread-safe of sys_read , sys_write (atomic????)
+    sys_read  -> vfs_read  (call low-level readPage of struct address_space
+    sys_write -> vfs_write (call low-level writePage of struct address_space
+
+    write:
+        get one page with lock
+        and call low-level writePage
+        it's safe if writePage imp of the fs is thread-safe , such as ext4 imp is safe
+
+    so -> using lock is better in application
+    

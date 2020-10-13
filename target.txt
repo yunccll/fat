@@ -1,0 +1,65 @@
+Target:
+Python -> Demo  For test case
+C++ (File) -> WriteLog + Multi-thread Sequence Read
+C++ (RocksDB Mode + File) --> WriteLog + Multi-thread Sequence Read
+C++ (RocksDB version) -> WriteLog + Multi-thread Sequence Read
+C++ (sqlite version) -> WriteLog + Multi-thread Sequence read
+Kernel ->  WriteLog, Multi-process Sequence Read
+
+Use Case 1:
+
+Streaming-based
+Streaming Write Log => readonly 
+Multi-thread Sequence read
+No Modify 
+
+Meta + Data 
+
+Meta:
+Name, size, 
+
+Data-Index(Bitmap)
+1 -> 2 -> 3 -> 4 -> 5 -> 6
+Data:
+block1 -> block2 -> block3  -> block4 -> block5 -> block6
+
+CheckPoint:
+    Write  block + Size 
+
+CheckPointed Blocks  + Pages  ==> Whole Datas
+
+    Dentry Cache 
+    stream1 | stream2 | stream3
+
+    PageCache 
+    Page -> Page -> Page -> Page 
+
+SequenceWriter (Filp) --->
+                       |--->  Inode  --> Write/Read Pages
+                                ^
+SequenceReader (Filp) ----------| 
+SequenceReader (Filp) ----------|
+SequenceReader (Filp) ----------|
+
+
+Super 
+Directory  Blocks 
+Inode Bitmap Blocks
+Data Bitmap Blocks
+
+Super 
+Directory Blocks(1024)
+Data Allocator Table
+Data
+
+
+
+
+
+
+
+
+Use caes 2 :  
+transaction Client -- Monitor Orders 
+Stream --> Write Log 
+Hash => [key] = value
