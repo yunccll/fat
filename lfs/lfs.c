@@ -10,7 +10,6 @@
 struct lfs_super_block {
     int a;
     //dir_iops;
-
 };
 
 static struct lfs_super_block * lfs_super_block_create(void){
@@ -41,6 +40,7 @@ static int lfs_fill_super(struct super_block *sb, void *data, int silent){
     //sb->s_time_max = ts.tv_sec;
     sb->s_maxbytes = 0xffffffff;
 
+     
     //TODO:
     return 0;
 }

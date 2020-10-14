@@ -1,4 +1,5 @@
-1. Events  2020.10.6
+2020.10.06
+1. FileSystem Events
     module init: Module_init(), Module_exit()
     mount & unmount:  SYSCALL_DEFINE (mount)    SYSCALL_DEFINE  (unmount)
     open: create & open_exist
@@ -35,8 +36,8 @@ misc:
     async_io
     polling
 
-
-2.  Mount  2020.10.6
+2020.10.06
+2.  Mount
     mount
         char * dev_name, 
         char * dir_name, 
@@ -110,11 +111,11 @@ SYSCALL_DEFINE5(mount, char __user *, dev_name, char __user *, dir_name,
 2020.10.7
 1. inode operations creation
     step:
-        mount event: create root inode , install root_inode with msdos_dir_inode_operations
-        open Event:  call .lookup in msdos_dir_inode_operations to build inode 
-        create Event: call .create of msdos_dir_inode_operations to build inode
-        mkdir Event: call .mkdir of msdos_dir_inode_operations to build inode
-        .lookup , .create, .mkdir will call fat_build_inode to  set the inode->i_op, inode->i_fop with proper operations
+        > mount event: create root inode , install root_inode with msdos_dir_inode_operations
+        > open Event:  call .lookup in msdos_dir_inode_operations to build inode 
+        > create Event: call .create of msdos_dir_inode_operations to build inode
+        > mkdir Event: call .mkdir of msdos_dir_inode_operations to build inode
+        >.lookup , .create, .mkdir will call fat_build_inode to  set the inode->i_op, inode->i_fop with proper operations
 
 details:
     mount Event:
@@ -160,7 +161,9 @@ details:
         } __randomize_layout;
 
     2. retval = do_umount(mnt, flags);
-    3. dput(path.dentry);
-    4. mntput_no_expire(mnt);
+    3. dput(path.dentry); // decreasing refcnt of dentry installed by user_path_at of (__user *name)
+    4. mntput_no_expire(struct mount *mnt);  mnt = real_mnt(path.mnt);
+        4.1>
+        4.2>
 
     
