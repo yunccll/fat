@@ -161,9 +161,50 @@ details:
         } __randomize_layout;
 
     2. retval = do_umount(mnt, flags);
-    3. dput(path.dentry); // decreasing refcnt of dentry installed by user_path_at of (__user *name)
-    4. mntput_no_expire(struct mount *mnt);  mnt = real_mnt(path.mnt);
-        4.1>
-        4.2>
+        > put_super ?
 
-    
+    3. dput(path.dentry); // decreasing refcnt of dentry installed by user_path_at of (__user *name)
+
+    4. mntput_no_expire(struct mount *mnt);  mnt = real_mnt(path.mnt);
+        4.1> rcu lock race condition test & handle for mnt object
+        4.2> put_mountpoint:
+            0->create tmp list; 1->lock{ move object to list};  2->unlock; 3-> free the object list
+        4.3> clean_mnt:
+            1> is mnt_internal ->  clean_mnt synced
+            2> not mnt_internal ->  clean_mnt asynced
+                > case K-thread -call->  schedule a delay work
+                > case not k-thread -call-> create task for clean_mnt later
+
+            clean_mnt:
+                1> mnt_pin_kill(mnt)
+                2> iterate all mnt:
+                    hlist_del(&m->mnt_umount);
+                    mntput(&m->mnt);
+                3> fsnotify_vfsmount_delete(&mnt->mnt);
+                4> dput(mnt->mnt.mnt_root);
+
+                5> deactivate_super(mnt->mnt.mnt_sb); 
+                    > lock (super->s_mount)
+                    > if(super->active == true) then :
+                        > cleancache_invalidate_fs(s);
+                        > unregister_shrinker(&s->s_shrink);
+                        >!!!! fs->kill_sb(s);   //call fs_type->kill_sb  -> kill_super_block in fs/super.c
+                            >> .kill_sb = generic_shutdown_super(struct super_block * sb)
+                                >> if(sb->s_root not NULL) => 
+                                    >> free dcache of this super, 
+                                    >> free inodes of the super
+                                    >> fnotify sb deleted
+                                    >>!!!!!  call the sops->put_super(struct super_block * sb); super_block->put_super
+                                    >>!!!! unlock(super->s_mount) : up_write(&sb->s_umount)
+                
+                        > list_lru_destroy(&s->s_dentry_lru);
+                        > list_lru_destroy(&s->s_inode_lru);
+                
+                        > put_filesystem(fs);
+                        > put_super(s);
+                     > else:
+                        unlock(super->s_mount)
+
+                6> mnt_free_id(mnt);
+                7> call_rcu(&mnt->mnt_rcu, delayed_free_vfsmnt); -> free memory for mnt_devname, mnt_cache
+
