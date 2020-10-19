@@ -208,3 +208,51 @@ details:
                 6> mnt_free_id(mnt);
                 7> call_rcu(&mnt->mnt_rcu, delayed_free_vfsmnt); -> free memory for mnt_devname, mnt_cache
 
+
+
+
+2010.10.16 
+open & create 
+1. create(name, flag, mode) ==  open(name, O_CREATE|flag, mode)
+2. SYSCALL_DEFINE3(open, char *  __user name, int flag, int mode):
+    
+    do_sys_open(int dfd, const char __user *filename, int flags, umode_t mode)  in fs/open.c
+    // open => do_sys_open(AT_FDCWD, filename, flags, mode);
+    1> int fd = build_open_flags(flags, mode, &op); 
+
+    2> struct filename * tmp = getname(filename); // putname(tmp) to free
+
+    3> fd = get_unused_fd_flags(flags); // put_unused_fd(fd) to free 
+
+    4> struct file *f = do_filp_open(dfd, tmp, &op); //most of logical here
+        4.1> set_nameidata(&nd, dfd, pathname);
+        4.2> filp = path_openat(&nd, op, lookup_flags | LOOKUP_RCU); //path_openat__Lookup_RCU
+            > alloc_empty_file(op->open_flag, current_cred())
+            > case TMP_FILE :  do_tmpfile(nd, flags, op, file);
+            > case O_PATH:  do_o_path(nd, flags, file);
+            > default: do_
+                const char *s = path_init(nd, flags);
+                while (!(error = link_path_walk(s, nd)) &&
+                    (error = do_last(nd, file, op)) > 0) {
+                    nd->flags &= ~(LOOKUP_OPEN|LOOKUP_CREATE|LOOKUP_EXCL);
+                    s = trailing_symlink(nd);
+                }
+                terminate_walk(nd);
+
+           Note:
+            do_last:
+                case create: 
+                    inode->create();
+                case open:
+                    inode->lookup();
+
+        4.3> if faild: path_openat(&nd, op, lookup_flags); // lookup normal
+        4.4> if failed: path_openat(&nd, op, lookup_flags | LOOKUP_REVAL);
+        4.5> restore_nameidata();
+
+    5> fsnotify_open(f);
+
+    6> fd_install(fd, f); // contact struct file to fd 
+
+    7> putname(tmp); // must free tmp filename struct
+
