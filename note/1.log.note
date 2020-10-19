@@ -256,3 +256,5 @@ open & create
 
     7> putname(tmp); // must free tmp filename struct
 
+//TODO: read/write
+//TODO: fsync

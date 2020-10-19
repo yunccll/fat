@@ -1,117 +1,85 @@
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
+//TODO: fat as a normal file (page-cached read/write, sync)
 
 
-
-namespace mockfs {
-    
-    class Entry {
-    public:
-    };
-    class VfsMount{
-    };
-
-    class FsStruct {
-    public:
-    private:
-        Entry * root;
-        Entry * pwd;
-        VfsMount * rootMnt;
-        VfsMount * pwdMnt;
-    };
-
-    class FileStruct {
-    public:
-        int getFreeFile();
-        freeFile(int fd);
-        File * getFile(int fd);
-        File * newFile();
-    private:
-        // atomic count;
-        // file lock
-        int maxFds; //current number of files
-        File ** files;// array of files
-        int nextFd;
-
-        FdSet openFds; //bitmap
-        int maxFdSet;
-
-    };
-
-    class File {
-    public:
-        //File operations
-        int open();
-        void close();
-        int flush();
-        uint64_t llseek(offset, origin);
-
-        Dentry * readdir();
-        int release();
-
-    private:
-        Dentry * entry;
-        VfsMount * vfsmnt;
-        uint32_t flags;
-        uint32_t mode;
-        uint64_t pos;
-        // AddressSpace * addrSpace;
-    }
+#define TRUE  1
+#define FALSE 0
 
 
-    class Process {
-    public:
-        int open(const char * name){
-            auto * f = files->getUnusedFile();
-            Dentry * entry = nullptr;
-            bool found = lookupDentry(name, &entry);
-            if(!found){
-               found = loadFromDisk(name, &entry);
-               if(!found) return -INVALID_PATH;
-            }
-            f->setEntry(entry);
-            return f->getfd();
-        }
-        void close(int fd){
-            auto * f = files->getFile(fd);
-            f->flush();
-            f->close();
-        }
+struct intf_pages {
+};
+struct intf_pages * read_pages(void * dev, int start, int len){
+    return NULL;
+}
+void free_pages(struct intf_pages * pages){
+}
 
-        int read(int fd, char * buf, size_t len){
-            auto * f = files->getFile(fd);
-            return f->read(buf, len);
-        }
-        int write(int fd, const char * buf, size_t len){
-            auto * f = files->getFile(fd);
-            return f->write(buf, len);
-        }
-
-        int mount(){
-            return 0;
-        }
-        void unmount(){
-        }
-
-        //TODO: all interfaces
-        //ng
-    private:
-        FsStruct * fs;
-        FileStruct * files;
-    };
-
-
-
+struct lfs_fat {
 };
 
 
-TEST(MainTest, use){
-    mockfs::Process process;
-    int fd = process.open("filename.txt");
-    ASSERT_TRUE(fd >= 0);
-
-    char buf[128] = {0};
-    int ret = process.read(fd, buf, sizeof(buf));
-    ASSERT_TRUE(ret >= 0);
-
-    process.close(fd);
+void lfs_fat_free(struct lfs_fat * fat){
+    free(fat);
 }
+struct lfs_fat * lfs_fat_create(){
+    return (struct lfs_fat*) malloc(sizeof(struct lfs_fat));
+}
+int lfs_fat_fill(struct lfs_fat * fat, struct intf_pages * pages){
+    return 0;
+}
+int lfs_fat_get_next_cluster(struct lfs_fat * fat, int cluster_no){
+    return 0;
+}
+void lfs_fat_set_next_cluster(struct lfs_fat * fat, int cluster_no, int next_cluster_no){
+}
+int lfs_fat_is_last_cluster(struct lfs_fat * fat, int cluster_no){
+    return TRUE;
+}
+int lfs_fat_is_bad_cluster(struct lfs_fat * fat, int cluster_no){
+    return FALSE;
+}
+
+int lfs_fat_get_first_idle_cluster(struct lfs_fat * fat){
+    return 0;
+}
+
+
+int lfs_fat_sync(struct lfs_fat * fat, struct intf_pages * pages){
+    return 0;
+}
+
+
+
+
+TEST(lfs_fat_test, mount){
+    const char * dev = "/dev/floppy";
+    struct intf_pages * pages = read_pages((void *)dev, 2, 9);
+
+    //1. load pages to lfs_fat
+    struct lfs_fat * fat = lfs_fat_create();
+
+    lfs_fat_fill(fat, pages);
+
+
+    //2. get/set next cluster
+    const int cluster_no = 100;
+    const int next_cluster_no = lfs_fat_get_next_cluster(fat, cluster_no);
+    ASSERT_EQ(next_cluster_no, 101);
+
+    lfs_fat_set_next_cluster(fat, cluster_no, 102);
+    ASSERT_EQ(102, lfs_fat_get_next_cluster(fat, cluster_no));
+
+
+    //3. find first idle  cluster No
+    const int idle_cluster_no = lfs_fat_get_first_idle_cluster(fat);
+    ASSERT_EQ(idle_cluster_no, 0);
+
+    //4. sync
+    lfs_fat_sync(fat, pages);
+
+    lfs_fat_free(fat);
+
+    free_pages(pages);
+}
+
+
