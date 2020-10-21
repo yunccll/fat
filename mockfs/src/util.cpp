@@ -4,17 +4,17 @@
 #include <iostream>
 
 TEST(UtilTest, isEvenOdd){
-    ASSERT_TRUE(is_even(0));
-    ASSERT_FALSE(is_odd(0));
+    ASSERT_EQ(1, is_even(0));
+    ASSERT_EQ(0, is_odd(0));
 
-    ASSERT_FALSE(is_even(1));
-    ASSERT_TRUE(is_odd(1));
+    ASSERT_EQ(0, is_even(1));
+    ASSERT_EQ(1, is_odd(1));
 
-    ASSERT_TRUE(is_even(2));
-    ASSERT_FALSE(is_odd(2));
+    ASSERT_EQ(1, is_even(2));
+    ASSERT_EQ(0, is_odd(2));
 
-    ASSERT_FALSE(is_even(3));
-    ASSERT_TRUE(is_odd(3));
+    ASSERT_EQ(0, is_even(3));
+    ASSERT_EQ(1, is_odd(3));
 }
 
 TEST(UtilTest, offset_of_cluster_even){
@@ -36,4 +36,14 @@ TEST(UtilTest, byte_array_get_uint16){
     ASSERT_EQ(0x856, byte_array_get_uint16_even(addr, 2));
     ASSERT_EQ(0x9A7, byte_array_get_uint16_odd(addr, 3));
     ASSERT_EQ(0xC9A, byte_array_get_uint16_even(addr, 4));
+}
+
+TEST(UtilTest, byte_array_set_uint16){
+    uint8_t addr []  = {0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0};
+    byte_array_set_uint16_even(addr, 0, 0x123);
+    ASSERT_EQ(0x123, byte_array_get_uint16_even(addr, 0));
+    byte_array_set_uint16_odd(addr, 1, 0x456);
+    byte_array_set_uint16_even(addr, 2, 0x789);
+    byte_array_set_uint16_odd(addr, 3, 0xabc);
+    byte_array_set_uint16_even(addr, 4, 0xdef);
 }

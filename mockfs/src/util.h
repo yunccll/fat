@@ -1,7 +1,10 @@
-#ifndef  UTIL_H
+#ifndef  UTIL_H 
 #define  UTIL_H
 
 #include <cstdint>
+#include <cassert>
+
+#define BUGON(x)       assert(!(x))
 
 #define TRUE  1
 #define FALSE 0
@@ -15,10 +18,10 @@ typedef unsigned long long sector_t;
 //#define byte_array_get_uint16(addr, offset)  (*((unsigned short*)(((char*)(addr)) + offset))
 
 //TODO: Unit test for all
-static inline int is_even(sector_t cluster_no){
+static inline int is_even(sector_t cluster_no){  //0 2
     return (cluster_no & 0x01) == 0x00;
 }
-static inline int is_odd(sector_t cluster_no){
+static inline int is_odd(sector_t cluster_no){ //1 3
     return (cluster_no & 0x01) == 0x01;
 }
 static uint64_t offset_of_cluster_even(sector_t cluster_no){
@@ -30,7 +33,7 @@ static inline uint16_t byte_array_get_uint16_even(uint8_t * addr, uint64_t offse
     return *(uint16_t*)(addr + offset) & 0xfff;
 }
 static inline void byte_array_set_uint16_even(uint8_t *  addr, uint64_t offset, uint64_t val){
-    *(uint16_t*)(addr+ offset) = (uint16_t)(val & 0xfff);
+    *(uint16_t*)(addr+ offset) = ((uint16_t)(val & 0xfff)) | (*(uint16_t*)(addr + offset) & 0xf000);
 }
 static inline uint64_t offset_of_cluster_odd(sector_t cluster_no){
     assert(is_odd(cluster_no));
@@ -41,7 +44,7 @@ static inline uint16_t byte_array_get_uint16_odd(uint8_t * addr, uint64_t offset
     return *(uint16_t*)(addr + offset) >> 4;
 }
 static inline void byte_array_set_uint16_odd(uint8_t *  addr, uint64_t offset, uint64_t val){
-    *(uint16_t*)(addr+ offset) = (uint16_t)(val>>4)&0xfff;
+    *(uint16_t*)(addr+ offset) = ((uint16_t(val&0xfff)) << 4) | (*((uint16_t*)(addr + offset)) & 0x0f);
 }
 
 #endif   /* UTIL_H */
