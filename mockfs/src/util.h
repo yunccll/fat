@@ -1,14 +1,7 @@
 #ifndef  UTIL_H 
 #define  UTIL_H
 
-#include <cstdint>
-#include <cassert>
-
-#define BUGON(x)       assert(!(x))
-
-#define TRUE  1
-#define FALSE 0
-typedef unsigned long long sector_t;
+#include "linux/types.h"
 
 
 //#define is_even(cluster_no)   (((cluster_no)&0x01) == 0)
