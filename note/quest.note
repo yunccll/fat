@@ -21,3 +21,10 @@
 
     so -> using lock is better in application
     
+3. about fat_inode in fat code
+    fat_inode 在fat_fill_super时创建，
+    在fatents中使用，基本只是在sync时 用到。
+    但是，没看到初始化的代码。针对sync的操作。
+
+    猜测： fat_inode代表了fat的几个扇区的read和write的操作。
+    想重用VFS的page cache来进行 读写扇区的操作。所以，只创建inode和初始化address_space，即可达到目的
