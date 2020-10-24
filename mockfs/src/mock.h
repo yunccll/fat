@@ -1,7 +1,12 @@
 #ifndef MOCK_H
 #define MOCK_H
 
-#include "linux/types.h"
+
+#include "base.h"
+
+
+#define le16_to_cpu(val) (val)
+#define le32_to_cpu(val) (val)
 
 namespace mock {
     struct super_block {
@@ -43,6 +48,18 @@ namespace mock {
 
     static inline void printk(const char * str){
     }
+
+    static inline uint16_t __get_unaligned_le16(const uint8_t *p) 
+    {
+        return p[0] | p[1] << 8;
+    }
+    static inline uint16_t get_unaligned_le16(const void *p)
+    {
+        return __get_unaligned_le16((const uint8_t*)p);
+    }
+
+
+
 
 } // end namespace mock
 
