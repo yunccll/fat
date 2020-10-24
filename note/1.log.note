@@ -36,6 +36,7 @@ misc:
     async_io
     polling
 
+
 2020.10.06
 2.  Mount
     mount
@@ -109,7 +110,7 @@ SYSCALL_DEFINE5(mount, char __user *, dev_name, char __user *, dir_name,
 
 
 2020.10.7
-1. inode operations creation
+3. inode operations creation
     step:
         > mount event: create root inode , install root_inode with msdos_dir_inode_operations
         > open Event:  call .lookup in msdos_dir_inode_operations to build inode 
@@ -144,7 +145,8 @@ details:
 
 
 
-2010-10-13
+2010.10.13
+4. Umount
     sys_umount // fs/namespace.c
     ksys_umount(char __user *name, int flags);
 
