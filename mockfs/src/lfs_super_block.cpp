@@ -86,9 +86,20 @@ int lfs_fill_super(struct super_block * sb, void * data, int silent){
     //2. read fat sectors
 
     //3. root_dentry create
-
+    //sb->s_root = lfs_root_dentry_create(); //TODO:
 
     return 0;
+}
+void lfs_kill_super(struct super_block * sb){
+    kill_block_super(sb); //for mount_bdev
+
+    /*  
+    lfs_root_dentry_destroy(sb->s_root); //TODO: 
+    sb->s_root = NULL;
+    */
+    
+    lfs_sbp_free((struct lfs_sbp*)sb->s_fs_info); //for lfs_super_block_create
+    sb->s_fs_info = NULL;
 }
 
 

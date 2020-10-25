@@ -9,10 +9,16 @@
 #define le32_to_cpu(val) (val)
 
 namespace mock {
+    struct dentry {
+    };
+
     struct super_block {
         int s_blocksize;
         unsigned int s_blocksize_bits;
         void * s_fs_info;
+
+
+        struct dentry * s_root;
     };
 
     static inline unsigned int blksize_bits(unsigned int size)
@@ -35,7 +41,7 @@ namespace mock {
     }
 
     struct buffer_head {
-        size_t b_size;      //size of mapping
+        
         char * b_data;      //pointer to data within the page
     };
 
@@ -59,7 +65,9 @@ namespace mock {
     }
 
 
-
+    
+    void kill_block_super(struct super_block * sb){
+    }
 
 } // end namespace mock
 

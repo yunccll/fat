@@ -163,7 +163,6 @@ details:
         } __randomize_layout;
 
     2. retval = do_umount(mnt, flags);
-        > put_super ?
 
     3. dput(path.dentry); // decreasing refcnt of dentry installed by user_path_at of (__user *name)
 
@@ -190,13 +189,14 @@ details:
                     > if(super->active == true) then :
                         > cleancache_invalidate_fs(s);
                         > unregister_shrinker(&s->s_shrink);
-                        >!!!! fs->kill_sb(s);   //call fs_type->kill_sb  -> kill_super_block in fs/super.c
+                        > call fs_type->kill_sb  -> kill_super_block in fs/super.c
+                            ####### fs->kill_sb(s); ########
                             >> .kill_sb = generic_shutdown_super(struct super_block * sb)
                                 >> if(sb->s_root not NULL) => 
                                     >> free dcache of this super, 
                                     >> free inodes of the super
                                     >> fnotify sb deleted
-                                    >>!!!!!  call the sops->put_super(struct super_block * sb); super_block->put_super
+                                    >>###### call the sops->put_super(struct super_block * sb); ###### //super_block->put_super
                                     >>!!!! unlock(super->s_mount) : up_write(&sb->s_umount)
                 
                         > list_lru_destroy(&s->s_dentry_lru);
@@ -232,7 +232,7 @@ open & create
             > alloc_empty_file(op->open_flag, current_cred())
             > case TMP_FILE :  do_tmpfile(nd, flags, op, file);
             > case O_PATH:  do_o_path(nd, flags, file);
-            > default: do_
+            > default: lookup the inode operations for create or lead the dentry to Memory Cache
                 const char *s = path_init(nd, flags);
                 while (!(error = link_path_walk(s, nd)) &&
                     (error = do_last(nd, file, op)) > 0) {
@@ -240,13 +240,14 @@ open & create
                     s = trailing_symlink(nd);
                 }
                 terminate_walk(nd);
-
-           Note:
-            do_last:
-                case create: 
-                    inode->create();
-                case open:
-                    inode->lookup();
+               Note:
+                do_last:
+                    case create: 
+                        dir_inode->i_op->create();
+                    case open:
+                        dir_inode->i_op->lookup();
+            > do_open();
+            vfs_open -> do_entry_open(f) -> f->f_op->open(inode, f);
 
         4.3> if faild: path_openat(&nd, op, lookup_flags); // lookup normal
         4.4> if failed: path_openat(&nd, op, lookup_flags | LOOKUP_REVAL);
@@ -257,6 +258,130 @@ open & create
     6> fd_install(fd, f); // contact struct file to fd 
 
     7> putname(tmp); // must free tmp filename struct
+
+
+
+2020.10.25
+4. dir 's open & create code
+
+dir_inode->i_op->create(struct inode *dir, struct dentry *dentry, umode_t mode, bool excl):
+dir_inode->i_op->open(struct inode *dir, struct dentry *dentry, unsigned int flags):
+    will call  new_inode(sb);
+    -->
+        sb->s_op->alloc_inode(struct super_block * sb);
+    
+
+2020.10.25
+5. iput -- free the inode 
+iput(struct inode *):
+    1> lock & dec(i_count)
+    2> if inode->i_nlink != 0 && (i_state & I_DIRTY_TIME) == 1:
+        inc(i_count)
+        unlock()
+        trace_writeback_lazytime_iput()
+        make_inode_dirty_sync(inode){
+            ######## sb->s_op->dirty_inode() ######## if(i_state | I_DIRTY_TIME) & not-null
+        }
+        goto >1
+
+        iput_final(inode){
+            ######## sb->s_op->drop_inode() ######## if not-null  &&  generic_drop_index if null
+            
+            if drop_OK && sb is active:
+                inode_add_lru(inode)
+                unlock(inode);
+                return ;
+
+            if sb is passive | drop OK:
+                inode->state = I_WILL_FREE
+                unlock(inode)
+
+                write_inode_now(inode, 1); //may be sleep
+
+                state ->remove--> I_WILL_FREE ;   // state &= ~I_WILL_FREE
+                lock(inode) //TODO: unlock
+            #end if
+            
+            inode->i_state = state | I_FREEING;
+            inode_lru_list_del(inode)
+            unlock(inode)
+
+            evict(inode){
+                delete from many list: io_list, sb_list
+
+                wait_for_writeback(inode); kernel thread write
+                
+                ######## sb->s_op->evict_node(inode)####### if not-null  OR : truncate_inode_pages_final(inode->data) && clear_inode
+
+                forget_bd or cd if is_block_dev or is_char_dev
+
+                remove_inode_hash(inode)
+
+                lock && Wake_up_bit(inode->i_state, __I__NEW); && unlock
+
+                destroy_inode(inode){
+                    free resource && notify_delete
+
+                    ####### sb->s_op->destroy_inode(inode) ###### if not-null
+
+                    if sb->s_op->free_inode == NULL; => return ;
+                    else:
+                        inode->free_inode = sb->s_op->free_inode; 
+                        call_rcu(& inode->i_rcu, i_callback);
+                }
+
+                i_callback(struct rcu_head * head){
+                    struct inode * inode = contain_of(head, struct inode, i_rcu);
+
+                    ######## inode->free_inode(inode)####### if not-null;  OR:  kmem_cache_free(inode);
+                }//i_callback
+            }//evict
+        }//iput_final
+
+    drop_inode ==>  evict_inode (data flush) ==> free_inode(memory free)
+
+
+2020.10.25
+6. close:
+    SYSCALL_DEFINE1(close) =>  __close_fd(current->files, fd) {
+        recycle the struct file
+        filp_close:{
+            filp->f_op->flush;
+            notify_flush()
+
+            fput(file); -> fput_many(file, 1){
+                //async call __fput(file)
+            }
+            return ;
+
+        }
+    }
+
+    //async call:
+    __fput(struct * file){
+        fnotify_close(file);
+
+        eventpoll_release(file);
+        locks_remove_file(file);
+
+        ima_file_free(file);
+ 
+        if(flags & FASYNC){
+            ######## filp->f_op->fasync(-1, file, 0) ########;
+        }
+
+        ######## filp->f_op->release(inode, file);
+
+        if char_dev => cdev_put;
+        
+        dput(dentry); ---> iput(inode);//TODO: 
+        mntput(mnt);
+        file_free(file);
+    }
+
+
+2020.10.25  //TODO: 
+7. dput
 
 //TODO: read/write
 //TODO: fsync
