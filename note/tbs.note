@@ -1,5 +1,14 @@
 1. list 
+	struct list_head head;	 //Declare
+	
+	list_empty()
+	list_is_single
+	list_entry 
+	list_add / list_add_tail
+	list_del
+
 2. hash
+	
 3. lock 
 4. rcu
 5. lru
