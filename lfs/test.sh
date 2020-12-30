@@ -11,7 +11,7 @@ date
 sudo insmod $MOD_NAME.ko 
 
 #mount 
-#sudo mount -t lfs ~/zero.img $MOUNT_POINT -o loop
+sudo mount -t lfs ~/zero.img $MOUNT_POINT -o loop
 
 #umount 
 #sudo umount $MOUNT_POINT
