@@ -107,6 +107,7 @@ static struct inode * make_root_inode(struct super_block * sb){
 }
 static void delete_inode(struct inode * root_inode){
     //NOOP
+    free_inode_nonrcu(inode);
 }
 static void destroy_root_inode(struct inode * root_inode, struct super_block * sb){
     //  d_free_root(root_inode)//free the inode for d_make_root  
