@@ -94,6 +94,14 @@ static const struct super_operations lfs_super_ops =
     //.show_options   = fat_show_options,
 };
 
+const struct inode_operations lfs_file_inode_operations = {
+};
+const struct file_operations lfs_file_operations = {
+    .llseek     = generic_file_llseek,
+    .read_iter  = generic_file_read_iter,
+    .write_iter = generic_file_write_iter,
+    .mmap       = generic_file_mmap,
+};
 
 
 static int lfs_create(struct inode *dir, struct dentry *dentry, umode_t mode, bool excl)
@@ -114,8 +122,8 @@ static int lfs_create(struct inode *dir, struct dentry *dentry, umode_t mode, bo
 	inode->i_blocks = 0;
 
 	if (S_ISREG(inode->i_mode)) {
-		//inode->i_op = &minix_file_inode_operations;
-		//inode->i_fop = &minix_file_operations;
+		inode->i_op = &lfs_file_inode_operations;
+		inode->i_fop = &lfs_file_operations;
 		//inode->i_mapping->a_ops = &minix_aops;
 	}
 	else if (S_ISDIR(inode->i_mode)) {
@@ -127,6 +135,9 @@ static int lfs_create(struct inode *dir, struct dentry *dentry, umode_t mode, bo
 
 	return 0;
 }
+
+
+
 static struct dentry * lfs_lookup(struct inode *dir, struct dentry *dentry, unsigned int flags)
 {
 	struct inode * inode;
@@ -141,7 +152,9 @@ static struct dentry * lfs_lookup(struct inode *dir, struct dentry *dentry, unsi
 		pr_info("inode is NULL!");
 		return ERR_PTR(-ENOMEM);
 	}
-	if((inode->i_state & I_NEW)){ // if New inode
+	//if((inode->i_state & I_NEW)){ // if New inode
+    {
+        pr_info("inode is New for init inode info");
 		inode->i_mode = S_IRWXUGO|S_IFREG;
 		inode->i_ino = iunique(sb, MSDOS_ROOT_INO);
         inode->i_uid = current_uid();
@@ -156,8 +169,8 @@ static struct dentry * lfs_lookup(struct inode *dir, struct dentry *dentry, unsi
 
 		if (S_ISREG(inode->i_mode)) {
 			pr_info("inode is regular file");
-			//inode->i_op = &lfs_file_inode_operations;
-			//inode->i_fop = &lfs_file_operations;
+			inode->i_op = &lfs_file_inode_operations;
+			inode->i_fop = &lfs_file_operations;
 			//inode->i_mapping->a_ops = &lfs_aops;
 		}
 	}
@@ -264,9 +277,9 @@ static struct inode * make_root_inode(struct super_block * sb){
     if(!root_inode) return root_inode;
     return init_root_inode(root_inode);
 }
-static void delete_inode(struct inode * root_inode){
+static void delete_inode(struct inode * inode){
     //NOOP
-    free_inode_nonrcu(inode);
+    //free_inode_nonrcu(inode);
 }
 static void destroy_root_inode(struct inode * root_inode, struct super_block * sb){
     //  d_free_root(root_inode)//free the inode for d_make_root  
