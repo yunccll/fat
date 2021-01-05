@@ -1,6 +1,8 @@
 MOD_NAME:=lfs
 MOUNT_POINT:=/mnt
-MOUNT_IMG_PATH:=~/zero.img
+MOUNT_IMG_PATH:=/home/chenglun/zero.img
+
+LIST_MOD:=$(shell sudo lsmod | grep $(MOD_NAME))
 
 ifneq ($(KERNELRELEASE),)
 obj-m :=$(MOD_NAME).o
@@ -13,6 +15,13 @@ install:
 help:
 	make -C $(KDIR) M=$(PWD) help
 
+h:
+	@echo " make open \n make list \n make insert/remove \n make mount/umount\n"
+	
+
+list:
+	@echo $(LIST_MOD)
+
 insert:
 	sudo insmod $(MOD_NAME).ko 
 mount:
@@ -22,6 +31,8 @@ umount:
 remove:
 	sudo rmmod $(MOD_NAME) && dmesg -T  | tail -20
 
+open:
+	sudo ./test/main $(MOUNT_POINT)/abc.txt
 
 clean:
 	make -C $(KDIR) M=$(PWD) clean
