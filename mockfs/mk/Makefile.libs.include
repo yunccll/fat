@@ -1,8 +1,8 @@
 
 #-- gtest
-GTEST_HOME_PATH		:= $(HOME)/dev/third/gtest
+GTEST_HOME_PATH		:= $(HOME)/third/gtest
 GTEST_INC_PATH		:= $(GTEST_HOME_PATH)
-GTEST_LIB_PATH		:= $(GTEST_HOME_PATH)
+GTEST_LIB_PATH		:= $(GTEST_HOME_PATH)/gtest
 GTEST_LIB_NAME		:= gtest_main
 
 

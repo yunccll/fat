@@ -4,9 +4,12 @@
 
 
 
-#include <cassert>
-#include <cstdint>
-#include <cstddef>
+#include <assert.h>
+#include <stdint.h>
+#include <stddef.h>
+
+#include <stdlib.h>
+#include <stdio.h>
 
 #include <linux/types.h>
 
@@ -16,6 +19,10 @@
 #define TRUE  1
 #define FALSE 0
 
+
+#define pr_debug    printf
+#define pr_info     printf
+#define pr_error    printf
 
 
 typedef __u64         sector_t;

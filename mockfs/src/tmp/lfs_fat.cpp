@@ -126,13 +126,13 @@ TEST(lfs_fat_test, mount){
     ASSERT_EQ(0xbc9, next_cluster_no);
 
     lfs_fat_set_next_cluster(fat, cluster_no, 0x064);
-    ASSERT_EQ(0x064, lfs_fat_get_next_cluster(fat, cluster_no));
+    ASSERT_EQ((sector_t)0x064, lfs_fat_get_next_cluster(fat, cluster_no));
 
 
     //3. find first idle  cluster No
     sector_t idle_cluster_no = 0;
     ASSERT_EQ(0, lfs_fat_get_first_idle_cluster(fat, &idle_cluster_no));
-    ASSERT_EQ(6, idle_cluster_no);
+    ASSERT_EQ((sector_t)6, idle_cluster_no);
 
     //4. sync
     lfs_fat_sync(fat, pages);

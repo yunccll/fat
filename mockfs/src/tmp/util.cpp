@@ -49,14 +49,14 @@ TEST(UtilTest, isEvenOdd){
 }
 
 TEST(UtilTest, offset_of_cluster_even){
-    ASSERT_EQ(0, offset_of_cluster_even(0));
-    ASSERT_EQ(3, offset_of_cluster_even(2));
-    ASSERT_EQ(6, offset_of_cluster_even(4));
+    ASSERT_EQ(0ull, offset_of_cluster_even(0));
+    ASSERT_EQ(3ull, offset_of_cluster_even(2));
+    ASSERT_EQ(6ull, offset_of_cluster_even(4));
 }
 TEST(UtilTest, offset_of_cluster_odd){
-    ASSERT_EQ(1, offset_of_cluster_odd(1));
-    ASSERT_EQ(4, offset_of_cluster_odd(3));
-    ASSERT_EQ(7, offset_of_cluster_odd(5));
+    ASSERT_EQ(1ull, offset_of_cluster_odd(1));
+    ASSERT_EQ(4ull, offset_of_cluster_odd(3));
+    ASSERT_EQ(7ull, offset_of_cluster_odd(5));
 }
 
 TEST(UtilTest, byte_array_get_uint16){

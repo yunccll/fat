@@ -41,7 +41,7 @@ namespace mock {
     }
 
     struct buffer_head {
-        
+        int b_size;        
         char * b_data;      //pointer to data within the page
     };
 
@@ -64,9 +64,7 @@ namespace mock {
         return __get_unaligned_le16((const uint8_t*)p);
     }
 
-
-    
-    void kill_block_super(struct super_block * sb){
+    static inline void kill_block_super(struct super_block * sb){
     }
 
 } // end namespace mock
