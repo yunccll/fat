@@ -8,12 +8,13 @@ struct dentry *mount_bdev(struct file_system_type *fs_type,
 {
 	pr_info("mount_bdev, TODO:\n");
 	//TODO:
-	// 1. create & open dev_name // blkdev_get();
+	// 1. create & open dev_name 
+	// struct block_device * bdev = blkdev_get();
 	//
 	// 2. sget(fs_type, test_dev, set_dev, flags|SB_NOSEC, bdev);
 	//
 	// 3. if(s->s_root){
-	//	blkdev_put(bdev, mode); 
+	//		blkdev_put(bdev, mode); 
 	// }
 	// else{
 	//		fill_super(sb, data, 0:1);	
