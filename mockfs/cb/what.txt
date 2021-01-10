@@ -1,0 +1,16 @@
+1. arch
+
+  System interface --> VFS --> Cache --> Special fs --> Block Device
+
+2. 
+    Super Block 
+    Inode 
+    Dentry 
+    filp
+
+    Inode Cache 
+    Dentry Cache 
+    Page Cache
+
+3. 
+
