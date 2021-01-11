@@ -2,6 +2,8 @@
 #ifndef  FILESYSTEM_H
 #define  FILESYSTEM_H
 
+#include "list.h"
+
 struct dentry;
 struct super_block;
 
@@ -21,7 +23,7 @@ struct file_system_type {
     void (*kill_sb) (struct super_block *);
     //struct module *owner;
     struct file_system_type * next;
-    //struct hlist_head fs_supers;
+    struct hlist_head fs_supers;
 };
 
 

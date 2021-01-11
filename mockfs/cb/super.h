@@ -6,6 +6,7 @@ struct file_system_type;
 
 struct super_block {
 //TODO:
+
 };
 
 
@@ -14,5 +15,16 @@ struct dentry *mount_bdev(struct file_system_type *fs_type,
 	int (*fill_super)(struct super_block *, void *, int));
 
 void kill_block_super(struct super_block *sb);
+
+
+
+// sget()
+// alloc_super
+// destroy_unused_super
+// grab_super
+// put_super
+// drop_super
+// iterato_super
+
 
 #endif   /* SUPER_H */

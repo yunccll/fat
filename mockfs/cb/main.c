@@ -47,6 +47,13 @@ TEST(FileSystemTypeTest, use){
 	lfs_exit();
 }
 
+#include "list.h"
+
+TEST(ListTest, use){
+    LIST_HEAD(head);
+}
+
 int main(int argc, char * argv[]){
     FileSystemTypeTest_use();
+    ListTest_use();
 }

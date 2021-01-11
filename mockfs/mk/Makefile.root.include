@@ -33,7 +33,7 @@ PROJ_DYNAMIC_LIBS  	=  pthread #dynamic lib names
 PROJ_CXXFLAGS += -g -Wall -Werror -pipe -Wno-shadow -fPIC -std=c++11
 #PROJ_CXXFLAGS += -g -w -pipe -Wno-shadow -fPIC -std=c++11
 PROJ_CXXFLAGS += $(addprefix -I, $(PROJ_INC_PATHES)) -I$(PROJ_ROOT_SRC_PATH)
-PROJ_CFLAGS += -fPIC
+PROJ_CFLAGS += -g -Wall -Werror -fPIC
 PROJ_CFLAGS += $(addprefix -I, $(PROJ_INC_PATHES)) -I$(PROJ_ROOT_SRC_PATH)
 
 #add customer rule for default variable
