@@ -14,9 +14,6 @@
 
 #include <stddef.h>
 
-typedef _Bool bool;
-#define true 1
-#define false 0
 
 struct list_head {
         struct list_head *next, *prev;

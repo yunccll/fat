@@ -12,16 +12,14 @@
 
 #include <string.h>
 
-#include <linux/types.h>
 
-
+#include "types.h"
+#include "err.h"
 #include "unit_test_wrapper.h"
 
 
 #define BUGON(x)       assert(!(x))
 
-#define TRUE  1
-#define FALSE 0
 
 
 #define pr_debug    printf
@@ -29,13 +27,12 @@
 #define pr_error    printf
 
 
-typedef __u64         sector_t;
 
 
 
 
-#define EBUSY	500
-#define EINVAL	501
+
+
 
 
 #endif   /* BASE_H */
