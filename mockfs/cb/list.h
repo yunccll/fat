@@ -13,7 +13,8 @@
 
 
 #include <stddef.h>
-
+#include "types.h"
+#include "compiler.h"
 
 struct list_head {
         struct list_head *next, *prev;
@@ -28,8 +29,6 @@ struct hlist_node {
 };
 
 
-#define WRITE_ONCE(x, val)  x = val;
-#define READ_ONCE(x) x
 
 #define POISON_POINTER_DELTA 0
 #define LIST_POISON1  ((void *) 0x100 + POISON_POINTER_DELTA)

@@ -34,14 +34,17 @@ static void lfs_exit(){
 
 
 TEST(FileSystemTypeTest, use){
+	struct super_block sb = {
+	};
+    struct dentry * root;
+
 	lfs_init();
 
 	print_filesystem();
 
-	lfs_fs_type.mount(&lfs_fs_type, 0, "~/zero.img", NULL);
+	root = lfs_fs_type.mount(&lfs_fs_type, 0, "~/zero.img", NULL);
+    ASSERT_FALSE(root != NULL);
 
-	struct super_block sb = {
-	};
 	lfs_fs_type.kill_sb(&sb);
 
 	lfs_exit();

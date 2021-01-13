@@ -12,6 +12,7 @@
 
 #define ASSERT_EQ(expect, expr)     assert(expect == (expr))
 #define ASSERT_TRUE(expr)           assert(expr)
+#define ASSERT_FALSE(expr)          assert(!(expr))
 
 
 #endif   /* UNIT_TEST_WRAPPER_H */
