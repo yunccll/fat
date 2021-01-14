@@ -52,3 +52,10 @@ int unregister_filesystem(struct file_system_type * fs)
 
 	return -EINVAL;
 }
+struct file_system_type * get_filesystem(struct file_system_type * fs_type){
+    //__module_get(fs_type->owner); 
+    return fs_type;
+}
+void put_filesystem(struct file_system_type * fs_type){
+    //module_put(fs_type->owner);
+}

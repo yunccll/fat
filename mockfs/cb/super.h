@@ -34,7 +34,7 @@ struct super_block {
     unsigned long   s_magic;
     struct dentry   *s_root;
     fmode_t         s_mode;
-
+    
 };
 
 

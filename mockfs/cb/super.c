@@ -9,9 +9,16 @@ static LIST_HEAD(super_blocks);
 
 // ********  Block device
 struct block_device {
-    char dev_name[512];
+    char dev_name[32];
     int mode;
+    unsigned bd_block_size;
+    struct super_block * bd_super;
 };
+
+static inline unsigned int block_size(struct block_device *bdev)
+{
+        return bdev->bd_block_size;
+}
 
 struct block_device * blkdev_get(const char * dev_name, int mode, struct file_system_type * type)
 {
@@ -62,6 +69,18 @@ static struct super_block * alloc_super(struct file_system_type * type, int flag
 }
 
 
+int sb_set_blocksize(struct super_block *sb, int size)
+{
+//    if (set_blocksize(sb->s_bdev, size))
+//        return 0;
+//    /*  If we get here, we know size is power of two
+//     *       * and it's value is between 512 and PAGE_SIZE */
+//    sb->s_blocksize = size;
+//    sb->s_blocksize_bits = blksize_bits(size);
+//    return sb->s_blocksize;
+    return 0;
+}
+
 static struct super_block * sget(struct file_system_type * type, 
     int (*test)(struct super_block *, void *), 
     int (*set)(struct super_block *, void *), 
@@ -97,23 +116,43 @@ retry:
     strlcpy(sb->s_id, type->name, sizeof(sb->s_id));
     list_add_tail(&sb->s_list, &super_blocks);
     hlist_add_head(&sb->s_instances, &type->fs_supers);
-    //get_filesystem(type); //TODO: sb ptr to type , add refcount of type struct
+    get_filesystem(type);
     return sb;
 }
 
 
 static int test_dev(struct super_block * sb, void *bdev){
-    //TODO: return (void *)s->s_bdev == data;
-    return 0;
+    return (void *)sb->s_bdev == bdev;
 }
 static int set_dev(struct super_block * sb, void *bdev){
-    //TODO:
-    //s->s_bdev = data;
-    //s->s_dev = s->s_bdev->bd_dev;
+    sb->s_bdev = bdev;
+    //sb->s_dev = sb->s_bdev->bd_dev;
     //s->s_bdi = bdi_get(s->s_bdev->bd_bdi);
     return 0;
 }
 
+static void deactivate_locked_super(struct super_block *sb)
+{
+    //TODO:
+//    struct file_system_type *fs = sb->s_type;
+//    if (atomic_dec_and_test(&sb->s_active)) {
+//        cleancache_invalidate_fs(sb);
+//        unregister_shrinker(&s->s_shrink);
+//        fs->kill_sb(s);
+//
+//        /*
+//         * Since list_lru_destroy() may sleep, we cannot call it from
+//         * put_super(), where we hold the sb_lock. Therefore we destroy_unused_super         * the lru lists right now.
+//         */
+//        list_lru_destroy(&s->s_dentry_lru);
+//        list_lru_destroy(&s->s_inode_lru);
+//
+//        put_filesystem(fs);
+//        put_super(s);
+//    } else {
+//        up_write(&s->s_umount);
+//    }
+}
 
 struct dentry *mount_bdev(struct file_system_type *fs_type,
 	int flags, const char *dev_name, void *data,
@@ -137,43 +176,44 @@ struct dentry *mount_bdev(struct file_system_type *fs_type,
         pr_error("ERROR: sget failed\n");
         goto error_sb;
     }
-    if(sb->s_root){
+    if(sb->s_root){ // find old sb, and free the new get blkdev 
+        // exception  ....
+        
         //up_write(&s->s_umount);
         blkdev_put(bdev, mode);
         //down_write(&s->s_umount);
     }
-    else{
+    else{ // alloc new sb , and init the new sb 
         sb->s_mode = mode;
-	//TODO:
-//        snprintf(s->s_id, sizeof(s->s_id), "%pg", bdev);
-//        sb_set_blocksize(s, block_size(bdev));
-//        error = fill_super(s, data, flags & SB_SILENT ? 1 : 0);
-//        if (error) {
-//            deactivate_locked_super(s);
-//            goto error;
-//        }
-//
+        snprintf(sb->s_id, sizeof(sb->s_id), "%s", (const char *)(bdev->dev_name)); //TBD:  snprintf("%pg") ???
+        sb_set_blocksize(sb, block_size(bdev));
+        error = fill_super(sb, data, flags & SB_SILENT ? 1 : 0);
+        if (error) {
+            deactivate_locked_super(sb);
+            goto error_bdev;
+        }
         sb->s_flags |= SB_ACTIVE;
-//        bdev->bd_super = sb;
+        bdev->bd_super = sb;
     }
 	return dget(sb->s_root);
 
 error_sb:
     error = PTR_ERR(sb);
-    blkdev_put(bdev, 0);
+error_bdev:
+    blkdev_put(bdev, mode);
 	return ERR_PTR(error);
 }
 
 void kill_block_super(struct super_block *sb)
 {
+	struct block_device *bdev = sb->s_bdev;
+	fmode_t mode = sb->s_mode;
+	bdev->bd_super = NULL;
+
 	pr_info("kill_block_super\n");
 	//TODO:
-//	struct block_device *bdev = sb->s_bdev;
-//	fmode_t mode = sb->s_mode;
-//
-//	bdev->bd_super = NULL;
 //	generic_shutdown_super(sb);
 //	sync_blockdev(bdev);
 //	WARN_ON_ONCE(!(mode & FMODE_EXCL));
-//	blkdev_put(bdev, mode | FMODE_EXCL);
+	blkdev_put(bdev, mode | FMODE_EXCL);
 }

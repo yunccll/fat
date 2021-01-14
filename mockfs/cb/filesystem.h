@@ -32,4 +32,8 @@ int unregister_filesystem(struct file_system_type * fs);
 
 void print_filesystem(void);
 
+
+struct file_system_type * get_filesystem(struct file_system_type * type);
+void put_filesystem(struct file_system_type * type);
+
 #endif   /* FILESYSTEM_H */
