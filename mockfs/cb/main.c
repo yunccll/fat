@@ -2,6 +2,7 @@
 #include "mock.h"
 #include "filesystem.h"
 #include "super.h" //for mount_bdev
+#include "list.h"
 
 static int lfs_fill_super(struct super_block * sb, void * data, int silent)
 {
@@ -32,11 +33,17 @@ static void lfs_exit(){
 	unregister_filesystem(&lfs_fs_type);
 }
 
+struct super_block * get_super_from_filesystem(struct file_system_type * fs_type){
+	if(fs_type && fs_type->fs_supers.first){
+
+		return (struct super_block*)hlist_entry(fs_type->fs_supers.first, struct super_block, s_instances);
+	}
+	return 0;
+}
 
 TEST(FileSystemTypeTest, use){
-	struct super_block sb = {
-	};
     struct dentry * root;
+    struct super_block * sb;
 
 	lfs_init();
 
@@ -44,8 +51,13 @@ TEST(FileSystemTypeTest, use){
 
 	root = lfs_fs_type.mount(&lfs_fs_type, 0, "~/zero.img", NULL);
     ASSERT_FALSE(root != NULL);
-
-	lfs_fs_type.kill_sb(&sb);
+    
+    sb = get_super_from_filesystem(&lfs_fs_type);
+    if(sb != NULL){
+        lfs_fs_type.kill_sb(sb);
+    }
+    else
+        pr_error("sb is NULL, when kill sb\n");
 
 	lfs_exit();
 }

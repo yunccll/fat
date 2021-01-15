@@ -5,6 +5,7 @@
 
 struct dentry {
 //TODO:
+	struct super_block *d_sb;	/* The root of the dentry tree */
 };
 
 static inline struct dentry *dget(struct dentry *dentry)

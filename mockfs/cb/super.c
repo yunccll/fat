@@ -134,8 +134,8 @@ static int set_dev(struct super_block * sb, void *bdev){
 static void deactivate_locked_super(struct super_block *sb)
 {
     //TODO:
-//    struct file_system_type *fs = sb->s_type;
-//    if (atomic_dec_and_test(&sb->s_active)) {
+    //struct file_system_type *fs = sb->s_type;
+    if (atomic_dec_and_test(&sb->s_active)) {
 //        cleancache_invalidate_fs(sb);
 //        unregister_shrinker(&s->s_shrink);
 //        fs->kill_sb(s);
@@ -151,7 +151,7 @@ static void deactivate_locked_super(struct super_block *sb)
 //        put_super(s);
 //    } else {
 //        up_write(&s->s_umount);
-//    }
+    }
 }
 
 struct dentry *mount_bdev(struct file_system_type *fs_type,
@@ -176,6 +176,7 @@ struct dentry *mount_bdev(struct file_system_type *fs_type,
         pr_error("ERROR: sget failed\n");
         goto error_sb;
     }
+
     if(sb->s_root){ // find old sb, and free the new get blkdev 
         // exception  ....
         
