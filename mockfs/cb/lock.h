@@ -13,7 +13,7 @@ typedef struct {
 } atomic_t;
 
 typedef struct {
-        s64 counter;
+    s64 counter;
 } atomic64_t;
 
 #define ATOMIC_INIT(i)      { (i) }
@@ -98,18 +98,56 @@ static inline bool atomic_dec_and_test(atomic_t *v)
 
 
 //spinlock_types.h
-struct spin_lock_t {
+struct spin_lock {
+    int count;
+};
+int spin_lock_init(struct spin_lock * spin_lock);
+void spin_lock(struct spin_lock * spin_lock);
+void spin_unlock(struct spin_lock * spin_lock);
+// 1 - lock successfule, 0 - lock failed
+int spin_trylock(struct spin_lock * spin_lock);
+int spin_is_locked(struct spin_lock * spin_lock);
+
+
+struct semaphone {
+    int count;
 };
 
+#define __SEMAPHORE_INITIALIZER(name, n)				\
+{									\
+	.count		= n,						\
+}
+
+#define DEFINE_SEMAPHORE(name)	\
+	struct semaphore name = __SEMAPHORE_INITIALIZER(name, 1)
+
+static inline void sema_init(struct semaphore *sem, int val)
+{
+	*sem = (struct semaphore) __SEMAPHORE_INITIALIZER(*sem, val);
+}
+
+extern void down(struct semaphore *sem);
+extern int down_interruptible(struct semaphore *sem);
+extern int down_killable(struct semaphore *sem);
+//trylock,  0->down successful, 1-> down failed diff with spin_trylock
+extern int down_trylock(struct semaphore *sem);
+extern int down_timeout(struct semaphore *sem, long jiffies);
+extern void up(struct semaphore *sem);
 
 
-//rwsem.h
+//rwsem.h  TODO: 
 struct rw_semaphore {
+    int count;
 };
 
-// mutex.h
+
+
+// mutex.h TODO:
 struct mutex {
+    int count;
 };
 
+
+//TODO: Next: finish the whole super_block related-function
 
 #endif   /* LOCK_H */

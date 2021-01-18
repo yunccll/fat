@@ -55,6 +55,7 @@ static struct super_block * alloc_super(struct file_system_type * type, int flag
     //init_rwsem(&s->s_umount);
     INIT_HLIST_NODE(&sb->s_instances);
     INIT_LIST_HEAD(&sb->s_list);
+    INIT_LIST_HEAD(&sb->s_inodes); //all inodes 
 
     sb->s_count = 1;
     atomic_set(&sb->s_active, 1);

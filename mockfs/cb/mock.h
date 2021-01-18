@@ -6,8 +6,6 @@
 struct qstr {
 	//TODO:
 };
-struct inode {
-};
 
 struct super_block;
 

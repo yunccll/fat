@@ -35,6 +35,7 @@ struct super_block {
     struct dentry   *s_root;
     fmode_t         s_mode;
     
+    struct list_head s_inodes; //all inodes
 };
 
 

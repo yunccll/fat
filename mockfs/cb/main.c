@@ -3,10 +3,16 @@
 #include "filesystem.h"
 #include "super.h" //for mount_bdev
 #include "list.h"
+#include "inode.h"
 
 static int lfs_fill_super(struct super_block * sb, void * data, int silent)
 {
 	//TODO:
+    struct inode * root_inode = new_inode(sb);
+    if(!inode){
+        return -ENOMEM;
+    }
+    sb->s_root = d_make_root(inode);
 	return 0;
 }
 
@@ -33,13 +39,13 @@ static void lfs_exit(){
 	unregister_filesystem(&lfs_fs_type);
 }
 
-struct super_block * get_super_from_filesystem(struct file_system_type * fs_type){
-	if(fs_type && fs_type->fs_supers.first){
-
-		return (struct super_block*)hlist_entry(fs_type->fs_supers.first, struct super_block, s_instances);
-	}
-	return 0;
-}
+//struct super_block * get_super_from_filesystem(struct file_system_type * fs_type){
+//	if(fs_type && fs_type->fs_supers.first){
+//
+//		return (struct super_block*)hlist_entry(fs_type->fs_supers.first, struct super_block, s_instances);
+//	}
+//	return 0;
+//}
 
 TEST(FileSystemTypeTest, use){
     struct dentry * root;
@@ -52,7 +58,7 @@ TEST(FileSystemTypeTest, use){
 	root = lfs_fs_type.mount(&lfs_fs_type, 0, "~/zero.img", NULL);
     ASSERT_FALSE(root != NULL);
     
-    sb = get_super_from_filesystem(&lfs_fs_type);
+    sb = root->d_sb;
     if(sb != NULL){
         lfs_fs_type.kill_sb(sb);
     }
