@@ -56,7 +56,6 @@ static void lfs_exit(){
 
 struct super_block * get_super_from_filesystem(struct file_system_type * fs_type){
 	if(fs_type && fs_type->fs_supers.first){
-
 		return (struct super_block*)hlist_entry(fs_type->fs_supers.first, struct super_block, s_instances);
 	}
 	return 0;

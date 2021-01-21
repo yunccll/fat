@@ -5,7 +5,6 @@
 
 #include <assert.h>
 #include <stdint.h>
-#include <stddef.h>
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -28,6 +27,7 @@
 
 
 
+#undef strlcpy
 #define strlcpy     strncpy
 
 

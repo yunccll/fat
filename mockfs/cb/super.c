@@ -3,83 +3,10 @@
 #include "base.h"
 #include "filesystem.h"
 #include "dcache.h"
+#include "block_dev.h"
 
 static LIST_HEAD(super_blocks);
-// static DEFINE_SPINLOCK(sb_lock);
-
-// ********  Block device
-struct block_device {
-    char dev_name[32];
-    int mode;
-    unsigned bd_block_size;
-    struct super_block * bd_super;
-    struct mutex bd_fsfreeze_mutex;
-    int bd_fsfreeze_count;
-};
-
-static inline unsigned int blksize_bits(unsigned int size)
-{
-    unsigned int bits = 8;
-    do {
-        bits++;
-        size >>= 1;
-    } while (size > 256);
-    return bits;
-}
-
-static inline unsigned int block_size(struct block_device *bdev)
-{
-        return bdev->bd_block_size;
-}
-
-struct block_device * blkdev_get(const char * dev_name, int mode, struct file_system_type * type)
-{
-    //TODO: create it now
-    struct block_device * ret = (struct block_device*)calloc(sizeof(struct block_device), 1);
-    if(ret == NULL){
-        return ERR_PTR(-ENOMEM);
-    }
-    strncpy(ret->dev_name, dev_name, sizeof(ret->dev_name));
-    ret->mode = mode;
-    mutex_init(&ret->bd_fsfreeze_mutex);
-    return ret;
-}
-void blkdev_put(struct block_device * bdev, int mode){
-    free(bdev);
-}
-
-
-
-int set_blocksize(struct block_device *bdev, int size)
-{
-	/* Size must be a power of two, and between 512 and PAGE_SIZE */
-	if (size > PAGE_SIZE || size < 512 || !is_power_of_2(size))
-		return -EINVAL;
-
-	/* Size cannot be smaller than the size supported by the device */
-	if (size < 512)
-		return -EINVAL;
-
-	/* Don't change the size if it is same as current */
-	if (bdev->bd_block_size != size) {
-		//TODO: sync_blockdev(bdev);
-		bdev->bd_block_size = size;
-		//TODO: bdev->bd_inode->i_blkbits = blksize_bits(size);
-		//TODO: kill_bdev(bdev);
-	}
-	return 0;
-}
-
-int sb_set_blocksize(struct super_block *sb, int size)
-{
-    if (set_blocksize(sb->s_bdev, size))
-        return 0;
-    /*  If we get here, we know size is power of two
-     *       * and it's value is between 512 and PAGE_SIZE */
-    sb->s_blocksize = size;
-    sb->s_blocksize_bits = blksize_bits(size);
-    return sb->s_blocksize;
-}
+static DEFINE_SPINLOCK(sb_lock);
 
 
 static void destroy_unused_super(struct super_block * sb){
@@ -95,7 +22,6 @@ static struct super_block * alloc_super(struct file_system_type * type, int flag
     if(sb == NULL){
         return ERR_PTR(-ENOMEM);
     }
-
 
     init_rwsem(&sb->s_umount);
     INIT_HLIST_NODE(&sb->s_instances);
@@ -119,6 +45,41 @@ static struct super_block * alloc_super(struct file_system_type * type, int flag
     return sb;
 }
 
+static void __put_super(struct super_block *sb)
+{
+    if (!--sb->s_count) {
+        list_del_init(&sb->s_list);
+//        WARN_ON(s->s_dentry_lru.node);
+//        WARN_ON(s->s_inode_lru.node);
+//        WARN_ON(!list_empty(&s->s_mounts));
+//        security_sb_free(s);
+//        fscrypt_sb_free(s);
+//        put_user_ns(s->s_user_ns);
+//        kfree(s->s_subtype);
+//        call_rcu(&s->rcu, destroy_super_rcu);
+		free(sb);
+    }
+}
+static void put_super(struct super_block *sb)
+{
+    spin_lock(&sb_lock);
+    __put_super(sb);
+    spin_unlock(&sb_lock);
+}
+
+static int grab_super(struct super_block *sb)
+{
+    sb->s_count++;
+    spin_unlock(&sb_lock);
+    down_write(&sb->s_umount);
+    if ((sb->s_flags & SB_BORN) && atomic_inc_not_zero(&sb->s_active)) {
+        put_super(sb);
+        return 1;
+    }
+    up_write(&sb->s_umount);
+    put_super(sb);
+    return 0;
+}
 
 
 static struct super_block * sget(struct file_system_type * type, 
@@ -131,16 +92,21 @@ static struct super_block * sget(struct file_system_type * type,
     struct super_block * old;
     int err;
 retry:
+    spin_lock(&sb_lock);
     if(test){
         hlist_for_each_entry(old, &type->fs_supers, s_instances){
             if(!test(old, data))
                 continue;
+            if(!grab_super(old)){ // spin_unlock(&sb_lock)
+                goto retry;
+            }
             destroy_unused_super(sb); 
             return old;
         }
     }
     if(!sb){
-        sb = alloc_super(type, flags);
+		spin_unlock(&sb_lock);
+        sb = alloc_super(type, (flags & ~SB_SUBMOUNT));
         if(!sb)
             return ERR_PTR(-ENOMEM);
         goto retry;
@@ -148,6 +114,7 @@ retry:
 
     err = set(sb, data);
     if(err){
+		spin_unlock(&sb_lock);
         destroy_unused_super(sb);
         return ERR_PTR(err);
     }
@@ -156,6 +123,7 @@ retry:
     strlcpy(sb->s_id, type->name, sizeof(sb->s_id));
     list_add_tail(&sb->s_list, &super_blocks);
     hlist_add_head(&sb->s_instances, &type->fs_supers);
+	spin_unlock(&sb_lock);
     get_filesystem(type);
     return sb;
 }
@@ -173,24 +141,22 @@ static int set_dev(struct super_block * sb, void *bdev){
 
 static void deactivate_locked_super(struct super_block *sb)
 {
-    //TODO:
-    //struct file_system_type *fs = sb->s_type;
+    struct file_system_type *fs = sb->s_type;
     if (atomic_dec_and_test(&sb->s_active)) {
-//        cleancache_invalidate_fs(sb);
-//        unregister_shrinker(&s->s_shrink);
-//        fs->kill_sb(s);
-//
+        if(fs->kill_sb)
+            fs->kill_sb(sb);
+
 //        /*
 //         * Since list_lru_destroy() may sleep, we cannot call it from
 //         * put_super(), where we hold the sb_lock. Therefore we destroy_unused_super         * the lru lists right now.
 //         */
 //        list_lru_destroy(&s->s_dentry_lru);
 //        list_lru_destroy(&s->s_inode_lru);
-//
-//        put_filesystem(fs);
-//        put_super(s);
-//    } else {
-//        up_write(&s->s_umount);
+
+        put_filesystem(fs);
+        put_super(sb);
+    } else {
+        up_write(&sb->s_umount);//TODO: ????
     }
 }
 
