@@ -25,11 +25,6 @@ static void d_instantiate(struct dentry * res, struct inode *inode)
     //TODO:    
 }
 
-static void iput(struct inode * inode)
-{
-    pr_debug("input\n");
-    //TODO:
-}
 
 
 struct dentry * d_make_root(struct inode * root_inode)
@@ -41,7 +36,7 @@ struct dentry * d_make_root(struct inode * root_inode)
         if(res)
             d_instantiate(res, root_inode);
         else
-            iput(root_inode);
+            iput(root_inode); //TODO:
     }
     return res;
 }

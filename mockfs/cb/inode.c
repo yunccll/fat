@@ -84,14 +84,21 @@ static struct inode * new_inode_pseudo(struct super_block * sb)
     return inode;
 }
 
-
 struct inode * new_inode(struct super_block * sb)
 {
-    struct inode * inode;
+	struct inode *inode;
     pr_debug("new inode for root\n");
 
+    //spin_lock_prefetch(&sb->s_inode_list_lock);
+
     inode = new_inode_pseudo(sb);
-    if(inode)
+    if (inode)
         inode_sb_list_add(inode);
-    return inode;
+    return inode;  
+}
+
+void iput(struct inode * inode)
+{
+    pr_debug("input\n");
+    //TODO:
 }

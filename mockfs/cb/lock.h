@@ -13,7 +13,7 @@ typedef struct {
 } atomic_t;
 
 typedef struct {
-        s64 counter;
+    s64 counter;
 } atomic64_t;
 
 
@@ -106,6 +106,7 @@ typedef struct  {
 void spin_lock_init(spinlock_t * lock);
 void spin_lock(spinlock_t * lock);
 void spin_unlock(spinlock_t * lock);
+// 1 - lock successfule, 0 - lock failed
 int spin_trylock(spinlock_t *lock);
 int spin_is_locked(spinlock_t *lock);
 
@@ -155,7 +156,7 @@ extern void up(struct semaphore *sem);
 
 
 
-//rwsem.h
+//rwsem.h  TODO: 
 struct rw_semaphore {
     volatile int count;
     volatile int write_count;
@@ -204,5 +205,7 @@ void mutex_init(struct mutex * lock);
 void mutex_lock(struct mutex * lock);
 void mutex_unlock(struct mutex * lock);
 int mutex_trylock(struct mutex * lock);
+
+//TODO: Next: finish the whole super_block related-function
 
 #endif   /* LOCK_H */

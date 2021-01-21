@@ -24,8 +24,6 @@ static inline struct dentry *dget(struct dentry *dentry)
     return dentry;
 }
 
-
-
 struct dentry * d_make_root(struct inode * root_inode);
 
 

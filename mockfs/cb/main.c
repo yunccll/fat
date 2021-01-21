@@ -4,6 +4,7 @@
 #include "inode.h"
 #include "dcache.h"
 #include "list.h"
+#include "inode.h"
 
 static int lfs_fill_super(struct super_block * sb, void * data, int silent)
 {
@@ -72,7 +73,7 @@ TEST(FileSystemTypeTest, use){
 	root_dentry = lfs_fs_type.mount(&lfs_fs_type, 0, "~/zero.img", NULL);
     ASSERT_TRUE(root_dentry != NULL);
     
-    sb = (root_dentry) ?root_dentry->d_sb : get_super_from_filesystem(&lfs_fs_type);
+    sb = (root_dentry) ? root_dentry->d_sb : get_super_from_filesystem(&lfs_fs_type);
 
     if(sb != NULL){
         lfs_fs_type.kill_sb(sb);
