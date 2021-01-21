@@ -1,13 +1,33 @@
 #include "base.h"
-#include "mock.h"
 #include "filesystem.h"
 #include "super.h" //for mount_bdev
+#include "inode.h"
+#include "dcache.h"
 #include "list.h"
 
 static int lfs_fill_super(struct super_block * sb, void * data, int silent)
 {
-	//TODO:
-	return 0;
+    int err;
+
+    struct inode * root_inode = new_inode(sb);
+    if(!root_inode){
+        err = -ENOMEM;
+        pr_error("new inode for root failed, err:[%d]\n", err);
+        goto out_fail;
+    }
+
+    //TODO:root_inode custom init; 
+    
+    sb->s_root = d_make_root(root_inode);
+    if(!sb->s_root){
+        err = -ENOMEM;
+        pr_error("make root dentry failed, err:[%d]\n", err);
+        goto out_fail; 
+    }
+    return 0;
+
+out_fail:
+	return err;
 }
 
 static struct dentry * lfs_mount(struct file_system_type *fs_type, int flags, const char *dev_name, void *data){
@@ -42,17 +62,18 @@ struct super_block * get_super_from_filesystem(struct file_system_type * fs_type
 }
 
 TEST(FileSystemTypeTest, use){
-    struct dentry * root;
+    struct dentry * root_dentry;
     struct super_block * sb;
 
 	lfs_init();
 
 	print_filesystem();
 
-	root = lfs_fs_type.mount(&lfs_fs_type, 0, "~/zero.img", NULL);
-    ASSERT_FALSE(root != NULL);
+	root_dentry = lfs_fs_type.mount(&lfs_fs_type, 0, "~/zero.img", NULL);
+    ASSERT_TRUE(root_dentry != NULL);
     
-    sb = get_super_from_filesystem(&lfs_fs_type);
+    sb = (root_dentry) ?root_dentry->d_sb : get_super_from_filesystem(&lfs_fs_type);
+
     if(sb != NULL){
         lfs_fs_type.kill_sb(sb);
     }

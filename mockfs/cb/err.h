@@ -4,7 +4,7 @@
 #include "errno.h"
 
 /* err: [-4095, 0】
-* void * ptr =createNode();
+* void * ptr = createNode();
 * if(IS_ERR(ptr)){
 *   return PTR_ERR(ptr);
 * }

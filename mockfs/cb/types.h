@@ -24,14 +24,16 @@ typedef _Bool bool;
 
 
 typedef __u64         sector_t;
-//typedef long long   __kernel_loff_t;
+typedef long long   __kernel_loff_t;
 //typedef __kernel_loff_t     loff_t;
 
 typedef __s64 time64_t;
 typedef __u64 timeu64_t;
 
+typedef u64 sector_t;
 
 typedef unsigned int fmode_t;
+
 
 
 #endif   /* TYPES_H */

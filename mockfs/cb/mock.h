@@ -6,9 +6,7 @@
 struct qstr {
 	//TODO:
 };
-struct inode {
-};
-
+struct inode;
 struct super_block;
 
 struct dentry_operations {

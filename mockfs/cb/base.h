@@ -106,6 +106,12 @@
 #define SB_NOUSER   (1<<31)
 
 
+#define PAGE_SIZE   4096
 
+
+static inline bool is_power_of_2(unsigned long n)
+{
+    return (n != 0 && ((n & (n - 1)) == 0));
+}
 
 #endif   /* BASE_H */

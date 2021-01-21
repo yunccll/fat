@@ -13,7 +13,19 @@ struct block_device {
     int mode;
     unsigned bd_block_size;
     struct super_block * bd_super;
+    struct mutex bd_fsfreeze_mutex;
+    int bd_fsfreeze_count;
 };
+
+static inline unsigned int blksize_bits(unsigned int size)
+{
+    unsigned int bits = 8;
+    do {
+        bits++;
+        size >>= 1;
+    } while (size > 256);
+    return bits;
+}
 
 static inline unsigned int block_size(struct block_device *bdev)
 {
@@ -29,12 +41,45 @@ struct block_device * blkdev_get(const char * dev_name, int mode, struct file_sy
     }
     strncpy(ret->dev_name, dev_name, sizeof(ret->dev_name));
     ret->mode = mode;
+    mutex_init(&ret->bd_fsfreeze_mutex);
     return ret;
 }
 void blkdev_put(struct block_device * bdev, int mode){
     free(bdev);
 }
 
+
+
+int set_blocksize(struct block_device *bdev, int size)
+{
+	/* Size must be a power of two, and between 512 and PAGE_SIZE */
+	if (size > PAGE_SIZE || size < 512 || !is_power_of_2(size))
+		return -EINVAL;
+
+	/* Size cannot be smaller than the size supported by the device */
+	if (size < 512)
+		return -EINVAL;
+
+	/* Don't change the size if it is same as current */
+	if (bdev->bd_block_size != size) {
+		//TODO: sync_blockdev(bdev);
+		bdev->bd_block_size = size;
+		//TODO: bdev->bd_inode->i_blkbits = blksize_bits(size);
+		//TODO: kill_bdev(bdev);
+	}
+	return 0;
+}
+
+int sb_set_blocksize(struct super_block *sb, int size)
+{
+    if (set_blocksize(sb->s_bdev, size))
+        return 0;
+    /*  If we get here, we know size is power of two
+     *       * and it's value is between 512 and PAGE_SIZE */
+    sb->s_blocksize = size;
+    sb->s_blocksize_bits = blksize_bits(size);
+    return sb->s_blocksize;
+}
 
 
 static void destroy_unused_super(struct super_block * sb){
@@ -52,7 +97,7 @@ static struct super_block * alloc_super(struct file_system_type * type, int flag
     }
 
 
-    //init_rwsem(&s->s_umount);
+    init_rwsem(&sb->s_umount);
     INIT_HLIST_NODE(&sb->s_instances);
     INIT_LIST_HEAD(&sb->s_list);
 
@@ -65,21 +110,15 @@ static struct super_block * alloc_super(struct file_system_type * type, int flag
     sb->s_time_min = TIME64_MIN;
     sb->s_time_max = TIME64_MAX;
 
+
+    spin_lock_init(&sb->s_inode_list_lock);
+    INIT_LIST_HEAD(&sb->s_inodes);
+
+
     return sb;
 }
 
 
-int sb_set_blocksize(struct super_block *sb, int size)
-{
-//    if (set_blocksize(sb->s_bdev, size))
-//        return 0;
-//    /*  If we get here, we know size is power of two
-//     *       * and it's value is between 512 and PAGE_SIZE */
-//    sb->s_blocksize = size;
-//    sb->s_blocksize_bits = blksize_bits(size);
-//    return sb->s_blocksize;
-    return 0;
-}
 
 static struct super_block * sget(struct file_system_type * type, 
     int (*test)(struct super_block *, void *), 
@@ -170,8 +209,17 @@ struct dentry *mount_bdev(struct file_system_type *fs_type,
         pr_error("ERROR: blkdev get failed\n");
         return ERR_CAST(bdev);
     }
+    mutex_lock(&bdev->bd_fsfreeze_mutex);
+    if(bdev->bd_fsfreeze_count > 0){
+        mutex_unlock(&bdev->bd_fsfreeze_mutex); 
+        error = -EBUSY;
+        goto error_bdev;
+    }
+
+
 	// 2. get or create sb with the block_device
     sb = sget(fs_type, test_dev, set_dev, flags, bdev);
+    mutex_unlock(&bdev->bd_fsfreeze_mutex);
     if(IS_ERR(sb)){
         pr_error("ERROR: sget failed\n");
         goto error_sb;
@@ -180,9 +228,9 @@ struct dentry *mount_bdev(struct file_system_type *fs_type,
     if(sb->s_root){ // find old sb, and free the new get blkdev 
         // exception  ....
         
-        //up_write(&s->s_umount);
+        up_write(&sb->s_umount);
         blkdev_put(bdev, mode);
-        //down_write(&s->s_umount);
+        down_write(&sb->s_umount);
     }
     else{ // alloc new sb , and init the new sb 
         sb->s_mode = mode;
