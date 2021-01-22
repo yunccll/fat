@@ -5,7 +5,6 @@
 #include "list.h"
 #include "lock.h"
 #include "types.h"
-#include "base.h"
 
 struct dengry;
 struct file_system_type;

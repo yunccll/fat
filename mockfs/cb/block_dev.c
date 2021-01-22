@@ -1,6 +1,7 @@
 #include "block_dev.h"
 #include "super.h"
 #include "inode.h"
+#include "base.h"
 
 unsigned int blksize_bits(unsigned int size)
 {

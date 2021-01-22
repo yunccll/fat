@@ -2,6 +2,7 @@
 #include "lock.h"
 #include "list.h"
 #include "super.h"
+#include "base.h"
 
 
 static struct inode * inode_create()

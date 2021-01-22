@@ -3,7 +3,6 @@
 #define  TYPES_H
 
 
-//#include <linux/types.h>
 
 #define TRUE  1
 #define FALSE 0
@@ -34,14 +33,19 @@ typedef __u64 u64;
 typedef _Bool bool;
 
 
+#ifdef OS_X
 typedef __u64         sector_t;
-typedef long long   __kernel_loff_t;
 typedef __kernel_loff_t     loff_t;
+typedef u64 blkcnt_t;
+#else
+#include <sys/types.h>
+#endif
+
+typedef long long   __kernel_loff_t;
 
 typedef __s64 time64_t;
 typedef __u64 timeu64_t;
 
-typedef u64 blkcnt_t;
 typedef u64 sector_t;
 
 typedef unsigned int fmode_t;

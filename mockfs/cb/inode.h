@@ -1,7 +1,7 @@
 #ifndef  INODE_H
 #define  INODE_H
 
-#include "base.h"
+#include "types.h"
 #include "list.h"
 #include "lock.h"
 #include "time64.h"
