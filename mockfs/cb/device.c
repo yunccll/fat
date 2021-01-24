@@ -54,9 +54,11 @@ void mcfs_dev_destroy(mcfs_dev_t * ptr){
 }
 
 mcfs_dev_t * mcfs_dev_create_file(const char * fname){
+    mcfs_dev_t * ptr;
+
     IF_TRUE_RETURN(fname == NULL, NULL, "fname is NULL");
 
-    mcfs_dev_t * ptr = (mcfs_dev_t*)calloc(sizeof(mcfs_dev_t), 1);
+    ptr = (mcfs_dev_t*)calloc(sizeof(mcfs_dev_t), 1);
     IF_TRUE_RETURN(ptr == NULL, NULL, "No enough memory, will close the file\n");
 
     ptr->_fname = fname;
@@ -71,9 +73,10 @@ error:
 }
 
 long long mcfs_dev_write(mcfs_dev_t * ptr, loff_t offset,const char * block, long long bytes){
+    loff_t ret;
     IF_TRUE_RETURN( ptr->_fd == INVALID_FD, -1, "open device first\n");
 
-    long long ret = lseek(ptr->_fd, offset, SEEK_SET);
+    ret = lseek(ptr->_fd, offset, SEEK_SET);
     IF_TRUE_RETURN(ret < 0, ret, "lseek file failed! err:%s\n", strerror(errno));
 
     ret = write(ptr->_fd, block, bytes);
@@ -83,9 +86,10 @@ long long mcfs_dev_write(mcfs_dev_t * ptr, loff_t offset,const char * block, lon
 }
 
 long long  mcfs_dev_read(mcfs_dev_t * ptr, loff_t offset, char * block, long long bytes){
+    loff_t ret;
     IF_TRUE_RETURN( ptr->_fd == INVALID_FD, -1, "open device first\n");
 
-    long long ret = lseek(ptr->_fd, offset, SEEK_SET);
+    ret = lseek(ptr->_fd, offset, SEEK_SET);
     IF_TRUE_RETURN(ret < 0, ret, "lseek file failed! err:%s\n", strerror(errno));
         
     //TRACE_PRINT("fd:%d, is_connected:%d, fname:%s, block:%p, bytes:%llu\n", ptr->_fd, ptr->_is_connected, ptr->_fname, block, bytes);

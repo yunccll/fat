@@ -4,11 +4,19 @@
 #include "block_dev.h"
 #include "device.h"
 
-//static struct buffer_head * alloc_bh(void){
-//    return 0;
-//}
+/*
+static struct buffer_head * alloc_buffer_head(void){
+	struct buffer_head * bh = (struct buffer_head*)calloc(sizeof(struct buffer_head), 1);	
+	if(bh){
+		INIT_LIST_HEAD(&bh->b_assoc_buffers);
+		spin_lock_init(&bh->b_uptodate_lock);
+	}
+    return bh;
+}*/
 
 
+
+ 
 
 
 

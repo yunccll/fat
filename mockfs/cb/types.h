@@ -35,11 +35,10 @@ typedef _Bool bool;
 typedef long long   __kernel_loff_t;
 
 
-#ifdef Darwin
-
-#include <sys/_types/_dev_t.h>
-
 typedef __u64         sector_t;
+
+#ifdef Darwin
+#include <sys/_types/_dev_t.h>
 typedef __kernel_loff_t     loff_t;
 typedef u64 blkcnt_t;
 

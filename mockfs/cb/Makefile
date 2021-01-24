@@ -1,6 +1,6 @@
 include ../mk/Makefile.root.include
 include ../mk/Makefile.libs.include
-HIDE=
+#HIDE=
 
 OS=$(shell uname -s)
 
