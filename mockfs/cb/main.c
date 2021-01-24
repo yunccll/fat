@@ -5,10 +5,17 @@
 #include "dcache.h"
 #include "list.h"
 #include "inode.h"
+#include "buffer_head.h"
 
 static int lfs_fill_super(struct super_block * sb, void * data, int silent)
 {
     int err;
+
+    struct buffer_head * mbr = sb_bread(sb, 0);
+    if(!mbr){
+        return -ENOMEM;
+    }
+    
 
     struct inode * root_inode = new_inode(sb);
     if(!root_inode){
@@ -69,7 +76,7 @@ TEST(FileSystemTypeTest, use){
 
 	print_filesystem();
 
-	root_dentry = lfs_fs_type.mount(&lfs_fs_type, 0, "~/zero.img", NULL);
+	root_dentry = lfs_fs_type.mount(&lfs_fs_type, 0, "/Users/chenglun/zero.img", NULL);
     ASSERT_TRUE(root_dentry != NULL);
     
     sb = (root_dentry) ? root_dentry->d_sb : get_super_from_filesystem(&lfs_fs_type);

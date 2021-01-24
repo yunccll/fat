@@ -1,9 +1,35 @@
 #include "buffer_head.h"
 #include "super.h"
+#include "base.h"
+#include "block_dev.h"
+#include "device.h"
+
+//static struct buffer_head * alloc_bh(void){
+//    return 0;
+//}
+
+
+
+
+
+
 
 struct buffer_head * sb_bread(struct super_block *sb, sector_t block)
 {
-    //TODO:
+    //return __bread_gfp(sb->s_bdev, block, sb->s_blocksize, __GFP_MOVABLE);
+    struct block_device * bdev = sb->s_bdev;
+    int bytes = 0;
+    loff_t offset = 0;
+    char buf[512];  
+
+    offset = (block * bdev->bd_block_size);
+    bytes = mcfs_dev_read(bdev->bd_real_dev, offset, buf, bdev->bd_block_size);
+    if(bytes >= 0){
+        pr_debug("read bytes:[%d]\n", bytes);
+        //TODO: construct an buffer_head, return it;
+        return (void *)1024;
+    }
+    pr_error("ERROR: read bytes from real device:[%s] faield\n", bdev->dev_name);
     return 0;
 }
 static inline void put_bh(struct buffer_head *bh)

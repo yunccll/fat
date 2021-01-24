@@ -4,6 +4,7 @@
 #include "filesystem.h"
 #include "dcache.h"
 #include "block_dev.h"
+#include "time64.h"
 
 static LIST_HEAD(super_blocks);
 static DEFINE_SPINLOCK(sb_lock);
@@ -134,7 +135,7 @@ static int test_dev(struct super_block * sb, void *bdev){
 }
 static int set_dev(struct super_block * sb, void *bdev){
     sb->s_bdev = bdev;
-    //sb->s_dev = sb->s_bdev->bd_dev;
+    sb->s_dev = sb->s_bdev->bd_dev;
     //s->s_bdi = bdi_get(s->s_bdev->bd_bdi);
     return 0;
 }

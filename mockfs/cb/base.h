@@ -23,8 +23,6 @@
 #define strlcpy     strncpy
 
 
-
-//#define offsetof(TYPE, MEMBER)  ((size_t)&((TYPE *)0)->MEMBER)
 /* *
     BUILD_BUG_ON_MSG(!__same_type(*(ptr), ((type *)0)->member) &&   \
         !__same_type(*(ptr), void),            \
@@ -40,10 +38,7 @@
     ((type *)(__mptr - offsetof(type, member)));    \
     })
 
-
 #define MAX_NON_LFS ((1UL<<31) - 1)
-#define TIME64_MAX          ((s64)~((u64)1 << 63))
-#define TIME64_MIN          (-TIME64_MAX - 1)
 
 #define __force     
 /*  file is open for reading */

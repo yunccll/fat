@@ -10,6 +10,7 @@ struct dengry;
 struct file_system_type;
 struct super_operations;
 
+    //sb->s_dev = sb->s_bdev->bd_dev;
 struct super_block {
     struct list_head s_list;
     struct block_device * s_bdev;
@@ -18,6 +19,7 @@ struct super_block {
     char s_id[32];
     int s_flags;
 
+    dev_t s_dev;
 
     int         s_count; //ref count
     atomic_t    s_active;
