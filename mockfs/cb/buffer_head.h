@@ -10,6 +10,7 @@
 
 struct super_block;
 struct block_device;
+struct page;
 struct buffer_head {
 
     sector_t b_blocknr;     /* start block number, default -1 */
@@ -27,6 +28,7 @@ struct buffer_head {
 
     atomic_t b_count;       /* users using this buffer_head */
 
+    struct page *  b_page;        /* the page this bh is mapped to */
 
 //    unsigned long b_state;      /* buffer state bitmap (see above) */
 //    struct page *b_page;        /* the page this bh is mapped to */

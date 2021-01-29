@@ -95,6 +95,7 @@
 
 
 #define PAGE_SIZE   4096
+#define BLOCK_SIZE  512
 
 
 static inline bool is_power_of_2(unsigned long n)

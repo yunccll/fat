@@ -6,6 +6,7 @@
 #define ENOMEM      100
 #define EBUSY	    101
 #define EINVAL	    102
+#define EIO         103
 
 
 

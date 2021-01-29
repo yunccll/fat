@@ -5,7 +5,7 @@
 #include "base.h"
 
 
-static struct inode * inode_create()
+struct inode * inode_create()
 {
     return (struct inode*)calloc(sizeof(struct inode), 1);
 }
@@ -24,7 +24,7 @@ static void inode_sb_list_add(struct inode *inode)
     spin_unlock(&inode->i_sb->s_inode_list_lock);
 }
 
-static int inode_init_always(struct super_block * sb, struct inode * inode)
+int inode_init_always(struct super_block * sb, struct inode * inode)
 {
 	inode->i_sb = sb;
 	inode->i_blkbits = sb->s_blocksize_bits;

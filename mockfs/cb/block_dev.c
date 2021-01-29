@@ -33,7 +33,7 @@ struct block_device * blkdev_get(const char * dev_name, int mode, struct file_sy
     strncpy(ret->dev_name, dev_name, sizeof(ret->dev_name));
     ret->mode = mode;
     mutex_init(&ret->bd_fsfreeze_mutex);
-    ret->bd_block_size = 512;
+    ret->bd_block_size = BLOCK_SIZE;
 
     //TODO: create file as device now
     ret->bd_real_dev = mcfs_dev_create_file(ret->dev_name);
@@ -58,12 +58,12 @@ void blkdev_put(struct block_device * bdev, int mode){
 
 int set_blocksize(struct block_device *bdev, int size)
 {
-	/* Size must be a power of two, and between 512 and PAGE_SIZE */
-	if (size > PAGE_SIZE || size < 512 || !is_power_of_2(size))
+	/* Size must be a power of two, and between BLOCK_SIZE and PAGE_SIZE */
+	if (size > PAGE_SIZE || size < BLOCK_SIZE || !is_power_of_2(size))
 		return -EINVAL;
 
 	/* Size cannot be smaller than the size supported by the device */
-	if (size < 512)
+	if (size < BLOCK_SIZE)
 		return -EINVAL;
 
 	/* Don't change the size if it is same as current */
@@ -81,7 +81,7 @@ int sb_set_blocksize(struct super_block *sb, int size)
     if (set_blocksize(sb->s_bdev, size))
         return 0;
     /*  If we get here, we know size is power of two
-     * and it's value is between 512 and PAGE_SIZE */
+     * and it's value is between BLOCK_SIZE and PAGE_SIZE */
     sb->s_blocksize = size;
     sb->s_blocksize_bits = blksize_bits(size);
     return sb->s_blocksize;
@@ -89,7 +89,7 @@ int sb_set_blocksize(struct super_block *sb, int size)
 
 static inline unsigned int bdev_logical_block_size(struct block_device *bdev)
 {
-    return 512; 
+    return BLOCK_SIZE; 
     //return queue_logical_block_size(bdev_get_queue(bdev));
 }
 int sb_min_blocksize(struct super_block *sb, int size)

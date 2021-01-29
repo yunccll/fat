@@ -35,7 +35,9 @@ struct inode {
 //    struct address_space    *i_mapping;
 };
 
+struct inode * inode_create();
 struct inode * new_inode(struct super_block * sb);
+int inode_init_always(struct super_block * sb, struct inode * inode);
 
 
 void iput(struct inode * inode);
