@@ -1,18 +1,34 @@
 #include "fat_super.h"
 #include "base.h"
+#include "msdos_fs.h"
 
-void fat_super_block_free(struct fat_super_block * sbf)
+void fat_sb_free(struct fat_sb * fsb)
 {
-    free(sbf);
+    free(fsb);
 }
-struct fat_super_block * fat_super_block_create(u8 * data, unsigned long size)
+
+static void fat_sb_print(struct fat_sb * fsb)
 {
+    //TODO:
+}
+static int fat_sb_read(struct fat_sb  *fsb, const struct fat_boot_sector * bs)
+{
+    //TODO:
+    return 0;
+}
+struct fat_sb * fat_sb_create(u8 * data, unsigned long size)
+{
+    struct fat_sb * fsb;
     if(!data){
         return NULL;
     }
-
-    struct fat_super_block * ptr = (struct fat_super_block*)calloc(sizeof(struct fat_super_block), 1);
-    //TODO:
     pr_debug("MRB info %x,%x,%x\n", data[0], data[1], data[2]);
-    return ptr;
+
+    fsb = (struct fat_sb*)calloc(sizeof(struct fat_sb), 1);
+    if(fsb && !fat_sb_read(fsb, (const struct fat_boot_sector*)data)){
+        fat_sb_print(fsb);
+        return fsb;
+    }
+    fat_sb_free(fsb);
+    return NULL;
 }

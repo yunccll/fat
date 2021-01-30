@@ -17,9 +17,9 @@ static struct super_operations fat_sb_ops= {
 
 
 static void fat_fs_info_free(struct super_block * sb){
-    struct fat_super_block * sbf = fat_sb(sb);
+    struct fat_sb * sbf = fat_sb(sb);
     if(sbf){
-        fat_super_block_free(sbf);
+        fat_sb_free(sbf);
     }
 }
 static int fat_fs_info_load(struct super_block * sb)
@@ -29,7 +29,7 @@ static int fat_fs_info_load(struct super_block * sb)
     if(!bh){
         return -ENOMEM;
     }
-    struct fat_super_block * sbf = fat_super_block_create((u8*)(bh->b_data), BLOCK_SIZE);
+    struct fat_sb * sbf = fat_sb_create((u8*)(bh->b_data), BLOCK_SIZE);
     fat_sb_save(sb, sbf);
     brelse(bh);
     return 0;
@@ -74,7 +74,7 @@ root_inode_free:
     return err; 
 }
 
-static int lfs_fill_super(struct super_block * sb, void * data, int silent)
+static int fat_fill_super(struct super_block * sb, void * data, int silent)
 {
     int err;
     //0. sb init
@@ -107,29 +107,29 @@ out_fail:
     return err;
 }
 
-static struct dentry * lfs_mount(struct file_system_type *fs_type, int flags, const char *dev_name, void *data){
-	pr_debug("file system : lfs_mount .....\n");
-	return mount_bdev(fs_type, flags, dev_name, data, &lfs_fill_super);
+static struct dentry * fat_mount(struct file_system_type *fs_type, int flags, const char *dev_name, void *data){
+	pr_debug("file system : fat_mount .....\n");
+	return mount_bdev(fs_type, flags, dev_name, data, &fat_fill_super);
 }
-void lfs_kill_sb(struct super_block * sb){
-	pr_debug("lfs_kill_sb\n");
-    fat_super_block_free(fat_sb(sb));
+void fat_kill_sb(struct super_block * sb){
+	pr_debug("fat_kill_sb\n");
+    fat_sb_free(fat_sb(sb));
     sb->s_fs_info = NULL;
 	kill_block_super(sb);
 }
 
-static struct file_system_type lfs_fs_type = {
-    .name       = "lfs",
-    .mount      = lfs_mount,
-    .kill_sb    = lfs_kill_sb,
+static struct file_system_type fat_fs_type = {
+    .name       = "fat",
+    .mount      = fat_mount,
+    .kill_sb    = fat_kill_sb,
     .fs_flags   = FS_REQUIRES_DEV,
 };
 
-static int lfs_init(){
-	return register_filesystem(&lfs_fs_type);
+static int fat_init(){
+	return register_filesystem(&fat_fs_type);
 }
-static void lfs_exit(){
-	unregister_filesystem(&lfs_fs_type);
+static void fat_exit(){
+	unregister_filesystem(&fat_fs_type);
 }
 
 struct super_block * get_super_from_filesystem(struct file_system_type * fs_type){
@@ -143,22 +143,22 @@ TEST(FileSystemTypeTest, use){
     struct dentry * root_dentry;
     struct super_block * sb;
 
-	lfs_init();
+	fat_init();
 
 	print_filesystem();
 
-	root_dentry = lfs_fs_type.mount(&lfs_fs_type, 0, "zero.img", NULL);
+	root_dentry = fat_fs_type.mount(&fat_fs_type, 0, "zero.img", NULL);
     ASSERT_TRUE(root_dentry != NULL);
     
-    sb = (root_dentry) ? root_dentry->d_sb : get_super_from_filesystem(&lfs_fs_type);
+    sb = (root_dentry) ? root_dentry->d_sb : get_super_from_filesystem(&fat_fs_type);
 
     if(sb != NULL){
-        lfs_fs_type.kill_sb(sb);
+        fat_fs_type.kill_sb(sb);
     }
     else
         pr_error("sb is NULL, when kill sb\n");
 
-	lfs_exit();
+	fat_exit();
 }
 
 #include "list.h"

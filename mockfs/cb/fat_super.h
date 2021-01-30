@@ -5,22 +5,22 @@
 #include "types.h"
 #include "super.h"
 
-struct fat_super_block {
+struct fat_sb {
     int value;
 };
 
-static inline void fat_sb_save(struct super_block * sb, struct fat_super_block * sbf)
+static inline void fat_sb_save(struct super_block * sb, struct fat_sb * fsb)
 {
-    if(sbf)
-        sb->s_fs_info = sbf;
+    if(fsb)
+        sb->s_fs_info = fsb;
 }
-static inline struct fat_super_block * fat_sb(struct super_block * sb){
-    return (struct fat_super_block*)sb->s_fs_info;
+static inline struct fat_sb * fat_sb(struct super_block * sb){
+    return (struct fat_sb*)sb->s_fs_info;
 }
 
 
-void fat_super_block_free(struct fat_super_block * sbf);
-struct fat_super_block * fat_super_block_create(u8 * data, unsigned long size);
+void fat_sb_free(struct fat_sb * fsb);
+struct fat_sb * fat_sb_create(u8 * data, unsigned long size);
 
 
 #endif   /* FAT_SUPER_H */

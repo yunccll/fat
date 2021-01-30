@@ -37,6 +37,9 @@ typedef long long   __kernel_loff_t;
 
 typedef __u64         sector_t;
 
+
+
+
 #ifdef Darwin
 #include <sys/_types/_dev_t.h>
 typedef __kernel_loff_t     loff_t;
@@ -49,7 +52,11 @@ typedef u64 blkcnt_t;
 typedef __s64 time64_t;
 typedef __u64 timeu64_t;
 
-typedef unsigned int fmode_t;
+typedef __u16 /*__bitwise*/ __le16;
+typedef __u32 /*__bitwise*/ __le32;
+typedef __u64 /*__bitwise*/ __le64;
 
+
+typedef unsigned int fmode_t;
 
 #endif   /* TYPES_H */
