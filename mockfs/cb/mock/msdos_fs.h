@@ -2,7 +2,7 @@
 #ifndef  MSDOS_FS_H
 #define  MSDOS_FS_H
 
-#include "types.h"
+#include "../types.h"
 
 #define MSDOS_NAME  11
 
@@ -60,6 +60,20 @@ struct fat_boot_sector {
     };
 
 };
+
+struct msdos_dir_entry {
+    __u8    name[MSDOS_NAME];/* name and extension */
+    __u8    attr;       /* attribute bits */
+    __u8    lcase;      /* Case for base and extension */
+    __u8    ctime_cs;   /* Creation time, centiseconds (0-199) */
+    __le16  ctime;      /* Creation time */
+    __le16  cdate;      /* Creation date */
+    __le16  adate;      /* Last access date */
+    __le16  starthi;    /* High 16 bits of cluster in FAT32 */
+    __le16  time,date,start;/* time, date and first cluster */
+    __le32  size;       /* file size (in bytes) */
+};
+
 
 
 #endif   /* MSDOS_FS_H */

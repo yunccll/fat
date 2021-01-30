@@ -1,7 +1,8 @@
 #include "fat_super.h"
 #include "base.h"
-#include "msdos_fs.h"
+#include "mock/msdos_fs.h"
 #include "mock/access_ok.h"
+//#include "mock/ffs.h"
 
 void fat_sb_free(struct fat_sb * fsb)
 {
@@ -12,10 +13,35 @@ static void fat_sb_print(struct fat_sb * fsb)
 {
     //TODO:
 }
-static int fat_sb_read(struct fat_sb  *fsb, const struct fat_boot_sector * bs)
+
+static int fat_sb_read(struct fat_sb  *fsb, const struct fat_boot_sector * fbs)
 {
-    unsigned short val = get_unaligned_le16(bs->sector_size);
-    //TODO:
+	fsb->sector_size = get_unaligned_le16(fbs->sector_size);
+
+	fsb->fat_bits = 12;
+	fsb->fsinfo_sector = 1;
+
+	fsb->fat_sector_start = le16_to_cpu(fbs->reserved); 
+	fsb->fat_length = le16_to_cpu(fbs->fat_length);
+	fsb->fats = fbs->fats;
+
+	fsb->root_dir_sector_start = fsb->fat_sector_start + fbs->fats * fsb->fat_length;
+	fsb->root_dir_entries = get_unaligned_le16(&fbs->dir_entries);
+
+	fsb->data_sector_start = fsb->root_dir_sector_start + fsb->root_dir_entries * fsb->sector_size / sizeof(struct msdos_dir_entry);
+
+	fsb->max_sectors = get_unaligned_le16(&fbs->sectors);
+	if(fsb->max_sectors == 0)
+		fsb->max_sectors = le32_to_cpu(fbs->total_sect);
+
+
+	fsb->sec_per_clus = fbs->sec_per_clus;
+	fsb->root_cluster = 0;
+	//TODO: fsb->max_cluster =  ??????
+
+	fsb->cluster_size = (fsb->sec_per_clus) * (fsb->sector_size);
+	fsb->cluster_bits = ffs(fsb->cluster_size) - 1;
+	
     return 0;
 }
 struct fat_sb * fat_sb_create(u8 * data, unsigned long size)

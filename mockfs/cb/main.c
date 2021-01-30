@@ -17,20 +17,22 @@ static struct super_operations fat_sb_ops= {
 
 
 static void fat_fs_info_free(struct super_block * sb){
-    struct fat_sb * sbf = fat_sb(sb);
-    if(sbf){
-        fat_sb_free(sbf);
+    struct fat_sb * fsb = fat_sb(sb);
+    if(fsb){
+        fat_sb_free(fsb);
     }
 }
 static int fat_fs_info_load(struct super_block * sb)
 {
+    struct buffer_head * bh;
+	struct fat_sb * fsb;
     assert(sb);
-    struct buffer_head * bh = sb_bread(sb, 0);
+	bh = sb_bread(sb, 0);
     if(!bh){
         return -ENOMEM;
     }
-    struct fat_sb * sbf = fat_sb_create((u8*)(bh->b_data), BLOCK_SIZE);
-    fat_sb_save(sb, sbf);
+	fsb = fat_sb_create((u8*)(bh->b_data), BLOCK_SIZE);
+    fat_sb_save(sb, fsb);
     brelse(bh);
     return 0;
 }
