@@ -1,6 +1,7 @@
 #include "fat_super.h"
 #include "base.h"
 #include "msdos_fs.h"
+#include "mock/access_ok.h"
 
 void fat_sb_free(struct fat_sb * fsb)
 {
@@ -13,6 +14,7 @@ static void fat_sb_print(struct fat_sb * fsb)
 }
 static int fat_sb_read(struct fat_sb  *fsb, const struct fat_boot_sector * bs)
 {
+    unsigned short val = get_unaligned_le16(bs->sector_size);
     //TODO:
     return 0;
 }
