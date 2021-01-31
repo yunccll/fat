@@ -4,10 +4,15 @@
 
 #include "mock/linux/types.h"
 
-#if 0
-#define WRITE_ONCE(x, val)  x = val;
-#define READ_ONCE(x) x
-#endif 
+
+#define ___PASTE(a,b) a##b
+#define __PASTE(a,b) ___PASTE(a,b)
+
+/* Not-quite-unique ID. */
+#ifndef __UNIQUE_ID
+# define __UNIQUE_ID(prefix) __PASTE(__PASTE(__UNIQUE_ID_, prefix), __LINE__)
+#endif
+
 
 
 #define barrier() __asm__ __volatile__("": : :"memory")

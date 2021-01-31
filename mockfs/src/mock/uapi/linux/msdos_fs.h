@@ -4,6 +4,8 @@
 
 #include "mock/linux/types.h"
 
+#define FAT_START_ENT   2
+
 #define MSDOS_NAME  11
 
 struct fat_boot_sector {

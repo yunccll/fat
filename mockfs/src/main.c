@@ -2,6 +2,10 @@
 #include "mock/linux/errno.h"
 #include "mock/linux/printk.h"
 #include "mock/uapi/linux/fs.h"
+#include "mock/uapi/linux/magic.h"
+#include "mock/linux/byteorder/little_endian.h"
+#include "mock/linux/byteorder/generic.h"
+#include "mock/linux/fs.h"
 
 #include "unit_test_wrapper.h"
 
@@ -10,10 +14,11 @@
 #include "inode.h"
 #include "dcache.h"
 #include "inode.h"
+#include "block_dev.h"
 #include "buffer_head.h"
 #include "fat_super.h"
 #include "fat_inode.h"
-
+#include "fat_misc.h"
 
 
 static struct super_operations fat_sb_ops= {
@@ -23,7 +28,28 @@ static struct super_operations fat_sb_ops= {
 };
 
 
-static void fat_fs_info_free(struct super_block * sb){
+static void sb_init(struct super_block * sb)
+{
+	struct timespec64 ts;
+
+	sb->s_flags |= SB_NODIRATIME|SB_NOATIME;
+    sb->s_magic = MSDOS_SUPER_MAGIC;
+    sb->s_op = &fat_sb_ops;
+    //sb->s_export_op = &fat_export_ops;
+	//TODO: fat_sb(sb)->dir_ops = &msdos_dir_inode_operations;
+    //TODO: sb->s_d_op = &msdos_dentry_operations;
+
+	sb->s_time_gran = 1; 
+	sb_min_blocksize(sb, 512);
+	sb->s_maxbytes = 0xffffffff;
+	fat_time_fat2unix(fat_sb(sb), &ts, 0, cpu_to_le16(FAT_DATE_MIN), 0);
+    sb->s_time_min = ts.tv_sec;
+
+    fat_time_fat2unix(fat_sb(sb), &ts, cpu_to_le16(FAT_TIME_MAX), cpu_to_le16(FAT_DATE_MAX), 0);
+    sb->s_time_max = ts.tv_sec;
+}
+static void fat_fs_info_free(struct super_block * sb)
+{
     struct fat_sb * fsb = fat_sb(sb);
     if(fsb){
         fat_sb_free(fsb);
@@ -87,7 +113,7 @@ static int fat_fill_super(struct super_block * sb, void * data, int silent)
 {
     int err;
     //0. sb init
-    sb->s_op = &fat_sb_ops;
+	sb_init(sb);
 
     //1. fs_info_inode
     err = fat_fs_info_load(sb);
