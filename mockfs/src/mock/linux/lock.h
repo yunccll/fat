@@ -25,9 +25,49 @@ typedef atomic64_t atomic_long_t;
 #define atomic_set(v,i)     WRITE_ONCE(((v)->counter), (i))
 #define atomic64_set(v,i)   WRITE_ONCE(((v)->counter), (i))
 
+static inline void
+atomic64_inc(atomic64_t *v)
+{
+    atomic64_set(v, atomic_read(v)+1);
+}
+static inline void
+atomic64_dec(atomic64_t *v)
+{
+    atomic64_set(v, atomic_read(v)-1);
+}
+
 static inline void atomic_dec(atomic_t *v)
 {
     atomic_set(v, atomic_read(v)-1);
+}
+static inline void atomic_inc(atomic_t *v)
+{
+    atomic_set(v, atomic_read(v)+1);
+}
+
+/**
+ * arch_atomic64_cmpxchg - cmpxchg atomic64 variable
+ * @v: pointer to type atomic64_t
+ * @o: expected value
+ * @n: new value
+ *
+ * Atomically sets @v to @n if it was equal to @o and returns
+ * the old value.
+ */
+
+static inline s64 arch_atomic64_cmpxchg(atomic64_t *v, s64 o, s64 n)
+{
+	s64 old = atomic_read(v);
+	if(old == o){
+		atomic_set(v, n);
+	}
+	return old;
+}
+
+static inline s64
+atomic64_cmpxchg(atomic64_t *v, s64 old, s64 new)
+{
+    return arch_atomic64_cmpxchg(v, old, new);
 }
 
 /**

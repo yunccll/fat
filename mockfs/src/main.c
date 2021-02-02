@@ -6,6 +6,8 @@
 #include "mock/linux/byteorder/little_endian.h"
 #include "mock/linux/byteorder/generic.h"
 #include "mock/linux/fs.h"
+#include "mock/uapi/linux/msdos_fs.h"
+#include "mock/linux/stat.h"
 
 #include "unit_test_wrapper.h"
 
@@ -15,6 +17,7 @@
 #include "dcache.h"
 #include "inode.h"
 #include "block_dev.h"
+#include "iversion.h"
 #include "buffer_head.h"
 #include "fat_super.h"
 #include "fat_inode.h"
@@ -85,6 +88,65 @@ static int fat_inode_load(struct super_block * sb)
     return 0;
 }
 
+/* fat_attr ---> inode->imode;
+ *                          is_dir?     writable
+ * ATTR_NONE    (0) -->         X       
+ * ATTR_RO      (1) -->         X       &= ~I_IWUGO
+ * ATTR_HIDDEN  (2) -->         X
+ * ATTR_SYS     (4) -->         X
+ * ATTR_VOLUME  (8) -->         X
+ * ATTR_DIR     (16) -->      Y
+ * ATTR_ARCH    (32) -->        X
+ */
+
+// fat_attr ---> inode->i_mode
+static inline u8 mode_from_fat_attr(const u8 fat_attr, const umode_t mode)
+{
+    umode_t ret_mode = mode;
+    if(fat_attr & ATTR_RO){
+        ret_mode &= ~S_IWUGO;
+    }
+    ret_mode |= ((fat_attr & ATTR_DIR) ? S_IFDIR : S_IFREG);
+    return ret_mode; 
+}
+//inode->i_mode ---> fat_attr
+static inline int fat_attr_make_from_mode(const u8 mode, u8 * fat_attr)
+{
+    if(S_ISDIR(mode))
+        *fat_attr |= ATTR_DIR;
+     
+    if( mode&S_IWUGO){ // writable 
+        *fat_attr &= ~ATTR_RO;
+    }
+    else{ // readonly
+        *fat_attr |= ATTR_RO;
+    }
+    return 0;
+}
+static int fat_root_subdirs(struct inode * root_inode)
+{
+    //TODO:
+    return 0;
+}
+
+static int root_inode_init(struct fat_sb * fsb, struct inode * inode){
+    inode->i_ino = MSDOS_ROOT_INO;
+    //TODO:inode->i_uid = current_uid();
+    //TODO:inode->i_gid = current_gid();
+    inode_inc_iversion(inode);
+    inode->i_mode = mode_from_fat_attr(ATTR_DIR, S_IRWXUGO);
+    //TODO:inode->i_op = &root_dir_inode_ops;
+    //TODO:inode->i_fop = &root_dir_file_ops;
+    fat_inode(inode)->fi_start = 0;
+    inode->i_size = fsb->root_dir_entries * sizeof(struct msdos_dir_entry);
+    inode->i_blocks = DIV_ROUND_UP(inode->i_size, fsb->cluster_size);
+
+    inode->i_mtime.tv_sec = inode->i_atime.tv_sec = inode->i_ctime.tv_sec = 0;
+    inode->i_mtime.tv_nsec = inode->i_atime.tv_nsec = inode->i_ctime.tv_nsec = 0;
+    set_nlink(inode, fat_root_subdirs(inode) + 2);
+    return 0;
+}
+
 static int root_dir_load(struct super_block * sb)
 {
     int err = -ENOMEM ;
@@ -93,8 +155,12 @@ static int root_dir_load(struct super_block * sb)
         pr_error("new inode for root failed, err:[%d]\n", err);
         return -ENOMEM;
     }
-
-    //TODO:root_inode custom init; 
+    
+    err = root_inode_init(fat_sb(sb), root_inode);
+    if(err){
+        pr_error("root_inode init failed,");
+        goto root_inode_free;
+    }
     
     sb->s_root = d_make_root(root_inode);
     if(!sb->s_root){

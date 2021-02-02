@@ -47,6 +47,8 @@ static struct super_block * alloc_super(struct file_system_type * type, int flag
     spin_lock_init(&sb->s_inode_list_lock);
     INIT_LIST_HEAD(&sb->s_inodes);
 
+    atomic64_set(&sb->s_remove_count, 0);
+
 
     return sb;
 }

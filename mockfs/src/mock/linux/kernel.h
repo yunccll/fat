@@ -103,4 +103,10 @@
 	typeof(y) __y = (y);			\
 	__x == 0 ? __y : ((__y == 0) ? __x : min(__x, __y)); })
 
+
+
+#define __KERNEL_DIV_ROUND_UP(n, d) (((n) + (d) - 1) / (d))
+
+#define DIV_ROUND_UP __KERNEL_DIV_ROUND_UP
+
 #endif   /* LINUX_KERNEL_H */

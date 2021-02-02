@@ -5,6 +5,9 @@
 #include "mock/linux/types.h"
 
 
+#define smp_mb()    barrier()
+
+
 #define ___PASTE(a,b) a##b
 #define __PASTE(a,b) ___PASTE(a,b)
 
@@ -81,6 +84,14 @@ static inline void __write_once_size(volatile void *p, void *res, int size)
 	__write_once_size(&(x), __u.__c, sizeof(x));	\
 	__u.__val;					\
 })
+
+
+# ifndef likely
+#  define likely(x) (x)
+# endif
+# ifndef unlikely
+#  define unlikely(x)   (x)
+# endif
 
 
 

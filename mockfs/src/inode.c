@@ -4,6 +4,7 @@
 #include "mock/linux/list.h"
 #include "mock/linux/printk.h"
 #include "mock/linux/slab.h"
+#include "mock/asm-generic/bug.h"
 
 
 #include "super.h"
@@ -42,6 +43,7 @@ int inode_init_always(struct super_block * sb, struct inode * inode)
 	spin_lock_init(&inode->i_lock);
 
     init_rwsem(&inode->i_rwsem);
+    atomic64_set(&inode->i_version, 0);
     //TODO:
     return 0;
 }
@@ -106,4 +108,67 @@ void iput(struct inode * inode)
 {
     pr_debug("input\n");
     //TODO:
+}
+
+void drop_nlink(struct inode *inode)
+{
+	WARN_ON(inode->i_nlink == 0);
+	inode->__i_nlink--;
+	if (!inode->i_nlink)
+		atomic64_inc(&inode->i_sb->s_remove_count);
+}
+
+/**
+ * clear_nlink - directly zero an inode's link count
+ * @inode: inode
+ *
+ * This is a low-level filesystem helper to replace any
+ * direct filesystem manipulation of i_nlink.  See
+ * drop_nlink() for why we care about i_nlink hitting zero.
+ */
+void clear_nlink(struct inode *inode)
+{
+	if (inode->i_nlink) {
+		inode->__i_nlink = 0;
+		atomic64_inc(&inode->i_sb->s_remove_count);
+	}
+}
+
+/**
+ * set_nlink - directly set an inode's link count
+ * @inode: inode
+ * @nlink: new nlink (should be non-zero)
+ *
+ * This is a low-level filesystem helper to replace any
+ * direct filesystem manipulation of i_nlink.
+ */
+void set_nlink(struct inode *inode, unsigned int nlink)
+{
+	if (!nlink) {
+		clear_nlink(inode);
+	} else {
+		/* Yes, some filesystems do change nlink from zero to one */
+		if (inode->i_nlink == 0)
+			atomic64_dec(&inode->i_sb->s_remove_count);
+
+		inode->__i_nlink = nlink;
+	}
+}
+
+/**
+ * inc_nlink - directly increment an inode's link count
+ * @inode: inode
+ *
+ * This is a low-level filesystem helper to replace any
+ * direct filesystem manipulation of i_nlink.  Currently,
+ * it is only here for parity with dec_nlink().
+ */
+void inc_nlink(struct inode *inode)
+{
+	if (unlikely(inode->i_nlink == 0)) {
+		WARN_ON(!(inode->i_state & I_LINKABLE));
+		atomic64_dec(&inode->i_sb->s_remove_count);
+	}
+
+	inode->__i_nlink++;
 }

@@ -48,7 +48,7 @@ struct super_block {
     //TODO: 
     const struct dentry_operations * s_d_op; /*  default d_op for dentries */
     
-    atomic_long_t s_remove_count; /* number of inode with nlink == 0 but still referenced */
+    atomic64_t s_remove_count; /* number of inode with nlink == 0 but still referenced */
 };
 
 

@@ -36,7 +36,7 @@ typedef long long   __kernel_loff_t;
 
 
 typedef __u64         sector_t;
-
+typedef u16     umode_t;
 
 
 

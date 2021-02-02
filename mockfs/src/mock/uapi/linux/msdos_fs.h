@@ -8,6 +8,25 @@
 
 #define MSDOS_NAME  11
 
+
+#define MSDOS_ROOT_INO   1  /*  The root inode number */
+#define MSDOS_FSINFO_INO 2  /*  Used for managing the FSINFO block */
+
+
+
+#define ATTR_NONE   0   /*  no attribute bits */
+#define ATTR_RO     1   /*  read-only */
+#define ATTR_HIDDEN 2   /*  hidden */
+#define ATTR_SYS    4   /*  system */
+#define ATTR_VOLUME 8   /*  volume label */
+#define ATTR_DIR    16  /*  directory */
+#define ATTR_ARCH   32  /*  archived */
+
+/*  attribute bits that are copied "as is" */
+#define ATTR_UNUSED (ATTR_VOLUME | ATTR_ARCH | ATTR_SYS | ATTR_HIDDEN)
+/*  bits that are used by the Windows 95/Windows NT extended FAT */
+#define ATTR_EXT    (ATTR_RO | ATTR_HIDDEN | ATTR_SYS | ATTR_VOLUME)
+
 struct fat_boot_sector {
     __u8    ignored[3]; /* Boot strap short or near jump */
     __u8    system_id[8];   /* Name - can be used to special case
