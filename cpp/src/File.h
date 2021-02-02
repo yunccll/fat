@@ -9,7 +9,7 @@
 namespace fat {
 
 class FileSystem;
-class Entry;
+struct Entry;
 
 class File {
 public:

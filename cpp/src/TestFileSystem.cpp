@@ -45,7 +45,7 @@ public:
                 return s;
             }
             uint64_t offsetInBlock = file->getOffsetInBlock(offset);
-            uint64_t len = std::min(leftSize, file->getBlockBytes()-offsetInBlock);
+            uint64_t len = std::min(leftSize, (uint64_t)file->getBlockBytes() - offsetInBlock);
             result.append(blockBuf, offsetInBlock, len); //copy to dest , perf optimal
 
             offset += len;
@@ -107,7 +107,7 @@ public:
         if(!s) return s;
 
         //copy data
-        uint64_t writeBytes = std::min(len, file->getBlockBytes() - offsetInBlock);
+        uint64_t writeBytes = std::min((uint64_t)len, file->getBlockBytes() - offsetInBlock);
         auto start = offsetInBlock;
         auto & thisBlock = block;
         std::for_each(src, src + writeBytes,  [&thisBlock, &start](char c) {
@@ -127,7 +127,7 @@ public:
         while(len > 0){
             block.clear();
             //insert data
-            uint64_t writeBytes = std::min(len, file->getBlockBytes());
+            uint64_t writeBytes = std::min((uint64_t)len, file->getBlockBytes());
             std::copy(src, src + writeBytes, std::back_inserter(block));
             if(writeBytes < file->getBlockBytes())
                 block.append(file->getBlockBytes() - writeBytes, '\0');

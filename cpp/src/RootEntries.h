@@ -11,7 +11,7 @@
 namespace fat {
 
 
-class Entry;
+struct Entry;
 struct DirItem;
 
 class RootEntries {
