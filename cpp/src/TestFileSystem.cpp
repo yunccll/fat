@@ -266,7 +266,7 @@ TEST(FileSystemTest, use)
 
         std::string result;
         ASSERT_TRUE(r->read(5, result).isOk());
-        ASSERT_EQ(5, result.size());
+        ASSERT_EQ(5ul, result.size());
 
         while(r->read(10, result).isOk()) ;
         //std::cout << "size: " << result.size() << " content:" << result << std::endl;

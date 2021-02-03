@@ -27,7 +27,7 @@ TEST_F(RootEntryArrayTest, readOneItem){
     };
 
     RootEntryArray array(data, sizeof(data));
-    ASSERT_EQ(1, array.getEntryCount());
+    ASSERT_EQ(1ul, array.getEntryCount());
     ASSERT_EQ(data,  (uint8_t*)&(array[0]));
 
     auto iter = array.begin();
@@ -55,7 +55,7 @@ TEST_F(RootEntryArrayTest, readMultiItem){
     };
 
     RootEntryArray array(data, sizeof(data));
-    ASSERT_EQ(3, array.getEntryCount());
+    ASSERT_EQ(3ul, array.getEntryCount());
     ASSERT_EQ(data,  (uint8_t*)&(array[0]));
 
     auto iter = array.begin();

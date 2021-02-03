@@ -45,7 +45,7 @@ protected:
 TEST_F(EntryTest, realEntry){
     Entry entry(realEntry, 32);
     ASSERT_EQ(std::string("A       TXT"), entry.getStorageName().ToString());
-    ASSERT_EQ(32, entry.getSize());
+    ASSERT_EQ(32ul, entry.getSize());
 
     std::string name;
     ASSERT_TRUE(entry.getName(name));

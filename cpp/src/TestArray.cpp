@@ -45,14 +45,14 @@ public:
         });
     };
     Array::ValueType & get(const int index) override {
-        if(index >= 0 && index < values.size()){
+        if(index >= 0 && (size_t)index < values.size()){
             return values[index];
         }
         return Array::NullObject;
     }
 
     const Array::ValueType & get(const int index) const override {
-        if(index >= 0 && index < values.size()){
+        if(index >= 0 && (size_t)index < values.size()){
             return values[index];
         }
         return Array::NullObject;
@@ -86,14 +86,14 @@ public:
         );
     };
     Array::ValueType & get(const int index) override {
-        if(index >= 0 && index < values.size()){
+        if(index >= 0 && (size_t)index < values.size()){
             return values[index];
         }
         return NewArray::NullObject;
     }
 
     const Array::ValueType & get(const int index) const override {
-        if(index >= 0 && index < values.size()){
+        if(index >= 0 && (size_t)index < values.size()){
             return values[index];
         }
         return NewArray::NullObject;
