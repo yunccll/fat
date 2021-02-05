@@ -1,6 +1,20 @@
 #ifndef  LINUX_FS_H
 #define  LINUX_FS_H
 
+#include "mock/linux/uidgid.h"
+
+
+static inline kuid_t current_uid()
+{
+    return KUIDT_INIT(100);
+}
+static inline kgid_t current_gid()
+{
+    return KGIDT_INIT(100);
+}
+
+
+
 #define MAX_NON_LFS ((1UL<<31) - 1)
 
 #define __force     

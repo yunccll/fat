@@ -39,6 +39,16 @@ typedef __u64         sector_t;
 typedef u16     umode_t;
 
 
+typedef unsigned int    __kernel_uid32_t;
+typedef unsigned int    __kernel_gid32_t;
+typedef unsigned short  __kernel_uid16_t;
+typedef unsigned short  __kernel_gid16_t;
+
+typedef __kernel_uid32_t    uid_t;
+typedef __kernel_gid32_t    gid_t;
+typedef __kernel_uid16_t        uid16_t;
+typedef __kernel_gid16_t        gid16_t;
+
 
 #ifdef Darwin
 #include <sys/_types/_dev_t.h>

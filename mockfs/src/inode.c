@@ -41,6 +41,8 @@ int inode_init_always(struct super_block * sb, struct inode * inode)
     inode->i_bytes = 0;
 
 	spin_lock_init(&inode->i_lock);
+    i_uid_write(inode, 0);
+    i_gid_write(inode, 0);
 
     init_rwsem(&inode->i_rwsem);
     atomic64_set(&inode->i_version, 0);

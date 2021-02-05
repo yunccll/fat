@@ -5,6 +5,7 @@
 #include "mock/linux/list.h"
 #include "mock/linux/lock.h"
 #include "mock/linux/time64.h"
+#include "mock/linux/uidgid.h"
 
 
 struct super_block;
@@ -142,6 +143,8 @@ struct inode {
 //    const struct inode_operations   *i_op;
 //    struct super_block  *i_sb;
 //    struct address_space    *i_mapping;
+    kuid_t i_uid;
+    kgid_t i_gid;
 };
 
 struct inode * inode_create();
@@ -192,5 +195,30 @@ void set_nlink(struct inode *inode, unsigned int nlink);
  */
 void inc_nlink(struct inode *inode);
 
+
+
+static inline uid_t i_uid_read(const struct inode *inode)
+{
+    //return from_kuid(inode->i_sb->s_user_ns, inode->i_uid);
+    return from_kuid(NULL, inode->i_uid);
+}
+
+static inline gid_t i_gid_read(const struct inode *inode)
+{
+    //return from_kgid(inode->i_sb->s_user_ns, inode->i_gid);
+    return from_kgid(NULL, inode->i_gid);
+}
+
+static inline void i_uid_write(struct inode *inode, uid_t uid)
+{
+    //inode->i_uid = make_kuid(inode->i_sb->s_user_ns, uid);
+    inode->i_uid = make_kuid(NULL, uid);
+}
+
+static inline void i_gid_write(struct inode *inode, gid_t gid)
+{
+    //inode->i_gid = make_kgid(inode->i_sb->s_user_ns, gid);
+    inode->i_gid = make_kgid(NULL, gid);
+}
 
 #endif   /* INODE_H */

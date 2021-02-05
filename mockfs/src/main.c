@@ -51,6 +51,11 @@ static void sb_init(struct super_block * sb)
     fat_time_fat2unix(fat_sb(sb), &ts, cpu_to_le16(FAT_TIME_MAX), cpu_to_le16(FAT_DATE_MAX), 0);
     sb->s_time_max = ts.tv_sec;
 }
+
+
+
+// ----------------------   fs_info sector related start 
+
 static void fat_fs_info_free(struct super_block * sb)
 {
     struct fat_sb * fsb = fat_sb(sb);
@@ -72,8 +77,11 @@ static int fat_fs_info_load(struct super_block * sb)
     brelse(bh);
     return 0;
 }
+// ----------------------   fs_info sector related end
 
 
+
+// ----------------------   fat related start
 static void fat_inode_free(struct super_block * sb)
 {
 }
@@ -87,52 +95,23 @@ static int fat_inode_load(struct super_block * sb)
     //TODO: test the code for fat2
     return 0;
 }
+// ----------------------   fat related end
 
-/* fat_attr ---> inode->imode;
- *                          is_dir?     writable
- * ATTR_NONE    (0) -->         X       
- * ATTR_RO      (1) -->         X       &= ~I_IWUGO
- * ATTR_HIDDEN  (2) -->         X
- * ATTR_SYS     (4) -->         X
- * ATTR_VOLUME  (8) -->         X
- * ATTR_DIR     (16) -->      Y
- * ATTR_ARCH    (32) -->        X
- */
 
-// fat_attr ---> inode->i_mode
-static inline u8 mode_from_fat_attr(const u8 fat_attr, const umode_t mode)
-{
-    umode_t ret_mode = mode;
-    if(fat_attr & ATTR_RO){
-        ret_mode &= ~S_IWUGO;
-    }
-    ret_mode |= ((fat_attr & ATTR_DIR) ? S_IFDIR : S_IFREG);
-    return ret_mode; 
-}
-//inode->i_mode ---> fat_attr
-static inline int fat_attr_make_from_mode(const u8 mode, u8 * fat_attr)
-{
-    if(S_ISDIR(mode))
-        *fat_attr |= ATTR_DIR;
-     
-    if( mode&S_IWUGO){ // writable 
-        *fat_attr &= ~ATTR_RO;
-    }
-    else{ // readonly
-        *fat_attr |= ATTR_RO;
-    }
-    return 0;
-}
+
+
+
+
+//  ------------------  fat_root_inode start.........
 static int fat_root_subdirs(struct inode * root_inode)
 {
     //TODO:
     return 0;
 }
-
 static int root_inode_init(struct fat_sb * fsb, struct inode * inode){
     inode->i_ino = MSDOS_ROOT_INO;
-    //TODO:inode->i_uid = current_uid();
-    //TODO:inode->i_gid = current_gid();
+    inode->i_uid = current_uid();
+    inode->i_gid = current_gid();
     inode_inc_iversion(inode);
     inode->i_mode = mode_from_fat_attr(ATTR_DIR, S_IRWXUGO);
     //TODO:inode->i_op = &root_dir_inode_ops;
@@ -146,7 +125,6 @@ static int root_inode_init(struct fat_sb * fsb, struct inode * inode){
     set_nlink(inode, fat_root_subdirs(inode) + 2);
     return 0;
 }
-
 static int root_dir_load(struct super_block * sb)
 {
     int err = -ENOMEM ;
@@ -174,6 +152,9 @@ root_inode_free:
     iput(root_inode);
     return err; 
 }
+//  ------------------  fat_root_inode end.........
+
+
 
 static int fat_fill_super(struct super_block * sb, void * data, int silent)
 {

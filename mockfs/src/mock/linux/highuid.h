@@ -1,0 +1,11 @@
+
+
+#ifndef  LINUX_HIGHUID_H
+#define  LINUX_HIGHUID_H
+
+
+#define DEFAULT_OVERFLOWUID 65534
+#define DEFAULT_OVERFLOWGID 65534
+
+
+#endif   /* LINUX_HIGHUID_H */
