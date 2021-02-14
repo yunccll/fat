@@ -234,6 +234,22 @@ TEST(FileSystemTypeTest, use){
     
     sb = (root_dentry) ? root_dentry->d_sb : get_super_from_filesystem(&fat_fs_type);
 
+    // tc_create_file(root_dentry);
+    // tc_close_file(root_dentry);
+    // tc_open_file(root_dentry);
+    // tc_read_file(root_dentry);
+    // tc_write_file(root_dentry);
+    // tc_flush_file(root_dentry);
+    // tc_close_file(root_dentry);
+    //
+    //
+    // dir:
+    // tc_open_dir(root_dentry)
+    // tc_close_dir(root_dentry);
+    // tc_read_dir(root_dentry);
+    //
+    // tc_unlink(root_dentry);
+
     if(sb != NULL){
         fat_fs_type.kill_sb(sb);
     }
