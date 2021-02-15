@@ -1,0 +1,349 @@
+0. WTF/min 是衡量代码de标志
+
+1. clean code that works 
+    > 可预测的开发方法。  知道什么时候完工
+    
+2. 使用自动运行的测试来推动开发  -- TDD
+两条规则：
+    > 只有自动测试 失败时， 我们才重写代码
+    > 消除重复设计，优化设计结构
+技术上的含义：
+    > 我们必须通过运行代码所提供的反馈来决定，并以此达到有机设计的目的
+    > 我们必须自己写测试程序，这是因为测试很多，很频繁，我们不能每天把大量的时间浪费在等待他人写测试程序上
+    > 我们的开发环境必须能迅速响应哪怕是很小的变化
+    > 为使测试简单，我们的整个规划必须是由许多高内聚、低耦合的部分组成
+蕴含了开发过程中的阶段：
+    1> 不可运行  写一个不能工作的测试程序，一开始这个测试程序甚至不能编译
+    2> 可运行-- 尽快让这个测试程序工作，为此可以在程序中使用一些不合情理的方法。
+    3> 重构 -- 消除       重复设计，优化设计结构
+不可运行/可运行/重构
+
+3. 测试驱动开发 教你认识编程过程中的反馈与需要实现的构思之间的差距,并提供了控制这个差距大小的技术。
+    两点：  差距  和  控制差距大小
+    差距：   测试的反馈 和 构思之间
+
+
+
+TDD的过程：
+    1) 快速新增一个测试
+    2) 运行所有测试，发现最近失败那个
+    3) 做点小改动
+    4) 运行所有的测试，并且全部通过
+    5) 重构并消除重复
+
+
+补充材料：
+Dependency & Duplication
+
+Steve Freeman ： 测试程序与代码的问题 不在于Duplication，而在于他们之间的Dependency。
+也就是说： Test Case 与 代码 的主要问题是Dependent on something.
+
+Dependency 的表现: 改动其中一个而不改动另外一个。
+
+Dependency 是软件开发中的关键问题.
+
+
+
+TDD Step:
+1) Write Test case,  你再写一个Story,设想你希望拥有的interface，在story中包含你所能想到的
+
+
+
+
+
+快速变绿的两个策略
+    Fake it --> 返回一个常量，然后慢慢使用变量替换直到真是代码
+    Obvious Implementation --> 输入真实的实现
+实践中是 Obvious Impl 后继续 Obvious Impl;  如果发现失败, and 蜕化到 fake it 直到 green, 继续Obvious Impl.
+
+第三种Style的驱动开发，Triangulation(三角定位法）:
+    > 将Design Objection 翻译成失败的测试案例（有Side Effects) .
+    > 快速与一个Stub Impl编译通过
+    > 输入看起来正确的代码to made the Test work，
+
+Translation of a feeling into a test is a common theme of TDD.
+
+
+
+Isolate Change   ( change code not effect testcase , change testcase not effect code)
+TODO: sum array
+s1.  ASSERT_EQ(5, sum(5));
+    int sum(int value) { 
+        return value; 
+    }
+    compile & run OK
+
+s2. ASSERT_EQ(5, sum(5, new int[]{5});
+    int sum(int value, int [] array){
+        return value;
+    }
+    compile & run OK , change interafce for next step [only change the impl to new function]
+
+s3. ASSERT_EQ(5, sum(5, new int[]{5});
+    int sum(int value, int [] array){
+        int ret = 0;
+        for(int i = 0; i < array.size(); ++i){
+            ret += array[i];
+        }
+        return ret;
+    }
+    compile & run OK, change impl for sum(arr);
+
+s4. ASSERT_EQ(5, sum(new int[]{5}));
+    int sum(int [] arrray){
+        ....
+    }
+    compile & run OK, change new interafce  for sum(array)
+
+s5. ASSERT_EQ(5, sum(new int[]{5}));
+    ASSERT_EQ(12, sum(new int[]{5, 7}));
+    Triangulation for validation
+
+
+
+
+
+Performance of tests
+    we would like our tests to run as quickly as possible
+Isolation of tests
+    we would the success or failure of one test to be irrelevant to other tests
+
+Test coupling
+    can have an obvious nasty effect, where breaking one test causes the next ten to fail even though the code is correct. 
+Test coupling 
+    can have a subtle really nasty effect, where the order of tests matters. 
+
+
+Patterns of Test Driven Development
+
+1>. Test n 
+ -- How do you test your software? Write an automated test.
+如何解决负反馈的问题
+
+This is a positive feedback loop. The more stress you feel, the less testing you will do.
+The less testing you do, the more errors you will make. The more errors you make, the
+more stress you feel. Rinse and repeat.
+How do you get out of such a loop? Either introduce a new element, replace one of the
+elements, or change the arrows. In this case we’ll replace “testing” with “automated
+testing”.
+
+2>. Isolated Test
+  -- How should the running of tests affect each other? Not at all.
+
+3>. Test List 
+  -- What should you test? Before you begin, write a list of all the tests you know you will
+have to write.
+
+The first part of our strategy for dealing with programming stress is to never take a
+step forward unless we know where our foot is going to land.
+    
+3.1> Big positive feedback loop::
+    The more experience I accumulated, the more things I knew that might need to be done. 
+    The more things I knew might need to be done, the less attention I had for what I was doing. 
+    The less attention I had for what I was doing, the less I accomplished. 
+    The less I accomplished, the more things I knew that needed to be done.
+
+How to write Test list: 
+Applied to test-driven development, what we put on the list are the tests we want to implement.
+First, put on the list examples of every operation that you know you need to implement.
+    e.g.  $5 + $2 = $7
+Next, for those operations that don’t already exist, put the null version of that operation. 
+    e.g. sub, multiply, divide 
+Finally, list all the refactorings that you think you will have to do to have clean code at the end of this session.
+    e.g. use the operator to replace function
+         extract $ to an object 
+
+4>. Test-First 
+When should you write your tests? Before you write the code that is to be tested
+
+A way to break stress and testing positive feedback loop.
+    The more stress you feel, The less testing you write.
+    The Less testing you write, The More stree you feel.
+    Write Test-First to break the loop
+
+5>. Assert-First 
+When should you write the asserts? Try writing them first. (before the write test)
+
+· Where should you start building a system? With the stories that you will be
+able to tell about the system when it is done.
+· Where should you start writing a bit of functionality? With the tests that will
+run when it is done.
+· Where should you start writing a test? With the asserts that will pass when it is
+done.
+
+
+When you are writing a test, you are solving severalproblems at once, 
+even if you no longer have to think about the implementation.
+
+· Where does the functionality belong? Is it a modification of an existing method, a new method on an existing class, an existing method name implemented in a new place, or a new class?
+· What should the names be called?
+· How are you going to check for the right answer?
+· What is the right answer?
+· What other tests does this test suggest?
+
+逆向考虑结果（Assert）， 从Assert 反推过程.
+注意这一章的例子：假设想写一个与远程系统通讯的test， 
+首先考虑结果：Assert： 读到明确的信息"abc"
+    void testcompleteReadSomething(){
+        ......
+        ASSERT_EQ("abc", reply.contents());
+    }
+    reply从哪里来, reader 
+    void testcompleteReadSomething(){
+        ....
+        reply = reader.read() 
+        ASSERT_EQ("abc", reply.contents());
+    }
+    reader从哪里来, create socket for reader
+    void testcompleteReadSomething(){
+        .....
+        socket = new Socket("localhost", remotePort).
+        reader = socket.createReader();
+        reply = reader.read() 
+        ASSERT_EQ("abc", reply.contents());
+    }
+    socket启动前，需要remotePort起来
+    void testcompleteReadSomething(){
+        Server s = new Server(remotePort);
+        socket = new Socket("localhost", remotePort).
+        reader = socket.createReader();
+        reply = reader.read() 
+        ASSERT_EQ("abc", reply.contents());
+    }
+    Refactor it :
+    void testcompleteReadSomething(){
+        Server ser = new Server(remotePort);
+        Writer wr = ser.createWriter();
+
+        socket = new Socket("localhost", remotePort).
+        wr.write("abc");
+        reader = socket.createReader();
+        reply = reader.read() 
+        ASSERT_EQ("abc", reply.contents());
+        reader.close();
+        socket.close();
+        wr.close();
+        ser.close();
+    }
+
+
+5> Test Data
+ -- What data do you use for test-first tests? Use data that makes the tests easy to read and
+follow.
+
+6> Evident Data 
+ -- How do you represent the intent of the data? Include expected and actual results in the
+test itself, and try to make their relationship apparent.
+e.g.
+    Exchange bank= new Exchange().
+    bank.addRate("USD", "GBP", STANDARD_RATE);
+    bank.commission(STANDARD_COMMISSION);
+    Money result= bank.convert(new Note(100, "USD"), "GBP");
+    [assertEquals(new Note(49.25, "GBP"), result);]
+or we could try to make the calculation obvious:
+    Exchange bank= new Exchange().
+    bank.addRate("USD", "GBP", 2);
+    bank.commission(0.0015);
+    Money result= bank.convert(new Note(100, "USD"), "GBP");
+    [assertEquals(new Note(100 / 2 * (1 - 0.0015), "GBP"), result);]
+
+缺点 : 可能导致dependency between code and tests
+
+    
+Patterns of TDD Implementation
+ -- Strategies of Implementation
+
+TDD is not about blindly following a set of rules for how to program. It is about
+intelligently choosing the size of your programming steps and the amount of feedback
+depending on conditions.
+
+Taking small steps forwards is the destination of all patterns in TDD implementation
+
+
+1> Fake It (til You Make It)
+    -- What is your first implementation once you have a broken test? Return a constant.
+Once you have the test running, gradually transform the constant into an expression
+using variables.
+
+
+There are a couple of effects that make Fake It Til You Make It powerful:
+    -- Psychological
+  Having a green bar is completely different than not having a green bar. When the bar is green, you know where you stand. Refactoring from there you can do with confidence.
+    -- Scope control
+  Programmers are good at imagining all sorts of future problems. Starting with one concrete example and generalizing from there prevents you from prematurely confusing yourself with extraneous concerns. You can do a better job of solving the immediate problem because you are focused. When you go to implement the next test case, you can focus on that one, too, knowing that the previous test is guaranteed to work.
+
+e.g. 
+    assertEquals(new MyDate("28.2.02"), new MyDate("1.3.02").yesterday());
+MyDate
+    public MyDate yesterday()
+    {
+        return new MyDate("28.2.02");
+    }
+There is duplication between the test and the code. I can shift it around by writing
+MyDate
+    public MyDate yesterday()
+    {
+        return new MyDate(new MyDate("31.1.02").days()-1);
+    }
+But there is still duplication. However, I can eliminate the data duplication (because
+this = MyDate(“31.1.02”) for the purposes of my test) by writing:
+MyDate
+    public MyDate yesterday()
+    {
+        return new MyDate(this.days()-1);
+    }
+
+
+2> Triangulate
+    -- How do you most conservatively drive abstraction with tests? Only
+abstract when you have two or more examples.
+
+e.g. 
+    public void testSum() {
+        assertEquals(4, plus(2, 2));
+    }
+    private int plus(int augend, int addend) {
+        return 4;
+    }
+
+    Triangulate : 
+    public void testSum() {
+        assertEquals(4, plus(2, 2));
+        assertEquals(7, plus(3,4));
+    }
+    private int plus(int augend, int addend) {
+        return augend + addend;
+    }
+
+I only use triangulation when I’m really, really unsure about the correct abstraction for
+the calculation. Otherwise I rely on either Obvious Implementation or Fake It. 
+
+
+3> Obvious Implementation
+How do you implement simple operations? Just implement them.
+
+For example, would I really use Fake It to implement something as simple as plus()? Not usually. I would just type in the obvious implementation. If I noticed I was getting surprised by red bars, I would go to smaller steps.
+
+4> One to Many
+    -- How do you implement an operation that works with collections of objects? Implement it without the collections first, then make it work with collections
+
+
+
+Process
+    -- patterns of when you write a test, tests and when you stop
+
+These patterns are about when you write a test, where you write tests, and when you
+
+1> One Step Test
+Which test should you pick next from the list? Pick a test that will teach you something and that you are confident you can implement.
+
+Each test should represent one step towards your overall goal. 
+
+If you don’t find any test on the list that represents one step, add some new tests that
+would represent progress towards the items there.
+
+
+
+
+
+stop.
