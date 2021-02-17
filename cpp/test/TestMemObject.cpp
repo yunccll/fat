@@ -1,9 +1,9 @@
 #include "gtest/gtest.h"
 
+#include <functional>
 #include "LogString.h"
 
 namespace helper {
-
 template<typename T>
 class mem_ptr {
 public:
@@ -37,7 +37,7 @@ public:
 #endif
         return objPtr;
     }
-	T * get() const {
+	inline T * get() const {
 		return objPtr;
 	}
 
@@ -53,9 +53,6 @@ public:
 		return objPtr == nullptr;
 	}
 
-	inline const T * getPtr() const {
-		return objPtr;
-	}
 
 	mem_ptr<T> & operator =(mem_ptr<T> && mem_obj){
 		if(!empty()){
@@ -73,6 +70,7 @@ public:
 		return objPtr;
 	}
 
+
 private:
 	mem_ptr(T * objPtr, bool canRelease)
 	: objPtr(objPtr)
@@ -81,8 +79,9 @@ private:
 	}
 private:
 	inline void release(T * objPtr){
-		if(canRelease)
+		if(canRelease){
 			delete objPtr;
+		}
 	}
 
 private:
@@ -92,7 +91,6 @@ private:
 private:
     T * objPtr;
 	bool canRelease;
-
 
 #ifdef UTEST
 public:
@@ -106,7 +104,7 @@ private:
 
 template<typename T>
 bool operator == (const void * ptr, const mem_ptr<T> & mptr){
-	return ptr == mptr.getPtr();
+	return ptr == mptr.get();
 }
 template<typename T>
 bool operator != (const void * ptr, const mem_ptr<T> & mptr){
@@ -115,11 +113,57 @@ bool operator != (const void * ptr, const mem_ptr<T> & mptr){
 
 } //end of namespace helper
 
+
+//template<T>
+//class mem_ptr_with_deleter : public mem_ptr<T> {
+//public:
+//	template<typename V>
+//	mem_ptr_with_deleter(V* ptr, std::function<void (T*)> & deleter)
+//	: mem_ptr(ptr)
+//	, deleter(deleter)
+//	{
+//	}
+//	~mem_ptr_with_deleter(){
+//		deleter()
+//	}
+//private:
+//	std::function<void (T*)> deleter;
+//};
+
 //TODO: customize the release function object from constructor
 class Customize {
+public:
+	Customize(helper::LogString & logString)
+	:logString(logString)
+	{
+		logString.ctor();
+	}
+	~Customize(){
+		logString.dtor();
+	}
+
+	helper::LogString & getLogString() {
+		return logString;
+	}
+private:
+	helper::LogString & logString;
 };
+void ReleaseCustomize(void * obj){
+	Customize * cus = static_cast<Customize*>(obj);
+	delete cus;
+}
+
+// global func for release
+// mem_func for release
+// functor for release
 TEST(mem_ptrTest, testCustomize){
-	int a = 100;
+//TODO:
+//	helper::LogString logString;
+//	{
+//		helper::mem_ptr<Customize> pCus(new Customize(logString), &ReleaseCustomize);
+//	}
+//	ASSERT_EQ(helper::LogString().ctor().dtor(), logString);
+	
 }
 
 class TestReleaseObject {
@@ -341,3 +385,4 @@ TEST(mem_ptrTest, testNullObject) {
 //TODO: big case --> const object pointer
 //TODO: scoped-object-array-ptr 
 //TODO: change a good name for helper::mem_ptr
+

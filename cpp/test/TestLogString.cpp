@@ -113,3 +113,17 @@ TEST(LogStringTest, asBase){
 	}
 }
 
+
+//TODO: Global use method
+//	#define LOGSTR	(helper::LogString::instance())
+//	LOGSTR.reset().operator("functions").method("methods");
+//	ASSERT_EQ(expect, LOGSTR);
+//
+//
+//	#define EXPECT  (helper::LogString::instance())
+//	 EXPECT.reset().operator("functions").method("methods");
+//   ASSERT_EQ(EXPECT, obj->ref());
+//
+//TODO: easy way for usually using
+//	logString = LogString::defaultObject(); ==> logString.reset().ctor().dtor();
+//	logString = LogString::create(); ==> logString.reset().ctor();
