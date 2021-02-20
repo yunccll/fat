@@ -11,8 +11,7 @@ std::shared_ptr<const Money> Money::franc(int amount) {
 
 
 
-//TODO:  
-//  if Frank : Dollar   = 2:1 ;  $5 + F10 = $10
+//TODO:    if Frank : Dollar   = 2:1 ;  $5 + F10 = $10
 //OK---> $5 * 2 = $10 
 //OK -->  $25 * 100 = $2500
 //OK --> Equal
