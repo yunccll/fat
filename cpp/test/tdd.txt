@@ -1,23 +1,38 @@
 0. WTF/min 是衡量代码de标志
 
 1. clean code that works 
-    > 可预测的开发方法。  知道什么时候完工
     
-2. 使用自动运行的测试来推动开发  -- TDD
-两条规则：
-    > 只有自动测试 失败时， 我们才star to write code
-    > 消除重复
+2. 两条规则of TDD
+    >Don't write a line of new code unless you first have a failing automated test.
+        有了一个可以失败的自动化案例，才去写代码 (实现)
+    >Eliminate Duplication
+        消除重复
 
-技术上的含义：
-    > 我们必须通过运行代码所提供的反馈来决定，并以此达到有机设计的目的
-    > 我们必须自己写测试程序，这是因为测试很多，很频繁，我们不能每天把大量的时间浪费在等待他人写测试程序上
-    > 我们的开发环境必须能迅速响应哪怕是很小的变化
-    > 为使测试简单，我们的整个规划必须是由许多高内聚、低耦合的部分组成
-蕴含了开发过程中的阶段：
-    1> 不可运行  写一个不能工作的测试程序，一开始这个测试程序甚至不能编译
-    2> 可运行-- 尽快让这个测试程序工作，为此可以在程序中使用一些不合情理的方法。
-    3> 重构 -- 消除       重复设计，优化设计结构
+规则的技术含义：
+technical implications : 
+    > You must design organically, with running code providing feedback between decisions.
+        基于多个方案代码的运行反馈进行有机的设计
+    > You must write you own tests, since you cann't wait twenty times a day for someone else to write test.
+        你需要编写自己的测试，因为你不能花很长的时间等待别人写测试
+    > You development environment must provide rapid response to small change
+        开发环境即可对小修改有快速的反应
+    > Your design must consist of many [highly cohesive, loosly coupled] components, just to make testing easy 
+        为使测试简单，设计由许多高内聚、低耦合的组件组成
+
+两条规则蕴含开发过程中的阶段：
+    > Red -- write a little test that doesn’t work, perhaps doesn’t even compile at first
+        不可运行  写一个不能工作的测试程序，一开始这个测试程序甚至不能编译
+    > Green -- make the test work quickly, committing whatever sins necessary in the
+    process
+        可运行-- 尽快让这个测试程序工作，为此可以在程序中使用一些不合情理的方法。
+    > Refactor -- eliminate all the duplication created in just getting the test to work
+        重构 -- 消除所有为了测试通过而造成的重复
+
 不可运行/可运行/重构
+
+
+
+
 
 3. 测试驱动开发 教你认识编程过程中的测试反馈与需要实现的构思之间的差距,并提供了控制这个差距大小的技术。
     两点：认识差距  和  控制差距大小
