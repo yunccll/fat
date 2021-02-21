@@ -118,7 +118,8 @@ TEST(ScopedMemPtrTest, testNullObject) {
 TEST(ScopedMemPtrTest, testcopyConstructor){
 	double * pRawDouble = new double (5.0);
 	{
-		helper::ScopedMemPtr<double> pDouble = pRawDouble;
+        // pRawDouble -> const ScopedMemPtr && ->  ScopedMemPtr(const ScopedMemPtr &)
+		helper::ScopedMemPtr<double> pDouble = pRawDouble;//  
 		ASSERT_TRUE(!pDouble.empty());
 		{
 			helper::ScopedMemPtr<double> pOtherDouble = std::move(pDouble);

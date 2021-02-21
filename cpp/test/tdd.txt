@@ -19,9 +19,9 @@
     3> 重构 -- 消除       重复设计，优化设计结构
 不可运行/可运行/重构
 
-3. 测试驱动开发 教你认识编程过程中的反馈与需要实现的构思之间的差距,并提供了控制这个差距大小的技术。
-    两点：差距  和  控制差距大小
-    差距：测试的反馈 和 构思之间
+3. 测试驱动开发 教你认识编程过程中的测试反馈与需要实现的构思之间的差距,并提供了控制这个差距大小的技术。
+    两点：认识差距  和  控制差距大小
+    其中，差距是 测试的反馈 和 构思之间
 
 
 
@@ -123,7 +123,7 @@ Index : Test n  -> Isolated Test -> Test List ->  Test-First  -> Assert First  -
 
 1>. Test n 
  -- How do you test your software? Write an automated test.
-如何解决负反馈的问题
+如何解决正反馈的问题
 
 This is a positive feedback loop. The more stress you feel, the less testing you will do.
 The less testing you do, the more errors you will make. The more errors you make, the
@@ -172,19 +172,33 @@ When should you write the asserts? Try writing them first. (before the write tes
 
 · Where should you start building a system? With the stories that you will be
 able to tell about the system when it is done.
-· Where should you start writing a bit of functionality? With the tests that will
-run when it is done.
-· Where should you start writing a test? With the asserts that will pass when it is
-done.
+    理解 ===> Strories is done, you can start buiding a system.
+
+· Where should you start writing a bit of functionality? With the tests that will run when it is done.
+    理解 ==> test is done , you can start write a bit of functionality
+
+· Where should you start writing a test? With the asserts that will pass when it is done.
+   理解==> asserts is done, you can start write a test
+
+理解： Order of TDD:    write Story -> write assert -> write test 
 
 
-When you are writing a test, you are solving severalproblems at once, 
-even if you no longer have to think about the implementation.
 
-· Where does the functionality belong? Is it a modification of an existing method, a new method on an existing class, an existing method name implemented in a new place, or a new class?
+不考虑实现，光写测试就得一次解决好几个问题,问题如下：
+When you are writing a test, you are solving several problems at once,  even if you no longer have to think about the implementation.
+
+· Where does the functionality belong? 
+    Is it a modification of an existing method, 
+    a new method on an existing class, 
+    an existing method name implemented in a new place, 
+    or a new class?
+
 · What should the names be called?
+
 · How are you going to check for the right answer?
+
 · What is the right answer?
+
 · What other tests does this test suggest?
 
 逆向考虑结果（Assert）， 从Assert 反推过程.
@@ -339,9 +353,9 @@ For example, would I really use Fake It to implement something as simple as plus
 
 Process
     -- patterns of when you write a test, tests and when you stop
-Index -> One step Test ->
+Index ->> One step Test ->> Starter Test ->> Explanation Test ->> Another Test ->> Break ->> Do Over ->> Cheap Desk, Nic Chair
 
-These patterns are about when you write a test, where you write tests, and when you
+These patterns are about when you write a test, where you write tests, and when you stop
 
 1> One Step Test
 Which test should you pick next from the list? Pick a test that will teach you something and that you are confident you can implement.
@@ -351,12 +365,9 @@ Each test should represent one step towards your overall goal.
 If you don’t find any test on the list that represents one step, add some new tests that
 would represent progress towards the items there.
 
-
-
-
 2>.  Starter Test 
 Which test should you start with? Start by testing a variant of an operation that doesn't do anything.
-你可以写一个什么也不做的变种，（可能是空的，可能是最简单的那个）
+你从针对某个简化操作的测试开始，该测试可能个空操作（可能是空的，可能是最简单的那个）
 
 
 The first question you have to ask with a new operation is "Where does it belong?"
@@ -376,38 +387,49 @@ answer:
 	The output should be the same as the input.
 	The input should be as small as possible, like a single polygon, or even an empty list of polygons.
 	
-3> .Explanation Test:
-How do you spread the use of automated testing? Ask for and give explanations in terms of tests.
-TODO:  to be more details
 
-4> Explanation Test
-How do you spread the use of automated testing? Ask for and give explanations in terms of tests.
-TODO: to be more details 
+3> Explanation Test
+How do you spread the use of automated testing? 
+如何推广运用自动化测试？ 
+Ask for and give explanations in terms of tests.
+以测试来沟进行沟通, 使用测试案例进行交流
 
-5> Another Test 
-How do you keep a technical discussion from straying off topic? When a tangential idea arises, add a test to the list and go back to the topic.
-TODO: to be more details
+4> Another Test 
+How do you keep a technical discussion from straying off topic? 
+如何保证技术讨论不要离题？
+When a tangential idea arises, add a test to the list and go back to the topic.
+当一个正切的idea出现，增加一个测试项继续讨论原来的主题
 
-6> Regression Test
-What's the first thing you do when a defect is reported? Write the smallest possible test that fails, and that once it runs, the defect will be repaired.
-TODO: to be more details
+5> Regression Test
+What's the first thing you do when a defect is reported? 
+当报缺陷时，你第一想到的是什么？
+Write the smallest possible test that fails, and that once it runs, the defect will be repaired.
+写一个最小的失败案例，一旦该案例通过，缺陷就会被修复
+
 
 7> Break
 What do you do when you feel tired or stuck? Take a break.
-TODO: to be more details
+当你感觉累或者卡住了你怎么办？ 
+休息下
 
 8> Do over
-What do you do when you are feeling lost(不知所措)? Throw away the code and start over(重新开始).
+What do you do when you are feeling lost(不知所措)? 
+当你感到不知所措时，怎么办？
+Throw away the code and start over(重新开始).
+扔掉代码，离开一段时间，再重新开始
+
 
 9> Cheap Desk, Nice chair
-What physical setup should you use for test-driven development? Get a really nice chair, skimping on the rest of the furniture if necessary.
+What physical setup should you use for test-driven development? 
+Get a really nice chair, skimping on the rest of the furniture if necessary.
 
 
 
-Testing Techniques
--> Child Test --> Mock Object --> Self Shunt --> Log String --> Crash Test Dummy --> Broken Test --> Clean Check-in
 
-1> Child Test	
+Testing Techniques  (TODO: 构思一些例子)
+Index -> Child Test --> Mock Object --> Self Shunt --> Log String --> Crash Test Dummy --> Broken Test --> Clean Check-in
+
+1> Child Test	 ( break into pieces)
 How do you get a test case running that turns out to be too big? 
 	- Write a smaller test case that represents the broken part of the bigger test case. 
 	- Get the smaller test case running. 
@@ -420,8 +442,7 @@ Create a fake version of the resource that answers constants.
 3> Self Shunt
 How do you test that one object communicates correctly with another? 
 Have the object under test communicate with the test case instead of with the object it expects.
-
-为了测试对象与其他对象的通信关系。 不需要构造其他对象,而是直接创建一个test object 替代其他对象，然后运行该test object
+为了测试对象与其他对象的通信关系。 不需要构造其他对象, 而是直接创建一个test object 替代其他对象，然后运行该test object
 
 4> Log String
 How do you test that the sequence in which messages are called is correct? 
@@ -470,59 +491,75 @@ Design Patterns
 
 1> Null Object 
 How do you represent special cases using objects? 
-Create an object representing the special case. Give it the same protocol as the regular objects.
+Create an object representing the [special case]. 
+Give it the [same protocol as the regular objects].
+//TODO: add the example from TDD book;
+
 
 2> Command
 3> Template Method
 4> Composite
 5> Pluggable Object
+
 6> Collecting Parameter
 How do you collect the results of an operation that is spread over several objects? 
 Add a parameter to the operation in which the results will be collected.
 
 7> Value Object
-How do you design objects that will be widely shared, but for whom identity is unimportant? 
+How do you design objects that will be [widely shared], but for whom identity is unimportant? 
 Set their state when they are created and never change it. 
 Operations on the object always return a new object.
+[reduce the dependency from code], [no side effects for shared object]
+//TODO: add the example from TDD book;
 
 8> Imposter
+
 
 
 Refactoring
 Usually, a refactoring cannot change the semantics of the program under any circumstances. 
 In TDD, the circumstances we care about are the tests that are already passing.
 正常情况下的重构是 在任何情况下保持程序的语义
-TDD中，我们不是关注程序的语义，而是关注已经通过的tests必须继续通过
-重构的是object code
+TDD中，我们不是关注程序的语义，而是关注已经通过的tests必须继续通过; 可能修改程序的语义。
+都是重构object code
 
 for example, we can replace constants with variables in TDD can call this operation a refactoring, because it doesn’t change the set of tests that pass.
+例如： 我们从常量修改为变量，改变了语义，但是没有改变测试案例集的变化，也称之为重构(in TDD)
+
 
 1> Reconcile Differences (调和差异)
 How do you unify two similar looking pieces of code? 
 Gradually bring them closer.
 [not??] Unify them only when they are absolutely identical.
+TODO: e.g. 
 
 2> Isolate Change 
 How do you change one part of a multi-part method or object? 
 First, isolate the part that has to change.
-
-
+TODO: e.g. 
 
 3> Migrate Data
 how do you move from one representation? Temporarily duplicate the data.
+TODO: e.g. 
 
 4> Extract Method
+TODO: e.g. 
 5> Inline Method
+TODO: e.g. 
 6> Extract Interface
+TODO: e.g. 
 7> Move Method
+TODO: e.g. 
 8> Method Object
 How do you represent a complicated method that requires several parameters and local variables? 
 	- Make an object out of the method.
+TODO: e.g. 
 9> Add Parameter
 How do you add a parameter to a method? 
 How:
 1. If the method is in an interface, add the parameter to the interface first
 2. Use the compiler errors to tell you what other code you need to change
+TODO: e.g. 
 
 10> Method Parameter to Constructor Parameter
 How do you move a parameter from a method or methods to the constructor?
@@ -535,4 +572,4 @@ How:
 	method and all caller
 	6. Remove the now-superfluous “this.” from references
 	7. Rename the variable correctly
-
+TODO: e.g. 
