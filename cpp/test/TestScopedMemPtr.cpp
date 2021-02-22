@@ -49,7 +49,7 @@ TEST(ScopedMemPtrTest, testNotReleaseObject){
     ObjectAsRef * obj = new ObjectAsRef(TRACER.reset()); 
     EXPECT.reset().ctor();
     {
-        helper::ScopedMemPtr<ObjectAsRef> objPtr(obj, false);
+        helper::ScopedMemPtr<ObjectAsRef> objPtr(obj, false, nullptr);
     }
     ASSERT_EQ(EXPECT, TRACER);
 
@@ -202,6 +202,58 @@ TEST(ScopedMemPtrTest, testNew){
         auto obj = helper::make_scoped<Args>(i, j);
         ASSERT_FALSE(obj.empty());
     }
+}
+
+template<typename T>
+static void global_deleter(T * v){
+    TRACER.dtor("global_deleter");
+    delete v;
+}
+
+using helper::unittest::ObjectAsMember;
+TEST(ScopedMemPtrTest, testGlobalDeleter){
+    EXPECT.reset().dtor("global_deleter");
+    {
+        TRACER.reset();
+        helper::ScopedMemPtr<ObjectAsMember> aptr(new ObjectAsMember, &global_deleter<ObjectAsMember>);
+    }
+    ASSERT_EQ(EXPECT.toString(), TRACER.toString());
+}
+
+TEST(ScopedMemPtrTest, testLambdaDeleter){
+    EXPECT.reset().dtor("lambda_deleter");
+    {
+        TRACER.reset();
+        helper::ScopedMemPtr<ObjectAsMember> aptr(new ObjectAsMember
+            , [](ObjectAsMember * w){
+                TRACER.dtor("lambda_deleter");
+                delete w;
+            }
+        );
+    }
+    ASSERT_EQ(EXPECT, TRACER);
+}
+TEST(ScopedMemPtrTest, testFunctor){
+    struct MyDeleter {
+        void operator()(ObjectAsMember * one){
+            TRACER.dtor("Functor");
+            delete one;
+        }
+    };
+
+    EXPECT.reset().dtor("Functor");
+    {
+        TRACER.reset();
+        helper::ScopedMemPtr<ObjectAsMember> aptr(new ObjectAsMember, MyDeleter());
+    }
+    ASSERT_EQ(EXPECT, TRACER);
+}
+
+using helper::unittest::ITracerAsMembe;
+TEST(ScopedMemPtrTest,  SubClassWithBasePtr){
+    helper::ScopedMemPtr<ITracerAsMembe> aptr(new ObjectAsMember);    
+    aptr->getTracer();
+    // auto delete the SubOne
 }
 
 //TODO: DefaultReleaser maybe an singlton,

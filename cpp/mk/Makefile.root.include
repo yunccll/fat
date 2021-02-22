@@ -25,6 +25,9 @@ PROJ_INC_PATHES =	#inc pathes for compile
 PROJ_LIB_PATHES = 	#libs pathes for link
 PROJ_LIB_NAMES 	=   # libXXX.a or libXXX.so format
 PROJ_LIB_FULL_NAMES =  # whole name for libs
+PROJ_CXX_SRC	=	$(wildcard *.cpp) #proj 's cxx src
+PROJ_C_SRC		=	$(wildcard *.c) #proj 's c src
+PROJ_OBJS		=	#proj 's object
 
 PROJ_STATIC_LIBS	=  #static lib names
 PROJ_DYNAMIC_LIBS  	=  pthread #dynamic lib names
@@ -47,8 +50,8 @@ LDLIBS   	+= $(addprefix -l, $(PROJ_LIB_NAMES)) \
 				$(add prefix -l, $(PROJ_DYNAMIC_LIBS))
 
 #-- source code && objects
-CXX_OBJS	= $(patsubst %.cpp,%.o, $(wildcard *.cpp))
-C_OBJS		= $(patsubst %.c,%.o, $(wildcard *.c))
+CXX_OBJS	= $(patsubst %.cpp,%.o, $(PROJ_CXX_SRC))
+C_OBJS		= $(patsubst %.cpp,%.o, $(PROJ_C_SRC))
 OBJS 		= $(CXX_OBJS) $(C_OBJS)
 TARGET_BIN 	= main.bin
 TARGET_LIB_NAME = main.lib

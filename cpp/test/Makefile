@@ -6,11 +6,13 @@ HIDE=
 PROJ_INC_PATHES +=	$(GTEST_INC_PATH) .
 PROJ_LIB_PATHES += 	$(GTEST_LIB_PATH)
 PROJ_LIB_NAMES 	+=   gtest_main  pthread
-PROJ_CXXFLAGS += #-DUTEST
+PROJ_CXXFLAGS += -std=c++14 #-DUTEST
 
-THIS_OBJS	:= $(patsubst %.cpp,%.o, $(wildcard ./helper/*.cpp))
-THIS_OBJS	+= $(patsubst %.cpp,%.o, $(wildcard ./helper/unittest/*.cpp))
-OBJS 	+= $(THIS_OBJS)
+
+PROJ_CXX_SRC += $(wildcard ./helper/*.cpp)
+PROJ_CXX_SRC += $(wildcard ./helper/unittest/*.cpp)
+PROJ_CXX_SRC += $(wildcard ./helper/object/*.cpp)
+
 
 
 all:$(TARGET_BIN)

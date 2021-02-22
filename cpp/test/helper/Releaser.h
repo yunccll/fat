@@ -3,13 +3,13 @@
 #define  HELPER_RELEASER_H
 
 namespace helper {
-
+//TODO: releaser to be const 
 template<typename T>
 class IReleasable {
 public:
 	virtual ~IReleasable(){
 	}
-	virtual void release(T * obj) = 0;
+	virtual void release(T * obj) const = 0;
 };
 
 template<typename T>
@@ -17,7 +17,7 @@ class DefaultReleaser : public IReleasable<T>{
 public:
 	~DefaultReleaser() override{
 	}
-	void release(T * obj) override {
+	void release(T * obj) const override {
         if(obj != nullptr)
             delete obj;
     }
@@ -33,7 +33,7 @@ public:
     }
     ~CustomizeReleaser() override{
     }
-	void release(T * obj) override {
+	void release(T * obj) const override {
         if(deleter){
             deleter(obj);
         }
@@ -45,6 +45,7 @@ public:
 private:
     std::function<void (T*)> deleter;
 };
+
 
 } //end of namespace helper
 

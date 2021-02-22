@@ -17,25 +17,33 @@ public:
     :ScopedMemPtr<T>((T*)nullptr, true, nullptr)
     {
     }
-    
+    template<typename V>
+    ScopedMemPtr(V * obj) 
+    : ScopedMemPtr<T>(obj, true, nullptr)
+    {
+    }
+    ScopedMemPtr(T * obj, const std::function<void (T *)> & deleter)
+    : ScopedMemPtr<T>(obj, true, new CustomizeReleaser<T>(deleter))
+    {
+    }
+    template<typename V>
+    ScopedMemPtr(V * obj,  bool canReleased, IReleasable<T> * releaser)
+    : PinnableObjectPtr<T>(obj, !canReleased)
+    , releaser(releaser == nullptr ? new DefaultReleaser<T>(): releaser)
+    {
+    }
+
 	//move constructor
 	ScopedMemPtr(ScopedMemPtr<T> && mem_obj) 
     : ScopedMemPtr()
 	{
         moveOwner(*this, mem_obj);
 	}
-
-    template<typename V>
-    ScopedMemPtr(V * obj,  bool canReleased = true, IReleasable<T> * releaser = nullptr)
-    : PinnableObjectPtr<T>(obj, !canReleased)
-    , releaser(releaser == nullptr ? new DefaultReleaser<T> : releaser)
-    {
-    }
-
     ~ScopedMemPtr() override {
         if(!this->isPin() && releaser != nullptr){
             releaser->release(this->get());
         }
+        delete releaser;
     }
 
 	bool empty() const {
@@ -55,6 +63,8 @@ public:
         moveOwner(*this, mem_obj);
 		return *this;
 	}
+
+protected:
 
 private:
     void moveOwner(ScopedMemPtr<T> & left, ScopedMemPtr<T> & right){
