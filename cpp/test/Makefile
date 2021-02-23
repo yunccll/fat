@@ -22,3 +22,12 @@ $(TARGET_BIN):$(OBJS)
 
 clean:
 	$(DO_CLEAN)
+
+utest: nothing
+	make -C ./utest
+
+utest.clean: nothing
+	make -C ./utest clean
+
+nothing:
+
