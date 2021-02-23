@@ -2,6 +2,8 @@
 #ifndef  HELPER_RELEASER_H
 #define  HELPER_RELEASER_H
 
+#include <functional>
+
 namespace helper {
 //TODO: releaser to be const 
 template<typename T>
